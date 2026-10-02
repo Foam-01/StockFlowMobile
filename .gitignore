@@ -46,3 +46,71 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+
+
+
+build/
+.dart_tool/
+.flutter-plugins-dependencies
+.pub-cache/
+
+ios/Flutter/.last_build_id
+
+# Android Studio will place build artifacts here
+android/app/debug
+android/app/profile
+android/app/release
+
+# Widget Preview related
+.widget_preview/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# iOS Simulator cache
+ios/simulator/
+
+# Gradle cache
+gradle/wrapper/gradle-wrapper.jar
+.gradle/
+
+# CocoaPods (ios dependencies)
+/ios/Pods/
+/ios/Podfile.lock
+.symlinks
+
+# Terminal Colors
+*colors.txt
+
+# VS Code
+.vscode/
+
+# IntelliJ
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Other common ignores
+.DS_Store
+.env
+.env.local
+.env.test
+.env.dev
+.env.prod
+*.swp
+*.swo
+*.bak
+*~
+.log
+
+
+# claude
+.claude
+.agent
+.gemini
+.claudeignore
