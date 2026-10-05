@@ -28,21 +28,39 @@ class MainApp extends StatelessWidget {
               },
             ),
             PopupMenuButton<String>(
-              onSelected: (String resuult) {
-                print('selected $resuult');
+              onSelected: (String result) {
+                print('selected $result');
               },
               itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                 const PopupMenuItem<String>(
                   value: 'Settings',
-                  child: Text('Settings'),
+                  child: Row(
+                    children: [
+                      Icon(Icons.settings),
+                      SizedBox(width: 12),
+                      Text('Settings'),
+                    ],
+                  ),
                 ),
                 const PopupMenuItem<String>(
                   value: 'Profile',
-                  child: Text('Profile'),
+                  child: Row(
+                    children: [
+                      Icon(Icons.account_circle),
+                      SizedBox(width: 12),
+                      Text('Profile'),
+                    ],
+                  ),
                 ),
                 const PopupMenuItem<String>(
                   value: 'Logout',
-                  child: Text('Logout'),
+                  child: Row(
+                    children: [
+                      Icon(Icons.logout),
+                      SizedBox(width: 12),
+                      Text('Logout'),
+                    ],
+                  ),
                 ),
               ],
             ),
