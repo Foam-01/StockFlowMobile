@@ -27,6 +27,25 @@ class MainApp extends StatelessWidget {
                 print('Settings icon pressed');
               },
             ),
+            PopupMenuButton<String>(
+              onSelected: (String resuult) {
+                print('selected $resuult');
+              },
+              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                const PopupMenuItem<String>(
+                  value: 'Settings',
+                  child: Text('Settings'),
+                ),
+                const PopupMenuItem<String>(
+                  value: 'Profile',
+                  child: Text('Profile'),
+                ),
+                const PopupMenuItem<String>(
+                  value: 'Logout',
+                  child: Text('Logout'),
+                ),
+              ],
+            ),
           ],
         ),
         body: const Center(child: Text('Flutter App')),
