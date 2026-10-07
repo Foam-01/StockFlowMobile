@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'main_app.dart';
+import 'package:my_first_app/row_example.dart';
 
 void main() {
-  runApp(const MainApp());
+  runApp(const RowExample());
 }

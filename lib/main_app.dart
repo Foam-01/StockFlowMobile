@@ -9,7 +9,7 @@ class MainApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.green,
-        scaffoldBackgroundColor: Colors.deepPurple,
+        scaffoldBackgroundColor: const Color.fromARGB(255, 4, 89, 135),
       ),
       home: Scaffold(
         appBar: AppBar(
@@ -66,7 +66,16 @@ class MainApp extends StatelessWidget {
             ),
           ],
         ),
-        body: const Center(child: Text('Flutter App')),
+        body: const Center(
+          child: Text(
+            'Flutter App',
+            style: TextStyle(
+              fontSize: 30,
+              fontWeight: FontWeight.bold,
+              color: Color.fromARGB(255, 194, 22, 22),
+            ),
+          ),
+        ),
       ),
     );
   }
