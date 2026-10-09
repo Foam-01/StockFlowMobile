@@ -187,7 +187,6 @@ class _NewOperationScreenState extends ConsumerState<NewOperationScreen> {
             decoration: const InputDecoration(
               labelText: 'Reference no. (optional)',
               hintText: 'e.g. PO-2026-0001',
-              border: OutlineInputBorder(),
             ),
           ),
           const SizedBox(height: 12),
@@ -195,10 +194,7 @@ class _NewOperationScreenState extends ConsumerState<NewOperationScreen> {
             controller: _note,
             enabled: !_saving,
             maxLines: 2,
-            decoration: const InputDecoration(
-              labelText: 'Note (optional)',
-              border: OutlineInputBorder(),
-            ),
+            decoration: const InputDecoration(labelText: 'Note (optional)'),
           ),
           const SizedBox(height: 24),
           Row(
@@ -376,10 +372,7 @@ class _LineCardState extends State<_LineCard> {
                         RegExp(allowNegative ? r'^-?\d*' : r'^\d*'),
                       ),
                     ],
-                    decoration: const InputDecoration(
-                      isDense: true,
-                      border: OutlineInputBorder(),
-                    ),
+                    decoration: const InputDecoration(isDense: true),
                     onChanged: (v) => widget.onChanged(int.tryParse(v) ?? 0),
                   ),
                 ),

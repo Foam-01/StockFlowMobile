@@ -173,7 +173,10 @@ void main() {
     expect(find.text('PO-OFF-1'), findsOneWidget);
     expect(find.text('Pending'), findsOneWidget);
     expect(
-      find.descendant(of: find.byType(NavigationBar), matching: find.text('1')),
+      find.descendant(
+        of: find.byKey(const Key('app_nav')),
+        matching: find.text('1'),
+      ),
       findsOneWidget,
     );
 

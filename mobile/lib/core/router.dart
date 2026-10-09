@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/auth/presentation/auth_controller.dart';
+import '../features/scanner/presentation/barcode_lookup.dart';
 import '../features/auth/presentation/login_screen.dart';
 import '../features/dashboard/presentation/dashboard_screen.dart';
 import '../features/history/presentation/product_history_screen.dart';
@@ -14,6 +15,7 @@ import '../features/operations/presentation/operations_screen.dart';
 import '../features/products/presentation/product_detail_screen.dart';
 import '../features/products/presentation/products_screen.dart';
 import '../features/profile/presentation/profile_screen.dart';
+import 'widgets/floating_nav.dart';
 
 final _rootKey = GlobalKey<NavigatorState>();
 
@@ -133,37 +135,37 @@ class _HomeShell extends ConsumerWidget {
     );
     return Scaffold(
       body: shell,
-      bottomNavigationBar: NavigationBar(
+      bottomNavigationBar: FloatingNav(
+        key: const Key('app_nav'),
         selectedIndex: shell.currentIndex,
-        onDestinationSelected: (i) =>
+        onSelected: (i) =>
             shell.goBranch(i, initialLocation: i == shell.currentIndex),
-        destinations: [
-          const NavigationDestination(
-            icon: Icon(Icons.space_dashboard_outlined),
-            selectedIcon: Icon(Icons.space_dashboard),
+        onScan: () async {
+          final product = await scanProduct(context, ref);
+          if (product != null && context.mounted) {
+            context.push('/products/${product.id}');
+          }
+        },
+        items: [
+          const NavItem(
+            icon: Icons.space_dashboard_outlined,
+            selectedIcon: Icons.space_dashboard_rounded,
             label: 'Dashboard',
           ),
-          const NavigationDestination(
-            icon: Icon(Icons.inventory_2_outlined),
-            selectedIcon: Icon(Icons.inventory_2),
+          const NavItem(
+            icon: Icons.inventory_2_outlined,
+            selectedIcon: Icons.inventory_2_rounded,
             label: 'Products',
           ),
-          NavigationDestination(
-            icon: Badge(
-              isLabelVisible: queued > 0,
-              label: Text('$queued'),
-              child: const Icon(Icons.swap_vert),
-            ),
-            selectedIcon: Badge(
-              isLabelVisible: queued > 0,
-              label: Text('$queued'),
-              child: const Icon(Icons.swap_vert_circle),
-            ),
+          NavItem(
+            icon: Icons.swap_vert_rounded,
+            selectedIcon: Icons.swap_vert_circle_rounded,
             label: 'Operations',
+            badge: queued,
           ),
-          const NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
+          const NavItem(
+            icon: Icons.person_outline_rounded,
+            selectedIcon: Icons.person_rounded,
             label: 'Profile',
           ),
         ],

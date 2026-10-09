@@ -54,7 +54,6 @@ class _ProductPickerState extends ConsumerState<_ProductPicker> {
               decoration: const InputDecoration(
                 hintText: 'Search product',
                 prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(),
               ),
               onChanged: (v) {
                 _debounce?.cancel();

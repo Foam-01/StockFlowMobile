@@ -27,14 +27,18 @@ class TxStatusChip extends StatelessWidget {
       ),
     };
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
       decoration: BoxDecoration(
         color: bg,
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
         status.label,
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(color: fg),
+        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+          color: fg,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.2,
+        ),
       ),
     );
   }
@@ -55,13 +59,13 @@ class TxTypeIcon extends StatelessWidget {
       TxType.adjust => scheme.tertiary,
     };
     return Container(
-      width: 40,
-      height: 40,
+      width: 44,
+      height: 44,
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.14),
-        borderRadius: BorderRadius.circular(10),
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(12),
       ),
-      child: Icon(type.icon, color: color, semanticLabel: type.label),
+      child: Icon(type.icon, size: 22, color: color, semanticLabel: type.label),
     );
   }
 }

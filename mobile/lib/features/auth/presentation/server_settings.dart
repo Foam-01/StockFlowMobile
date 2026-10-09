@@ -124,7 +124,6 @@ class _ServerDialogState extends ConsumerState<_ServerDialog> {
               decoration: const InputDecoration(
                 labelText: 'API URL',
                 hintText: 'http://192.168.1.10:3000',
-                border: OutlineInputBorder(),
               ),
               validator: (v) => validateServerUrl(v ?? ''),
               onChanged: (_) => setState(() => _result = null),

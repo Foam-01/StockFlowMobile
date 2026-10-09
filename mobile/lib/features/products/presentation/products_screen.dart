@@ -10,6 +10,7 @@ import '../../scanner/presentation/barcode_lookup.dart';
 import '../domain/product.dart';
 import 'products_controller.dart';
 import 'widgets/stock_badge.dart';
+import 'widgets/product_thumb.dart';
 
 class ProductsScreen extends ConsumerStatefulWidget {
   const ProductsScreen({super.key});
@@ -89,7 +90,6 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                   controller: _search,
                   hintText: 'Search name, SKU or barcode',
                   leading: const Icon(Icons.search),
-                  elevation: const WidgetStatePropertyAll(0),
                   onChanged: _onSearchChanged,
                   trailing: [
                     if (_search.text.isNotEmpty)
@@ -162,11 +162,11 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
         padding: const EdgeInsets.only(bottom: 24),
         itemCount: state.items.length + 1 + (showFooter ? 1 : 0),
         separatorBuilder: (_, i) =>
-            i == 0 ? const SizedBox.shrink() : const Divider(height: 1),
+            i == 0 ? const SizedBox.shrink() : const SizedBox(height: 10),
         itemBuilder: (context, i) {
           if (i == 0) {
             return Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+              padding: const EdgeInsets.fromLTRB(20, 14, 20, 4),
               child: Text(
                 '${state.total} product${state.total == 1 ? '' : 's'}',
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
@@ -237,23 +237,52 @@ class _ProductTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-      leading: CircleAvatar(
-        backgroundColor: theme.colorScheme.surfaceContainerHighest,
-        child: Text(
-          product.name.characters.first.toUpperCase(),
-          style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+    final scheme = theme.colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Card(
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () => context.push('/products/${product.id}'),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                ProductThumb(product: product),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        product.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontSize: 15,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        [product.sku, ?product.category?.name].join(' · '),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      StockLevelBar(product: product),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 14),
+                StockBadge(product: product),
+              ],
+            ),
+          ),
         ),
       ),
-      title: Text(product.name, maxLines: 1, overflow: TextOverflow.ellipsis),
-      subtitle: Text(
-        [product.sku, ?product.category?.name].join(' · '),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-      ),
-      trailing: StockBadge(product: product),
-      onTap: () => context.push('/products/${product.id}'),
     );
   }
 }

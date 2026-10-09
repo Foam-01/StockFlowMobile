@@ -7,9 +7,9 @@ import '../domain/dashboard.dart';
 /// Series colours (validated categorical slots 1–2, light and dark steps).
 class FlowColors {
   static Color received(Brightness b) =>
-      b == Brightness.dark ? const Color(0xFF3987E5) : const Color(0xFF2A78D6);
+      b == Brightness.dark ? const Color(0xFF6FC2A4) : const Color(0xFF2F7A62);
   static Color issued(Brightness b) =>
-      b == Brightness.dark ? const Color(0xFFD95926) : const Color(0xFFEB6834);
+      b == Brightness.dark ? const Color(0xFFDB8F63) : const Color(0xFFC26A3D);
 }
 
 const _weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];

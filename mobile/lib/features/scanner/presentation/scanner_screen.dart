@@ -227,10 +227,7 @@ class _ManualEntryDialogState extends State<_ManualEntryDialog> {
         controller: _text,
         autofocus: true,
         keyboardType: TextInputType.number,
-        decoration: const InputDecoration(
-          hintText: 'e.g. 8850999320014',
-          border: OutlineInputBorder(),
-        ),
+        decoration: const InputDecoration(hintText: 'e.g. 8850999320014'),
         onSubmitted: (_) => _submit(),
       ),
       actions: [

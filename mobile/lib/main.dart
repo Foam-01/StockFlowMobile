@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'core/config.dart';
 import 'features/offline/data/local_store.dart';
 import 'core/router.dart';
+import 'core/theme.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,20 +29,13 @@ Future<void> main() async {
 class StockFlowApp extends ConsumerWidget {
   const StockFlowApp({super.key});
 
-  static const _seed = Color(0xFF1E6F5C);
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp.router(
       title: 'StockFlow',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: _seed)),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: _seed,
-          brightness: Brightness.dark,
-        ),
-      ),
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
       routerConfig: ref.watch(routerProvider),
     );
   }

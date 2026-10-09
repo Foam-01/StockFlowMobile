@@ -28,5 +28,7 @@ class EmptyDashboardRepository implements DashboardRepository {
 }
 
 /// The bottom-navigation tab with [label] (avoids clashing with page text).
-Finder navTab(String label) =>
-    find.descendant(of: find.byType(NavigationBar), matching: find.text(label));
+Finder navTab(String label) => find.descendant(
+  of: find.byKey(const Key('app_nav')),
+  matching: find.text(label),
+);
