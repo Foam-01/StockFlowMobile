@@ -9,7 +9,10 @@ import 'package:stockflow/features/operations/data/operations_repository.dart';
 import 'package:stockflow/features/operations/domain/stock_transaction.dart';
 import 'package:stockflow/features/products/data/products_repository.dart';
 import 'package:stockflow/features/products/domain/product.dart';
+import 'package:stockflow/features/dashboard/data/dashboard_repository.dart';
 import 'package:stockflow/main.dart';
+
+import 'fakes.dart';
 
 class MockAuth extends Mock implements AuthRepository {}
 
@@ -111,6 +114,9 @@ void main() {
         retry: (_, _) => null,
         overrides: [
           authRepositoryProvider.overrideWithValue(auth),
+          dashboardRepositoryProvider.overrideWithValue(
+            EmptyDashboardRepository(),
+          ),
           productsRepositoryProvider.overrideWithValue(products),
           operationsRepositoryProvider.overrideWithValue(ops),
           tokenStorageProvider.overrideWithValue(MemoryTokenStorage()),
@@ -119,7 +125,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Operations'));
+    await tester.tap(navTab('Operations'));
     await tester.pumpAndSettle();
   }
 

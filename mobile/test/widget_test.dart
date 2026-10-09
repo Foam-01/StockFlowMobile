@@ -10,7 +10,10 @@ import 'package:stockflow/features/history/data/history_repository.dart';
 import 'package:stockflow/features/history/domain/movement.dart';
 import 'package:stockflow/features/products/data/products_repository.dart';
 import 'package:stockflow/features/products/domain/product.dart';
+import 'package:stockflow/features/dashboard/data/dashboard_repository.dart';
 import 'package:stockflow/main.dart';
+
+import 'fakes.dart';
 
 class MockAuthRepository extends Mock implements AuthRepository {}
 
@@ -103,6 +106,9 @@ void main() {
         retry: (_, _) => null,
         overrides: [
           authRepositoryProvider.overrideWithValue(auth),
+          dashboardRepositoryProvider.overrideWithValue(
+            EmptyDashboardRepository(),
+          ),
           productsRepositoryProvider.overrideWithValue(products),
           historyRepositoryProvider.overrideWithValue(history),
           tokenStorageProvider.overrideWithValue(storage),
@@ -117,6 +123,8 @@ void main() {
     storage.token = 'saved';
     when(() => auth.me()).thenAnswer((_) async => _admin);
     await pumpApp(tester);
+    await tester.tap(navTab('Products'));
+    await tester.pumpAndSettle();
   }
 
   group('login', () {
@@ -171,9 +179,12 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(storage.token, 'jwt-token');
+      expect(find.text('Hello, Admin'), findsOneWidget); // lands on dashboard
+      await tester.tap(navTab('Products'));
+      await tester.pumpAndSettle();
       expect(find.text('Drinking water 600ml'), findsOneWidget);
 
-      await tester.tap(find.text('Profile'));
+      await tester.tap(navTab('Profile'));
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('sign_out')));
       await tester.pumpAndSettle();

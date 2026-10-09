@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/errors.dart';
 import '../../../core/widgets/state_views.dart';
+import '../../scanner/presentation/barcode_lookup.dart';
 import '../domain/product.dart';
 import 'products_controller.dart';
 import 'widgets/stock_badge.dart';
@@ -64,6 +65,19 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Products'),
+        actions: [
+          IconButton(
+            key: const Key('scan_product'),
+            tooltip: 'Scan barcode',
+            icon: const Icon(Icons.qr_code_scanner),
+            onPressed: () async {
+              final product = await scanProduct(context, ref);
+              if (product != null && context.mounted) {
+                context.push('/products/${product.id}');
+              }
+            },
+          ),
+        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(112),
           child: Column(

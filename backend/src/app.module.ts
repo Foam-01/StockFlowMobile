@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { AttachmentsModule } from './attachments/attachments.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { CategoriesModule } from './categories/categories.module.js';
+import { DashboardModule } from './dashboard/dashboard.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { ProductsModule } from './products/products.module.js';
 import { StockModule } from './stock/stock.module.js';
@@ -14,6 +16,8 @@ import { StockModule } from './stock/stock.module.js';
     CategoriesModule,
     ProductsModule,
     StockModule,
+    DashboardModule,
+    AttachmentsModule,
   ],
 })
 export class AppModule {}

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../core/errors.dart';
+import '../../scanner/presentation/barcode_lookup.dart';
 import '../domain/draft.dart';
 import '../domain/stock_transaction.dart';
 import 'operations_controller.dart';
@@ -46,6 +47,32 @@ class _NewOperationScreenState extends ConsumerState<NewOperationScreen> {
     );
     if (product == null) return;
     setState(() => _lines.add(DraftLine(product: product, quantity: 1)));
+  }
+
+  /// Scanning an item already on the list adds 1 to it, like a till.
+  Future<void> _scanProduct() async {
+    final product = await scanProduct(context, ref, title: 'Scan item');
+    if (product == null || !mounted) return;
+    final i = _lines.indexWhere((l) => l.product.id == product.id);
+    setState(() {
+      if (i == -1) {
+        _lines.add(DraftLine(product: product, quantity: 1));
+      } else {
+        _lines[i] = _lines[i].withQuantity(_lines[i].quantity + 1);
+      }
+    });
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          duration: const Duration(seconds: 2),
+          content: Text(
+            i == -1
+                ? 'Added ${product.name}'
+                : '${product.name}: ${_lines[i].quantity}',
+          ),
+        ),
+      );
   }
 
   Future<void> _submit() async {
@@ -141,10 +168,16 @@ class _NewOperationScreenState extends ConsumerState<NewOperationScreen> {
               Text('Items', style: theme.textTheme.titleMedium),
               const Spacer(),
               TextButton.icon(
+                key: const Key('scan_item'),
+                onPressed: _saving ? null : _scanProduct,
+                icon: const Icon(Icons.qr_code_scanner),
+                label: const Text('Scan'),
+              ),
+              TextButton.icon(
                 key: const Key('add_item'),
                 onPressed: _saving ? null : _addProduct,
                 icon: const Icon(Icons.add),
-                label: const Text('Add product'),
+                label: const Text('Add'),
               ),
             ],
           ),
@@ -220,6 +253,16 @@ class _LineCard extends StatefulWidget {
 
 class _LineCardState extends State<_LineCard> {
   late final _qty = TextEditingController(text: '${widget.line.quantity}');
+
+  /// Keep the field in sync when the quantity changes from outside
+  /// (e.g. scanning the same item again).
+  @override
+  void didUpdateWidget(_LineCard old) {
+    super.didUpdateWidget(old);
+    if ((int.tryParse(_qty.text) ?? 0) != widget.line.quantity) {
+      _qty.text = '${widget.line.quantity}';
+    }
+  }
 
   @override
   void dispose() {

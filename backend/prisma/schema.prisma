@@ -34,6 +34,7 @@ model User {
   createdAt    DateTime           @default(now())
   createdTx    StockTransaction[] @relation("CreatedBy")
   confirmedTx  StockTransaction[] @relation("ConfirmedBy")
+  uploads      Attachment[]       @relation("UploadedBy")
 }
 
 model Category {
@@ -88,5 +89,9 @@ model Attachment {
   transactionId String
   transaction   StockTransaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
   url           String
+  /// Cloudinary public_id, needed to delete the image.
+  publicId      String?          @unique
+  uploadedById  String?
+  uploadedBy    User?            @relation("UploadedBy", fields: [uploadedById], references: [id])
   createdAt     DateTime         @default(now())
 }

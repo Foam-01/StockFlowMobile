@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../products/domain/product.dart';
+import '../../dashboard/data/dashboard_repository.dart';
 import '../../history/presentation/history_controller.dart';
 import '../../products/data/products_repository.dart';
 import '../../products/presentation/products_controller.dart';
@@ -118,6 +119,7 @@ class TxActions {
       note: note,
     );
     _ref.invalidate(txListProvider);
+    _ref.invalidate(dashboardProvider);
     return tx;
   }
 
@@ -134,6 +136,7 @@ class TxActions {
     final tx = await op;
     _ref.invalidate(txListProvider);
     _ref.invalidate(txDetailProvider(id));
+    _ref.invalidate(dashboardProvider);
     if (stockChanged) {
       _ref.invalidate(productListProvider);
       _ref.invalidate(productDetailProvider);

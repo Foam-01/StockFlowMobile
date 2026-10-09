@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../features/auth/presentation/auth_controller.dart';
 import '../features/auth/presentation/login_screen.dart';
+import '../features/dashboard/presentation/dashboard_screen.dart';
 import '../features/history/presentation/product_history_screen.dart';
 import '../features/operations/domain/stock_transaction.dart';
 import '../features/operations/presentation/new_operation_screen.dart';
@@ -23,7 +24,7 @@ final routerProvider = Provider<GoRouter>((ref) {
 
   return GoRouter(
     navigatorKey: _rootKey,
-    initialLocation: '/products',
+    initialLocation: '/dashboard',
     refreshListenable: refresh,
     redirect: (context, state) {
       final auth = ref.read(authControllerProvider);
@@ -34,7 +35,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       }
       final signedIn = auth.value != null;
       if (!signedIn) return loc == '/login' ? null : '/login';
-      if (loc == '/login' || loc == '/splash' || loc == '/') return '/products';
+      if (loc == '/login' || loc == '/splash' || loc == '/') {
+        return '/dashboard';
+      }
       return null;
     },
     routes: [
@@ -43,6 +46,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       StatefulShellRoute.indexedStack(
         builder: (_, _, shell) => _HomeShell(shell: shell),
         branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/dashboard',
+                builder: (_, _) => const DashboardScreen(),
+              ),
+            ],
+          ),
           StatefulShellBranch(
             routes: [
               GoRoute(
@@ -122,6 +133,11 @@ class _HomeShell extends StatelessWidget {
         onDestinationSelected: (i) =>
             shell.goBranch(i, initialLocation: i == shell.currentIndex),
         destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.space_dashboard_outlined),
+            selectedIcon: Icon(Icons.space_dashboard),
+            label: 'Dashboard',
+          ),
           NavigationDestination(
             icon: Icon(Icons.inventory_2_outlined),
             selectedIcon: Icon(Icons.inventory_2),

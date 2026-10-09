@@ -12,7 +12,10 @@ import 'package:stockflow/features/history/presentation/product_history_screen.d
 import 'package:stockflow/features/operations/domain/stock_transaction.dart';
 import 'package:stockflow/features/products/data/products_repository.dart';
 import 'package:stockflow/features/products/domain/product.dart';
+import 'package:stockflow/features/dashboard/data/dashboard_repository.dart';
 import 'package:stockflow/main.dart';
+
+import 'fakes.dart';
 
 class MockAuth extends Mock implements AuthRepository {}
 
@@ -86,6 +89,9 @@ void main() {
         retry: (_, _) => null,
         overrides: [
           authRepositoryProvider.overrideWithValue(auth),
+          dashboardRepositoryProvider.overrideWithValue(
+            EmptyDashboardRepository(),
+          ),
           productsRepositoryProvider.overrideWithValue(products),
           historyRepositoryProvider.overrideWithValue(history),
           tokenStorageProvider.overrideWithValue(MemoryTokenStorage()),
@@ -93,6 +99,8 @@ void main() {
         child: const StockFlowApp(),
       ),
     );
+    await tester.pumpAndSettle();
+    await tester.tap(navTab('Products'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Drinking water 600ml'));
     await tester.pumpAndSettle();

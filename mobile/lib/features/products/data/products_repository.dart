@@ -18,6 +18,7 @@ abstract class ProductsRepository {
     int limit = 20,
   });
   Future<Product> get(String id);
+  Future<Product> getByBarcode(String barcode);
   Future<List<Category>> categories();
 }
 
@@ -62,6 +63,18 @@ class ApiProductsRepository implements ProductsRepository {
   Future<Product> get(String id) async {
     try {
       final res = await _dio.get<Map<String, dynamic>>('/products/$id');
+      return Product.fromJson(res.data!);
+    } catch (e) {
+      throw ApiException.from(e);
+    }
+  }
+
+  @override
+  Future<Product> getByBarcode(String barcode) async {
+    try {
+      final res = await _dio.get<Map<String, dynamic>>(
+        '/products/barcode/${Uri.encodeComponent(barcode)}',
+      );
       return Product.fromJson(res.data!);
     } catch (e) {
       throw ApiException.from(e);

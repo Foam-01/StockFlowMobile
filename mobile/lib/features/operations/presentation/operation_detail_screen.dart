@@ -5,6 +5,7 @@ import '../../../core/errors.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../domain/stock_transaction.dart';
+import 'evidence_photos.dart';
 import 'operations_controller.dart';
 import 'widgets/tx_widgets.dart';
 
@@ -76,7 +77,11 @@ class _OperationDetailScreenState extends ConsumerState<OperationDetailScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Operation')),
       body: tx.when(
-        data: (tx) => _Body(tx: tx),
+        data: (tx) => _Body(
+          tx: tx,
+          canEditPhotos:
+              user != null && (user.isAdmin || tx.createdById == user.id),
+        ),
         error: (e, _) => ErrorView(
           error: e,
           onRetry: () => ref.invalidate(txDetailProvider(widget.txId)),
@@ -160,9 +165,10 @@ class _OperationDetailScreenState extends ConsumerState<OperationDetailScreen> {
 }
 
 class _Body extends StatelessWidget {
-  const _Body({required this.tx});
+  const _Body({required this.tx, required this.canEditPhotos});
 
   final StockTransaction tx;
+  final bool canEditPhotos;
 
   @override
   Widget build(BuildContext context) {
@@ -223,6 +229,8 @@ class _Body extends StatelessWidget {
             ],
           ),
         ),
+        const SizedBox(height: 24),
+        EvidencePhotos(tx: tx, canEdit: canEditPhotos),
       ],
     );
   }

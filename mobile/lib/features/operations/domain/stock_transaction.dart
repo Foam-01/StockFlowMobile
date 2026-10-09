@@ -54,6 +54,22 @@ class TxItem {
   }
 }
 
+class Attachment {
+  const Attachment({required this.id, required this.url});
+
+  final String id;
+  final String url;
+
+  /// Cloudinary on-the-fly square thumbnail (resized, auto format/quality).
+  String thumbnailUrl([int size = 300]) => url.replaceFirst(
+    '/image/upload/',
+    '/image/upload/c_fill,w_$size,h_$size,q_auto,f_auto/',
+  );
+
+  factory Attachment.fromJson(Map<String, dynamic> json) =>
+      Attachment(id: json['id'] as String, url: json['url'] as String);
+}
+
 class StockTransaction {
   const StockTransaction({
     required this.id,
@@ -67,6 +83,7 @@ class StockTransaction {
     this.note,
     this.confirmedByName,
     this.confirmedAt,
+    this.attachments = const [],
   });
 
   final String id;
@@ -80,6 +97,7 @@ class StockTransaction {
   final DateTime createdAt;
   final String? confirmedByName;
   final DateTime? confirmedAt;
+  final List<Attachment> attachments;
 
   bool get isDraft => status == TxStatus.draft;
 
@@ -106,6 +124,9 @@ class StockTransaction {
       confirmedAt: json['confirmedAt'] == null
           ? null
           : DateTime.parse(json['confirmedAt'] as String).toLocal(),
+      attachments: ((json['attachments'] as List?) ?? const [])
+          .map((e) => Attachment.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
   }
 }
