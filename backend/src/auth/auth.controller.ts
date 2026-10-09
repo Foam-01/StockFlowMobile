@@ -1,0 +1,31 @@
+import { Body, Controller, Get, HttpCode, Post } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { AuthService } from './auth.service.js';
+import type { AuthUser } from './decorators/index.js';
+import { CurrentUser, Public } from './decorators/index.js';
+import { LoginDto, RegisterDto } from './dto/auth.dto.js';
+
+@ApiTags('auth')
+@Controller('auth')
+export class AuthController {
+  constructor(private readonly auth: AuthService) {}
+
+  @Public()
+  @Post('register')
+  register(@Body() dto: RegisterDto) {
+    return this.auth.register(dto);
+  }
+
+  @Public()
+  @Post('login')
+  @HttpCode(200)
+  login(@Body() dto: LoginDto) {
+    return this.auth.login(dto);
+  }
+
+  @ApiBearerAuth()
+  @Get('me')
+  me(@CurrentUser() user: AuthUser) {
+    return this.auth.me(user.id);
+  }
+}
