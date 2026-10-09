@@ -12,11 +12,13 @@ history per product.
 - **Backend:** NestJS · Prisma · PostgreSQL (Neon) · JWT · Cloudinary
 - Built as a portfolio / demo project, run locally
 
-<!-- Screenshots: add images to docs/screenshots/ and uncomment.
-| Dashboard | Products | Scan | Operation |
-|---|---|---|---|
-| ![](docs/screenshots/dashboard.png) | ![](docs/screenshots/products.png) | ![](docs/screenshots/scan.png) | ![](docs/screenshots/operation.png) |
--->
+| Dashboard | Products | Product & history |
+|---|---|---|
+| <img src="docs/screenshots/dashboard.png" width="250" alt="Dashboard"> | <img src="docs/screenshots/products.png" width="250" alt="Products"> | <img src="docs/screenshots/product-detail.png" width="250" alt="Product detail with movements"> |
+
+| Operations | New document | Sign in |
+|---|---|---|
+| <img src="docs/screenshots/operations.png" width="250" alt="Stock operations"> | <img src="docs/screenshots/new-operation.png" width="250" alt="New issue form"> | <img src="docs/screenshots/login.png" width="250" alt="Sign in"> |
 
 ## Features
 

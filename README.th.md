@@ -10,11 +10,13 @@
 - **Backend:** NestJS · Prisma · PostgreSQL (Neon) · JWT · Cloudinary
 - โปรเจกต์สำหรับ portfolio / demo รันบนเครื่อง local
 
-<!-- ภาพหน้าจอ: ใส่รูปใน docs/screenshots/ แล้วเอา comment ออก
-| Dashboard | Products | Scan | Operation |
-|---|---|---|---|
-| ![](docs/screenshots/dashboard.png) | ![](docs/screenshots/products.png) | ![](docs/screenshots/scan.png) | ![](docs/screenshots/operation.png) |
--->
+| Dashboard | สินค้า | สินค้าและประวัติ |
+|---|---|---|
+| <img src="docs/screenshots/dashboard.png" width="250" alt="Dashboard"> | <img src="docs/screenshots/products.png" width="250" alt="Products"> | <img src="docs/screenshots/product-detail.png" width="250" alt="Product detail with movements"> |
+
+| เอกสารสต็อก | สร้างเอกสาร | เข้าสู่ระบบ |
+|---|---|---|
+| <img src="docs/screenshots/operations.png" width="250" alt="Stock operations"> | <img src="docs/screenshots/new-operation.png" width="250" alt="New issue form"> | <img src="docs/screenshots/login.png" width="250" alt="Sign in"> |
 
 ## ฟีเจอร์
 
