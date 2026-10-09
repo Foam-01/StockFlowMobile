@@ -8,6 +8,7 @@ import {
 import { Prisma, Role, TxStatus } from '@prisma/client';
 import { AuthUser } from '../auth/decorators/index.js';
 import { PrismaService } from '../prisma/prisma.service.js';
+import { withRetry } from '../prisma/retry.js';
 import { CreateTxDto, TxQueryDto } from './dto/stock.dto.js';
 import {
   InsufficientStockError,
@@ -37,7 +38,7 @@ export class StockService {
   async create(dto: CreateTxDto, user: AuthUser) {
     // Idempotent: an offline client retrying the same clientUuid gets the original back.
     if (dto.clientUuid) {
-      const existing = await this.prisma.stockTransaction.findUnique({
+      const existing = await this.prisma.db.stockTransaction.findUnique({
         where: { clientUuid: dto.clientUuid },
         include: txInclude,
       });
@@ -52,14 +53,14 @@ export class StockService {
     this.guardRules(() => validateItems(dto.type, dto.items));
 
     const productIds = [...new Set(dto.items.map((i) => i.productId))];
-    const found = await this.prisma.product.count({
+    const found = await this.prisma.db.product.count({
       where: { id: { in: productIds } },
     });
     if (found !== productIds.length) {
       throw new BadRequestException('One or more products do not exist');
     }
 
-    return this.prisma.stockTransaction.create({
+    return this.prisma.db.stockTransaction.create({
       data: {
         type: dto.type,
         clientUuid: dto.clientUuid,
@@ -78,21 +79,21 @@ export class StockService {
       status,
       ...(productId && { items: { some: { productId } } }),
     };
-    const [items, total] = await this.prisma.$transaction([
-      this.prisma.stockTransaction.findMany({
+    const [items, total] = await Promise.all([
+      this.prisma.db.stockTransaction.findMany({
         where,
         include: txInclude,
         orderBy: { createdAt: 'desc' },
         skip: (page - 1) * limit,
         take: limit,
       }),
-      this.prisma.stockTransaction.count({ where }),
+      this.prisma.db.stockTransaction.count({ where }),
     ]);
     return { items, total, page, limit };
   }
 
   async findOne(id: string) {
-    const tx = await this.prisma.stockTransaction.findUnique({
+    const tx = await this.prisma.db.stockTransaction.findUnique({
       where: { id },
       include: txInclude,
     });
@@ -109,40 +110,45 @@ export class StockService {
     const tx = await this.findOne(id);
     const deltas = netDeltas(tx.type, tx.items);
 
-    await this.prisma.$transaction(async (db) => {
-      const claimed = await db.stockTransaction.updateMany({
-        where: { id, status: TxStatus.DRAFT },
-        data: {
-          status: TxStatus.CONFIRMED,
-          confirmedById: user.id,
-          confirmedAt: new Date(),
-        },
-      });
-      if (claimed.count === 0) {
-        throw new ConflictException('Only DRAFT transactions can be confirmed');
-      }
-
-      for (const [productId, delta] of deltas) {
-        if (delta >= 0) {
-          await db.product.update({
-            where: { id: productId },
-            data: { onHand: { increment: delta } },
-          });
-          continue;
-        }
-        const res = await db.product.updateMany({
-          where: { id: productId, onHand: { gte: -delta } },
-          data: { onHand: { decrement: -delta } },
+    // Retry the whole transaction (it rolls back on failure), not single queries.
+    await withRetry(() =>
+      this.prisma.$transaction(async (db) => {
+        const claimed = await db.stockTransaction.updateMany({
+          where: { id, status: TxStatus.DRAFT },
+          data: {
+            status: TxStatus.CONFIRMED,
+            confirmedById: user.id,
+            confirmedAt: new Date(),
+          },
         });
-        if (res.count === 0) {
-          const p = await db.product.findUnique({ where: { id: productId } });
-          throw new BadRequestException(
-            new InsufficientStockError(productId, p?.onHand ?? 0, -delta)
-              .message,
+        if (claimed.count === 0) {
+          throw new ConflictException(
+            'Only DRAFT transactions can be confirmed',
           );
         }
-      }
-    });
+
+        for (const [productId, delta] of deltas) {
+          if (delta >= 0) {
+            await db.product.update({
+              where: { id: productId },
+              data: { onHand: { increment: delta } },
+            });
+            continue;
+          }
+          const res = await db.product.updateMany({
+            where: { id: productId, onHand: { gte: -delta } },
+            data: { onHand: { decrement: -delta } },
+          });
+          if (res.count === 0) {
+            const p = await db.product.findUnique({ where: { id: productId } });
+            throw new BadRequestException(
+              new InsufficientStockError(productId, p?.onHand ?? 0, -delta)
+                .message,
+            );
+          }
+        }
+      }),
+    );
 
     return this.findOne(id);
   }
@@ -152,7 +158,7 @@ export class StockService {
     if (user.role !== Role.ADMIN && tx.createdById !== user.id) {
       throw new ForbiddenException('Only the creator or an admin can cancel');
     }
-    const res = await this.prisma.stockTransaction.updateMany({
+    const res = await this.prisma.db.stockTransaction.updateMany({
       where: { id, status: TxStatus.DRAFT },
       data: { status: TxStatus.CANCELLED },
     });
@@ -164,12 +170,12 @@ export class StockService {
 
   /** Recomputes balance from the ledger and compares it to the cached onHand. */
   async auditProduct(productId: string) {
-    const product = await this.prisma.product.findUnique({
+    const product = await this.prisma.db.product.findUnique({
       where: { id: productId },
     });
     if (!product) throw new NotFoundException('Product not found');
 
-    const lines = await this.prisma.stockTransactionItem.findMany({
+    const lines = await this.prisma.db.stockTransactionItem.findMany({
       where: { productId },
       select: {
         quantity: true,
@@ -192,13 +198,13 @@ export class StockService {
    * balance right after it (computed from the ledger in confirmation order).
    */
   async productMovements(productId: string, page: number, limit: number) {
-    const product = await this.prisma.product.findUnique({
+    const product = await this.prisma.db.product.findUnique({
       where: { id: productId },
       select: { id: true, unit: true, onHand: true },
     });
     if (!product) throw new NotFoundException('Product not found');
 
-    const lines = await this.prisma.stockTransactionItem.findMany({
+    const lines = await this.prisma.db.stockTransactionItem.findMany({
       where: { productId, transaction: { status: TxStatus.CONFIRMED } },
       select: {
         quantity: true,

@@ -22,10 +22,10 @@ export class AuthService {
   /** Self-registration always creates STAFF; admins are seeded. */
   async register(dto: RegisterDto) {
     const email = dto.email.toLowerCase();
-    const exists = await this.prisma.user.findUnique({ where: { email } });
+    const exists = await this.prisma.db.user.findUnique({ where: { email } });
     if (exists) throw new ConflictException('Email already registered');
 
-    const user = await this.prisma.user.create({
+    const user = await this.prisma.db.user.create({
       data: {
         email,
         name: dto.name,
@@ -36,7 +36,7 @@ export class AuthService {
   }
 
   async login(dto: LoginDto) {
-    const user = await this.prisma.user.findUnique({
+    const user = await this.prisma.db.user.findUnique({
       where: { email: dto.email.toLowerCase() },
     });
     const ok = user && (await bcrypt.compare(dto.password, user.passwordHash));
@@ -45,7 +45,9 @@ export class AuthService {
   }
 
   async me(userId: string) {
-    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    const user = await this.prisma.db.user.findUnique({
+      where: { id: userId },
+    });
     if (!user) throw new NotFoundException('User not found');
     return publicUser(user);
   }

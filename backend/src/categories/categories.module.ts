@@ -25,7 +25,7 @@ export class CategoriesService {
   constructor(private readonly prisma: PrismaService) {}
 
   findAll() {
-    return this.prisma.category.findMany({
+    return this.prisma.db.category.findMany({
       orderBy: { name: 'asc' },
       include: { _count: { select: { products: true } } },
     });
@@ -33,10 +33,10 @@ export class CategoriesService {
 
   async create(dto: CreateCategoryDto) {
     const name = dto.name.trim();
-    if (await this.prisma.category.findUnique({ where: { name } })) {
+    if (await this.prisma.db.category.findUnique({ where: { name } })) {
       throw new ConflictException('Category already exists');
     }
-    return this.prisma.category.create({ data: { name } });
+    return this.prisma.db.category.create({ data: { name } });
   }
 }
 

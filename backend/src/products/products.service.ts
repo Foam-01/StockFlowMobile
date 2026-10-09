@@ -25,24 +25,26 @@ export class ProductsService {
           { barcode: { contains: q } },
         ],
       }),
-      ...(lowStock && { onHand: { lte: this.prisma.product.fields.minStock } }),
+      ...(lowStock && {
+        onHand: { lte: this.prisma.db.product.fields.minStock },
+      }),
     };
 
-    const [items, total] = await this.prisma.$transaction([
-      this.prisma.product.findMany({
+    const [items, total] = await Promise.all([
+      this.prisma.db.product.findMany({
         where,
         include: { category: true },
         orderBy: { name: 'asc' },
         skip: (page - 1) * limit,
         take: limit,
       }),
-      this.prisma.product.count({ where }),
+      this.prisma.db.product.count({ where }),
     ]);
     return { items, total, page, limit };
   }
 
   async findOne(id: string) {
-    const product = await this.prisma.product.findUnique({
+    const product = await this.prisma.db.product.findUnique({
       where: { id },
       include: { category: true },
     });
@@ -51,7 +53,7 @@ export class ProductsService {
   }
 
   async findByBarcode(barcode: string) {
-    const product = await this.prisma.product.findUnique({
+    const product = await this.prisma.db.product.findUnique({
       where: { barcode },
       include: { category: true },
     });
@@ -60,19 +62,19 @@ export class ProductsService {
   }
 
   create(dto: CreateProductDto) {
-    return this.write(() => this.prisma.product.create({ data: dto }));
+    return this.write(() => this.prisma.db.product.create({ data: dto }));
   }
 
   async update(id: string, dto: UpdateProductDto) {
     await this.findOne(id);
     return this.write(() =>
-      this.prisma.product.update({ where: { id }, data: dto }),
+      this.prisma.db.product.update({ where: { id }, data: dto }),
     );
   }
 
   async remove(id: string) {
     await this.findOne(id);
-    await this.write(() => this.prisma.product.delete({ where: { id } }));
+    await this.write(() => this.prisma.db.product.delete({ where: { id } }));
   }
 
   /** Map Prisma constraint errors to HTTP errors. */
