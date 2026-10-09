@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../core/errors.dart';
+import '../../offline/domain/pending_op.dart';
+import '../../offline/presentation/sync_controller.dart';
 import '../../scanner/presentation/barcode_lookup.dart';
 import '../domain/draft.dart';
 import '../domain/stock_transaction.dart';
@@ -97,12 +99,48 @@ class _NewOperationScreenState extends ConsumerState<NewOperationScreen> {
       if (!mounted) return;
       context.pushReplacement('/operations/${tx.id}');
     } catch (e) {
+      final error = ApiException.from(e);
+      if (error.isNetwork) return _saveOffline();
       if (!mounted) return;
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(ApiException.from(e).message)));
+          .showSnackBar(SnackBar(content: Text(error.message)));
     } finally {
       if (mounted) setState(() => _saving = false);
     }
+  }
+
+  /// No connection: keep the document on the device and send it later.
+  /// Same clientUuid, so if the first attempt actually reached the server,
+  /// the sync gets that draft back instead of creating a second one.
+  Future<void> _saveOffline() async {
+    await ref
+        .read(syncControllerProvider.notifier)
+        .enqueue(
+          PendingOp(
+            clientUuid: _clientUuid,
+            type: _type,
+            referenceNo: _reference.text.trim(),
+            note: _note.text.trim(),
+            createdAt: DateTime.now(),
+            lines: [
+              for (final l in _lines)
+                PendingLine(
+                  productId: l.product.id,
+                  productName: l.product.name,
+                  sku: l.product.sku,
+                  unit: l.product.unit,
+                  quantity: l.quantity,
+                ),
+            ],
+          ),
+        );
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Saved on this device. It will sync when online.'),
+      ),
+    );
+    context.pop();
   }
 
   @override

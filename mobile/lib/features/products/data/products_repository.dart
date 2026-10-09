@@ -3,10 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api_client.dart';
 import '../../../core/errors.dart';
+import '../../offline/data/local_store.dart';
 import '../domain/product.dart';
+import 'cached_products_repository.dart';
 
 final productsRepositoryProvider = Provider<ProductsRepository>(
-  (ref) => ApiProductsRepository(ref.watch(dioProvider)),
+  (ref) => CachedProductsRepository(
+    ApiProductsRepository(ref.watch(dioProvider)),
+    ref.watch(productCacheProvider),
+  ),
 );
 
 abstract class ProductsRepository {

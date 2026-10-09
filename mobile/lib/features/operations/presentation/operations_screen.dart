@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/widgets/state_views.dart';
+import '../../offline/presentation/sync_section.dart';
 import '../domain/stock_transaction.dart';
 import 'operations_controller.dart';
 import 'widgets/tx_widgets.dart';
@@ -99,15 +100,25 @@ class _OperationsScreenState extends ConsumerState<OperationsScreen> {
         icon: const Icon(Icons.add),
         label: const Text('New'),
       ),
-      body: switch (list) {
-        AsyncValue(:final value?, isLoading: false) ||
-        AsyncValue(:final value?, hasError: false) => _buildList(value, status),
-        AsyncValue(:final error?, isLoading: false) => ErrorView(
-          error: error,
-          onRetry: () => ref.invalidate(txListProvider),
-        ),
-        _ => const Center(child: CircularProgressIndicator()),
-      },
+      body: Column(
+        children: [
+          const SyncSection(),
+          Expanded(
+            child: switch (list) {
+              AsyncValue(:final value?, isLoading: false) ||
+              AsyncValue(
+                :final value?,
+                hasError: false,
+              ) => _buildList(value, status),
+              AsyncValue(:final error?, isLoading: false) => ErrorView(
+                error: error,
+                onRetry: () => ref.invalidate(txListProvider),
+              ),
+              _ => const Center(child: CircularProgressIndicator()),
+            },
+          ),
+        ],
+      ),
     );
   }
 

@@ -97,7 +97,7 @@ stateDiagram-v2
 ```
 
 Creating a draft with a `clientUuid` the server has already seen returns the
-original draft, so a retried request (or a future offline queue) never
+original draft, so a retried request (including the offline queue) never
 creates duplicates.
 
 ## Evidence photos
@@ -121,6 +121,34 @@ sequenceDiagram
 Limits: 5 photos per transaction; only the creator or an admin can add or
 delete; not on cancelled transactions. Thumbnails use Cloudinary on-the-fly
 transforms (`c_fill,w_300,h_300,q_auto,f_auto`).
+
+## Offline mode
+
+```mermaid
+flowchart TD
+  Save["Save document"] --> Try{"POST /transactions<br/>(clientUuid)"}
+  Try -- "201" --> Done["Open draft"]
+  Try -- "network error" --> Q[("SQLite outbox")]
+  Try -- "4xx / 5xx" --> Err["Show error, stay on form"]
+  Q --> Trig["Trigger: reconnect · app resume ·<br/>login · Sync now"]
+  Trig --> Send{"Re-send with<br/>same clientUuid"}
+  Send -- "ok (or existing draft)" --> Rm["Remove from outbox"]
+  Send -- "network / 5xx" --> Wait["Stop pass, keep pending"]
+  Send -- "other 4xx" --> Fail["Mark failed:<br/>retry or discard"]
+```
+
+- **Outbox** (`outbox` table): documents saved without a connection, sent
+  oldest-first. A network error stops the pass, since everything after it
+  would fail too. A rejected item is marked *failed* with the server's reason
+  and never blocks the rest of the queue.
+- **No duplicates:** the `clientUuid` is created once per form. If the first
+  attempt actually reached the server but the response was lost, the retry
+  gets the same draft back.
+- **Product cache** (`product_cache` table): every product the app sees is
+  cached, so search, the item picker and barcode scanning keep working
+  offline. Server errors (e.g. 404) are never hidden by the cache.
+- Confirming and cancelling stay **online-only** on purpose: they change real
+  stock, which needs the server's current balance.
 
 ## Data model
 

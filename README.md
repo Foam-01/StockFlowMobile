@@ -8,7 +8,7 @@ A mobile inventory app for receiving, issuing and adjusting stock: barcode
 scanning, photo evidence, a live dashboard and a full, auditable movement
 history per product.
 
-- **Mobile:** Flutter · Riverpod · go_router · Dio · mobile_scanner
+- **Mobile:** Flutter · Riverpod · go_router · Dio · mobile_scanner · sqflite
 - **Backend:** NestJS · Prisma · PostgreSQL (Neon) · JWT · Cloudinary
 - Built as a portfolio / demo project, run locally
 
@@ -28,11 +28,12 @@ history per product.
   - stock only changes on confirm (admin), and can never be issued below zero, even with concurrent confirms
   - resending a document with the same `clientUuid` never creates a duplicate
 - **Evidence photos:** camera or gallery, uploaded straight to Cloudinary with server-signed requests
+- **Offline mode:** documents saved without a connection are queued in SQLite and synced automatically (no duplicates); products stay searchable and scannable offline
 - **History & audit:** movements per product with running balance; ledger vs cached stock check
 - Loading, empty and error states with retry on every screen
 - API docs via Swagger
 
-See **[docs/architecture.md](docs/architecture.md)** for diagrams: system overview, confirm flow, upload flow and data model.
+See **[docs/architecture.md](docs/architecture.md)** for diagrams: system overview, confirm flow, upload flow, offline sync and data model.
 
 ## Project structure
 
@@ -46,7 +47,7 @@ See **[docs/architecture.md](docs/architecture.md)** for diagrams: system overvi
 └── mobile/    # Flutter app
     └── lib/
         ├── core/        # api client, server URL config, router, widgets
-        └── features/    # auth, dashboard, products, operations, history, scanner, profile
+        └── features/    # auth, dashboard, products, operations, history, scanner, offline, profile
 ```
 
 ## Getting started

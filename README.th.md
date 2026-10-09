@@ -6,7 +6,7 @@
 
 แอปจัดการสต็อกสินค้าบนมือถือ รับเข้า เบิกออก และปรับยอดได้ มีสแกนบาร์โค้ด รูปแนบหลักฐาน Dashboard และประวัติการเคลื่อนไหวของแต่ละสินค้าที่ตรวจสอบย้อนหลังได้
 
-- **Mobile:** Flutter · Riverpod · go_router · Dio · mobile_scanner
+- **Mobile:** Flutter · Riverpod · go_router · Dio · mobile_scanner · sqflite
 - **Backend:** NestJS · Prisma · PostgreSQL (Neon) · JWT · Cloudinary
 - โปรเจกต์สำหรับ portfolio / demo รันบนเครื่อง local
 
@@ -26,11 +26,12 @@
   - สต็อกเปลี่ยนเมื่อ Admin ยืนยันเท่านั้น และไม่มีทางติดลบ ถึงจะยืนยันพร้อมกันหลายคน
   - ส่งเอกสารซ้ำด้วย `clientUuid` เดิม จะไม่เกิดรายการซ้ำ
 - **รูปแนบหลักฐาน:** ถ่ายรูปหรือเลือกจากแกลเลอรี อัปโหลดตรงไป Cloudinary ด้วยลายเซ็นจาก server
+- **โหมดออฟไลน์:** เอกสารที่บันทึกตอนไม่มีเน็ตจะเข้าคิวใน SQLite แล้ว sync ให้อัตโนมัติโดยไม่เกิดรายการซ้ำ ระหว่างออฟไลน์ยังค้นหาและสแกนสินค้าได้
 - **ประวัติและ audit:** ดูการเคลื่อนไหวของแต่ละสินค้าพร้อมยอดคงเหลือสะสม และเทียบ ledger กับยอดในระบบ
 - ทุกหน้าจอมีสถานะ loading, ว่าง และ error พร้อมปุ่มลองใหม่
 - เอกสาร API ด้วย Swagger
 
-ดูแผนภาพได้ที่ **[docs/architecture.th.md](docs/architecture.th.md)**: ภาพรวมระบบ, ขั้นตอนยืนยันเอกสาร, ขั้นตอนอัปโหลดรูป และโครงสร้างข้อมูล
+ดูแผนภาพได้ที่ **[docs/architecture.th.md](docs/architecture.th.md)**: ภาพรวมระบบ, ขั้นตอนยืนยันเอกสาร, ขั้นตอนอัปโหลดรูป, การ sync ออฟไลน์ และโครงสร้างข้อมูล
 
 ## โครงสร้างโปรเจกต์
 
@@ -44,7 +45,7 @@
 └── mobile/    # Flutter app
     └── lib/
         ├── core/        # api client, ตั้งค่า server URL, router, widgets
-        └── features/    # auth, dashboard, products, operations, history, scanner, profile
+        └── features/    # auth, dashboard, products, operations, history, scanner, offline, profile
 ```
 
 ## เริ่มต้นใช้งาน

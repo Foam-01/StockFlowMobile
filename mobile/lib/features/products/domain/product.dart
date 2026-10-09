@@ -6,6 +6,8 @@ class Category {
 
   factory Category.fromJson(Map<String, dynamic> json) =>
       Category(id: json['id'] as String, name: json['name'] as String);
+
+  Map<String, dynamic> toJson() => {'id': id, 'name': name};
 }
 
 class Product {
@@ -47,6 +49,18 @@ class Product {
         ? null
         : Category.fromJson(json['category'] as Map<String, dynamic>),
   );
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'sku': sku,
+    'barcode': barcode,
+    'name': name,
+    'unit': unit,
+    'minStock': minStock,
+    'onHand': onHand,
+    'imageUrl': imageUrl,
+    'category': category?.toJson(),
+  };
 }
 
 class Paged<T> {

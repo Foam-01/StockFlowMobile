@@ -6,6 +6,7 @@ import '../features/auth/presentation/auth_controller.dart';
 import '../features/auth/presentation/login_screen.dart';
 import '../features/dashboard/presentation/dashboard_screen.dart';
 import '../features/history/presentation/product_history_screen.dart';
+import '../features/offline/presentation/sync_controller.dart';
 import '../features/operations/domain/stock_transaction.dart';
 import '../features/operations/presentation/new_operation_screen.dart';
 import '../features/operations/presentation/operation_detail_screen.dart';
@@ -119,36 +120,48 @@ final routerProvider = Provider<GoRouter>((ref) {
   );
 });
 
-class _HomeShell extends StatelessWidget {
+class _HomeShell extends ConsumerWidget {
   const _HomeShell({required this.shell});
 
   final StatefulNavigationShell shell;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Watching also starts auto-sync once the user is signed in.
+    final queued = ref.watch(
+      syncControllerProvider.select((s) => s.value?.queue.length ?? 0),
+    );
     return Scaffold(
       body: shell,
       bottomNavigationBar: NavigationBar(
         selectedIndex: shell.currentIndex,
         onDestinationSelected: (i) =>
             shell.goBranch(i, initialLocation: i == shell.currentIndex),
-        destinations: const [
-          NavigationDestination(
+        destinations: [
+          const NavigationDestination(
             icon: Icon(Icons.space_dashboard_outlined),
             selectedIcon: Icon(Icons.space_dashboard),
             label: 'Dashboard',
           ),
-          NavigationDestination(
+          const NavigationDestination(
             icon: Icon(Icons.inventory_2_outlined),
             selectedIcon: Icon(Icons.inventory_2),
             label: 'Products',
           ),
           NavigationDestination(
-            icon: Icon(Icons.swap_vert),
-            selectedIcon: Icon(Icons.swap_vert_circle),
+            icon: Badge(
+              isLabelVisible: queued > 0,
+              label: Text('$queued'),
+              child: const Icon(Icons.swap_vert),
+            ),
+            selectedIcon: Badge(
+              isLabelVisible: queued > 0,
+              label: Text('$queued'),
+              child: const Icon(Icons.swap_vert_circle),
+            ),
             label: 'Operations',
           ),
-          NavigationDestination(
+          const NavigationDestination(
             icon: Icon(Icons.person_outline),
             selectedIcon: Icon(Icons.person),
             label: 'Profile',

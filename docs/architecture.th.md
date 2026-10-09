@@ -88,7 +88,7 @@ stateDiagram-v2
   CANCELLED --> [*]
 ```
 
-ถ้าสร้าง draft ด้วย `clientUuid` ที่ server เคยเห็นแล้ว จะได้ draft เดิมกลับไป การส่งซ้ำ (หรือคิว offline ในอนาคต) จึงไม่สร้างรายการซ้ำ
+ถ้าสร้าง draft ด้วย `clientUuid` ที่ server เคยเห็นแล้ว จะได้ draft เดิมกลับไป การส่งซ้ำ (รวมถึงคิวออฟไลน์) จึงไม่สร้างรายการซ้ำ
 
 ## รูปแนบหลักฐาน
 
@@ -109,6 +109,26 @@ sequenceDiagram
 ```
 
 ข้อจำกัด: ไม่เกิน 5 รูปต่อรายการ เพิ่มหรือลบได้เฉพาะผู้สร้างหรือ Admin และแนบกับรายการที่ยกเลิกแล้วไม่ได้ รูปย่อให้ Cloudinary ย่อให้ทันที (`c_fill,w_300,h_300,q_auto,f_auto`)
+
+## โหมดออฟไลน์
+
+```mermaid
+flowchart TD
+  Save["Save document"] --> Try{"POST /transactions<br/>(clientUuid)"}
+  Try -- "201" --> Done["Open draft"]
+  Try -- "network error" --> Q[("SQLite outbox")]
+  Try -- "4xx / 5xx" --> Err["Show error, stay on form"]
+  Q --> Trig["Trigger: reconnect · app resume ·<br/>login · Sync now"]
+  Trig --> Send{"Re-send with<br/>same clientUuid"}
+  Send -- "ok (or existing draft)" --> Rm["Remove from outbox"]
+  Send -- "network / 5xx" --> Wait["Stop pass, keep pending"]
+  Send -- "other 4xx" --> Fail["Mark failed:<br/>retry or discard"]
+```
+
+- **Outbox** (ตาราง `outbox`): เอกสารที่บันทึกตอนไม่มีเน็ต ส่งตามลำดับเก่าไปใหม่ ถ้าเจอปัญหาเน็ตจะหยุดรอบนั้นไว้ก่อน เพราะรายการถัดไปก็จะล้มเหมือนกัน ส่วนรายการที่ server ปฏิเสธจะถูกทำเครื่องหมาย *failed* พร้อมเหตุผล โดยไม่ขวางรายการอื่น
+- **ไม่เกิดรายการซ้ำ:** `clientUuid` สร้างครั้งเดียวต่อฟอร์ม ถ้าครั้งแรกไปถึง server แล้วแต่คำตอบหายระหว่างทาง ตอนส่งซ้ำจะได้ draft เดิมกลับมา
+- **Product cache** (ตาราง `product_cache`): สินค้าทุกตัวที่แอปเคยโหลดจะถูกเก็บไว้ ค้นหา เลือกสินค้า และสแกนบาร์โค้ดจึงยังใช้ได้ตอนออฟไลน์ แต่ error จาก server (เช่น 404) จะไม่ถูกซ่อนด้วย cache
+- การยืนยันและยกเลิกเอกสาร**ต้องออนไลน์เท่านั้น**โดยตั้งใจ เพราะเป็นการเปลี่ยนสต็อกจริง ต้องใช้ยอดล่าสุดจาก server
 
 ## โครงสร้างข้อมูล
 

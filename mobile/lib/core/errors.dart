@@ -2,10 +2,18 @@ import 'package:dio/dio.dart';
 
 /// User-facing error derived from a failed API call.
 class ApiException implements Exception {
-  ApiException(this.message, {this.statusCode});
+  ApiException(this.message, {this.statusCode, this.isNetwork = false});
 
   final String message;
   final int? statusCode;
+
+  /// The request never got an answer (offline, timeout, server down).
+  /// Safe to retry later; the server may or may not have seen it.
+  final bool isNetwork;
+
+  /// Worth retrying later: no answer, or a temporary server failure.
+  bool get isTransient =>
+      isNetwork || (statusCode != null && statusCode! >= 500);
 
   factory ApiException.from(Object error) {
     if (error is ApiException) return error;
@@ -16,7 +24,10 @@ class ApiException implements Exception {
       case DioExceptionType.receiveTimeout:
       case DioExceptionType.sendTimeout:
       case DioExceptionType.connectionError:
-        return ApiException('Cannot reach the server. Check your connection.');
+        return ApiException(
+          'Cannot reach the server. Check your connection.',
+          isNetwork: true,
+        );
       default:
         break;
     }
