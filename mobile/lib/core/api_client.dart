@@ -21,7 +21,7 @@ final dioProvider = Provider<Dio>((ref) {
   final storage = ref.watch(tokenStorageProvider);
   final dio = Dio(
     BaseOptions(
-      baseUrl: apiBaseUrl,
+      baseUrl: ref.watch(serverUrlProvider),
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 15),
       contentType: Headers.jsonContentType,

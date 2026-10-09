@@ -2,85 +2,125 @@
 
 **English** | [ภาษาไทย](README.th.md)
 
-A mobile inventory app for receiving, issuing and adjusting stock, with a full movement history per product.
+[![CI](https://github.com/Foam-01/StockFlowMobile/actions/workflows/ci.yml/badge.svg)](https://github.com/Foam-01/StockFlowMobile/actions/workflows/ci.yml)
 
-- **Mobile:** Flutter · Riverpod · go_router · Dio
-- **Backend:** NestJS · Prisma · PostgreSQL (Neon) · JWT
+A mobile inventory app for receiving, issuing and adjusting stock: barcode
+scanning, photo evidence, a live dashboard and a full, auditable movement
+history per product.
+
+- **Mobile:** Flutter · Riverpod · go_router · Dio · mobile_scanner
+- **Backend:** NestJS · Prisma · PostgreSQL (Neon) · JWT · Cloudinary
 - Built as a portfolio / demo project, run locally
+
+<!-- Screenshots: add images to docs/screenshots/ and uncomment.
+| Dashboard | Products | Scan | Operation |
+|---|---|---|---|
+| ![](docs/screenshots/dashboard.png) | ![](docs/screenshots/products.png) | ![](docs/screenshots/scan.png) | ![](docs/screenshots/operation.png) |
+-->
 
 ## Features
 
-- JWT login with `ADMIN` / `STAFF` roles (token kept in secure storage)
-- Product list with search and barcode lookup, plus stock-level badges
-- Three kinds of stock documents: `RECEIVE`, `ISSUE` and `ADJUST`
-- Documents move from `DRAFT` to `CONFIRMED` or `CANCELLED`; stock changes only on confirm
-- Per-product movement history and audit
+- **Roles:** JWT login with `ADMIN` / `STAFF`; the token is kept in secure storage
+- **Dashboard:** stock KPIs, received vs issued over the last 7 days, products that need attention, recent activity
+- **Products:** search, category and low-stock filters, stock-level badges, infinite scroll
+- **Barcode scanner:** scan to open a product, or scan items into a document (re-scan adds +1)
+- **Stock documents:** `RECEIVE`, `ISSUE` and `ADJUST`; `DRAFT` → `CONFIRMED` / `CANCELLED`
+  - stock only changes on confirm (admin), and can never be issued below zero, even with concurrent confirms
+  - resending a document with the same `clientUuid` never creates a duplicate
+- **Evidence photos:** camera or gallery, uploaded straight to Cloudinary with server-signed requests
+- **History & audit:** movements per product with running balance; ledger vs cached stock check
+- Loading, empty and error states with retry on every screen
 - API docs via Swagger
+
+See **[docs/architecture.md](docs/architecture.md)** for diagrams: system overview, confirm flow, upload flow and data model.
 
 ## Project structure
 
 ```
 .
+├── .github/workflows/ci.yml   # backend + Flutter checks, release APK
 ├── backend/   # NestJS API
-│   ├── prisma/          # schema, migrations, seed
-│   └── src/             # auth, products, categories, stock
+│   ├── prisma/          # schema, migrations, seed, demo history
+│   └── src/             # auth, products, stock, dashboard, attachments
+├── docs/      # architecture diagrams
 └── mobile/    # Flutter app
     └── lib/
-        ├── core/        # api client, config, router, token storage
-        └── features/    # auth, products, operations, history, profile
+        ├── core/        # api client, server URL config, router, widgets
+        └── features/    # auth, dashboard, products, operations, history, scanner, profile
 ```
 
 ## Getting started
 
 ### Prerequisites
 
-- Node.js 20+
-- Flutter SDK (Dart 3.x)
+- Node.js 22+ (CI uses 24)
+- Flutter 3.47+ (Dart 3.13)
 - A PostgreSQL database ([Neon](https://neon.tech) has a free tier)
-- Android Studio with an emulator, or an Android phone
+- A [Cloudinary](https://cloudinary.com) account for photos (optional; free tier)
+- An Android phone or emulator
 
 ### 1. Backend
 
 ```bash
 cd backend
 npm install
-cp .env.example .env      # then fill in DATABASE_URL, DIRECT_URL, JWT_SECRET
+cp .env.example .env      # fill in DATABASE_URL, DIRECT_URL, JWT_SECRET, CLOUDINARY_*
 npx prisma migrate deploy
-npx prisma db seed        # creates demo accounts and sample data
+npx prisma db seed        # demo accounts and products
+npm run seed:history      # optional: 6 days of demo movements for the dashboard
 npm run start:dev
 ```
 
-The API runs at `http://localhost:3000`, with Swagger at `http://localhost:3000/docs`.
+- API: `http://localhost:3000`
+- Swagger: `http://localhost:3000/docs`
+- Health check: `http://localhost:3000/health`
+
+Without `CLOUDINARY_*`, everything works except photo upload, which reports
+"not configured". `seed:history` is safe to re-run: it replaces its own
+demo rows and keeps the ledger consistent.
 
 **Demo accounts** (passwords come from `SEED_ADMIN_PASSWORD` / `SEED_STAFF_PASSWORD` in `.env`)
 
-| Email | Role |
-|---|---|
-| `admin@stockflow.dev` | ADMIN |
-| `staff@stockflow.dev` | STAFF |
+| Email | Role | Can |
+|---|---|---|
+| `admin@stockflow.dev` | ADMIN | everything, including confirming documents and editing products |
+| `staff@stockflow.dev` | STAFF | create drafts, scan, attach photos to own documents |
 
 ### 2. Mobile
 
 ```bash
 cd mobile
 flutter pub get
-flutter devices                 # find your device id
-flutter run -d emulator-5554    # Android emulator
+flutter run
 ```
 
-The app picks the API URL automatically (see `mobile/lib/core/config.dart`):
+**Server address.** On the login screen, tap **Server** to set the API URL and
+**Test connection**. The setting is saved on the device.
 
 | Running on | API URL |
 |---|---|
-| Android emulator | `http://10.0.2.2:3000` |
-| Web / desktop | `http://localhost:3000` |
-| Physical phone | Your PC's LAN IP (same Wi-Fi) |
+| Android emulator | `http://10.0.2.2:3000` (default) |
+| Web / desktop | `http://localhost:3000` (default) |
+| Physical phone | `http://<your PC's Wi-Fi IP>:3000` |
 
-On a physical phone:
+For a physical phone: same Wi-Fi as the PC, and allow inbound TCP 3000 in the
+PC's firewall. You can also bake the URL in at build time with
+`--dart-define=API_URL=http://192.168.1.10:3000`.
+
+### APK
+
+Every push to `main` builds a release APK in GitHub Actions. Download it from
+the **stockflow-apk** artifact of the latest
+[CI run](https://github.com/Foam-01/StockFlowMobile/actions/workflows/ci.yml).
+To build one locally:
 
 ```bash
-flutter run --dart-define=API_URL=http://192.168.1.10:3000
+cd mobile
+flutter build apk --release   # build/app/outputs/flutter-apk/app-release.apk
 ```
+
+The APK is signed with the debug key, which is fine for a demo install but
+not for Play Store release.
 
 ## Main API endpoints
 
@@ -88,21 +128,33 @@ flutter run --dart-define=API_URL=http://192.168.1.10:3000
 |---|---|---|
 | POST | `/auth/login` | Log in |
 | GET | `/auth/me` | Current user |
-| GET | `/products` | List products |
+| GET | `/dashboard` | KPIs, 7-day flow, needs attention, recent activity |
+| GET | `/products` | List / search / filter products |
 | GET | `/products/barcode/:barcode` | Find a product by barcode |
-| POST / PATCH / DELETE | `/products/:id` | Manage products |
-| POST | `/transactions` | Create a document (draft) |
+| POST / PATCH / DELETE | `/products/:id` | Manage products (admin) |
+| POST | `/transactions` | Create a draft (idempotent with `clientUuid`) |
 | GET | `/transactions` | List documents |
-| POST | `/transactions/:id/confirm` | Confirm a document (applies stock) |
-| POST | `/transactions/:id/cancel` | Cancel a document |
-| GET | `/products/:id/movements` | Movement history |
-| GET | `/products/:id/audit` | Product audit |
+| POST | `/transactions/:id/confirm` | Confirm, which applies stock (admin) |
+| POST | `/transactions/:id/cancel` | Cancel a draft |
+| POST | `/transactions/:id/attachments/signature` | Sign a photo upload |
+| POST / DELETE | `/transactions/:id/attachments` | Save / delete a photo |
+| GET | `/products/:id/movements` | Movement history with running balance |
+| GET | `/products/:id/audit` | Ledger vs cached stock (admin) |
+| GET | `/health` | Liveness check (no auth) |
 
 See Swagger at `/docs` for the full reference.
 
 ## Tests
 
 ```bash
-cd backend && npm test          # unit tests (Vitest)
-cd mobile && flutter test       # widget / unit tests
+cd backend && npm test          # unit tests (Vitest): stock rules, ledger, dashboard, signing, retry
+cd mobile && flutter test       # widget / unit tests for every screen and flow
 ```
+
+CI runs typecheck, lint, tests and build for the backend, plus format check,
+analyze and tests for the app, on every push and pull request.
+
+## Demo
+
+<!-- Add a short screen recording link here (e.g. YouTube / Google Drive). -->
+_Demo video coming soon._

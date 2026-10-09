@@ -10,6 +10,8 @@ import bcrypt from 'bcryptjs';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { LoginDto, RegisterDto } from './dto/auth.dto.js';
 
+// Strip the password hash from anything sent to clients.
+// oxlint-disable-next-line no-unused-vars
 const publicUser = ({ passwordHash: _, ...user }: User) => user;
 
 @Injectable()

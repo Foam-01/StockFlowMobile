@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'core/config.dart';
 import 'core/router.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final savedServerUrl = await ServerUrlStore.read();
   runApp(
-    // Show errors immediately with a Retry button instead of silent auto-retry.
-    ProviderScope(retry: (_, _) => null, child: const StockFlowApp()),
+    ProviderScope(
+      // Show errors immediately with a Retry button instead of silent auto-retry.
+      retry: (_, _) => null,
+      overrides: [savedServerUrlProvider.overrideWithValue(savedServerUrl)],
+      child: const StockFlowApp(),
+    ),
   );
 }
 
