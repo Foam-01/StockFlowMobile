@@ -19,25 +19,27 @@ L10n get l10nNow => _current;
 L10n _current = lookupL10n(const Locale('en'));
 void setCurrentL10n(L10n value) => _current = value;
 
-/// Persists the language chosen in Profile; null follows the device.
+/// Persists the language chosen in Profile. Thai until the user picks one;
+/// choosing "System" (null) follows the device.
 class LocaleStore {
   static const _key = 'app_locale';
+  static const _system = 'system';
+  static const defaultLocale = Locale('th');
   static const _storage = FlutterSecureStorage();
 
   static Future<Locale?> read() async {
     try {
       final code = await _storage.read(key: _key);
-      return code == null ? null : Locale(code);
+      if (code == null) return defaultLocale;
+      return code == _system ? null : Locale(code);
     } catch (_) {
-      return null;
+      return defaultLocale;
     }
   }
 
   static Future<void> write(Locale? locale) async {
     try {
-      locale == null
-          ? await _storage.delete(key: _key)
-          : await _storage.write(key: _key, value: locale.languageCode);
+      await _storage.write(key: _key, value: locale?.languageCode ?? _system);
     } catch (_) {
       // Storage unavailable: the choice still applies for this session.
     }

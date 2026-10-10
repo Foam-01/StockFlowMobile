@@ -734,5 +734,13 @@
   "noPhotosYet": "No photos yet",
   "addReason": "Please add a reason",
   "moreWords": "A few more words, please",
-  "assign": "Assign"
+  "assign": "Assign",
+  "uploadFailed": "Upload failed: {detail}",
+  "@uploadFailed": {
+    "placeholders": {
+      "detail": {
+        "type": "String"
+      }
+    }
+  }
 }

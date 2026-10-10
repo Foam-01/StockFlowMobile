@@ -20,17 +20,24 @@ class ProductThumb extends StatelessWidget {
 
   static IconData _icon(String? category) {
     final c = (category ?? '').toLowerCase();
-    if (c.contains('bever') || c.contains('drink')) {
+    if (c.contains('bever') ||
+        c.contains('drink') ||
+        c.contains('เครื่องดื่ม')) {
       return Icons.local_drink_outlined;
     }
-    if (c.contains('snack') || c.contains('food')) {
+    if (c.contains('snack') || c.contains('food') || c.contains('ขนม')) {
       return Icons.cookie_outlined;
     }
-    if (c.contains('house') || c.contains('clean')) {
+    if (c.contains('house') || c.contains('clean') || c.contains('ของใช้')) {
       return Icons.cleaning_services_outlined;
     }
-    if (c.contains('station') || c.contains('office')) {
+    if (c.contains('station') ||
+        c.contains('office') ||
+        c.contains('เครื่องเขียน')) {
       return Icons.edit_outlined;
+    }
+    if (c.contains('install') || c.contains('อะไหล่')) {
+      return Icons.build_outlined;
     }
     return Icons.inventory_2_outlined;
   }

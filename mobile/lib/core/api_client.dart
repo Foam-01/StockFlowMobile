@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'config.dart';
+import 'l10n.dart';
 import 'token_storage.dart';
 
 /// Bumped every time the API rejects our token (401).
@@ -33,6 +34,8 @@ final dioProvider = Provider<Dio>((ref) {
       onRequest: (options, handler) async {
         final token = await storage.read();
         if (token != null) options.headers['Authorization'] = 'Bearer $token';
+        // The API answers messages (errors, submit blockers) in this language.
+        options.headers['Accept-Language'] = l10nNow.localeName;
         handler.next(options);
       },
       onError: (error, handler) {

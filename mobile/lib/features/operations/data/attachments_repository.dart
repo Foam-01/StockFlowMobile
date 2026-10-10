@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/api_client.dart';
 import '../../../core/errors.dart';
+import '../../../core/l10n.dart';
 
 final attachmentsRepositoryProvider = Provider<AttachmentsRepository>(
   (ref) => ApiAttachmentsRepository(
@@ -94,7 +95,7 @@ class ApiAttachmentsRepository implements AttachmentsRepository {
       final data = e.response?.data;
       if (data is Map && data['error'] is Map) {
         return ApiException(
-          'Upload failed: ${(data['error'] as Map)['message']}',
+          l10nNow.uploadFailed('${(data['error'] as Map)['message']}'),
           statusCode: e.response?.statusCode,
         );
       }

@@ -1086,4 +1086,9 @@ class L10nEn extends L10n {
 
   @override
   String get assign => 'Assign';
+
+  @override
+  String uploadFailed(String detail) {
+    return 'Upload failed: $detail';
+  }
 }

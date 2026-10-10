@@ -1974,6 +1974,12 @@ abstract class L10n {
   /// In en, this message translates to:
   /// **'Assign'**
   String get assign;
+
+  /// No description provided for @uploadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload failed: {detail}'**
+  String uploadFailed(String detail);
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

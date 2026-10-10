@@ -1077,4 +1077,9 @@ class L10nTh extends L10n {
 
   @override
   String get assign => 'มอบหมาย';
+
+  @override
+  String uploadFailed(String detail) {
+    return 'อัปโหลดรูปไม่สำเร็จ: $detail';
+  }
 }
