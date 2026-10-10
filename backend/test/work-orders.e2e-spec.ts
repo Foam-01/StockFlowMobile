@@ -277,6 +277,26 @@ describe('doing the work', () => {
       .expect(404);
   });
 
+  it('answers in Thai when the client asks for it', async () => {
+    const wo = await workOrder({ requiredEvidence: ['AFTER'] });
+    await http('tech', 'post', `/work-orders/${wo.id}/start`).expect(200);
+
+    const res = await http('tech', 'post', `/work-orders/${wo.id}/submit`)
+      .set('Accept-Language', 'th-TH,th;q=0.9')
+      .expect(400);
+    expect(res.body.message).toBe('ใบงานยังไม่พร้อมส่งตรวจ');
+    expect(res.body.problems).toContain('ต้องมีรูปหลังทำงาน');
+
+    const detail = await http('tech', 'get', `/work-orders/${wo.id}`)
+      .set('Accept-Language', 'th')
+      .expect(200);
+    expect(detail.body.submissionProblems).toContain('ต้องมีรูปหลังทำงาน');
+
+    // English stays the default.
+    const en = await http('tech', 'get', `/work-orders/${wo.id}`).expect(200);
+    expect(en.body.submissionProblems).toContain('Photo required: after work');
+  });
+
   it('submit is refused until required items and photos are there', async () => {
     const wo = await workOrder({ requiredEvidence: ['BEFORE', 'AFTER'] });
     await http('tech', 'post', `/work-orders/${wo.id}/start`).expect(200);

@@ -17,16 +17,54 @@ async function upsertUser(
   });
 }
 
+/** Earlier seeds used English names; rename those rows instead of duplicating. */
+const LEGACY_CATEGORIES: Record<string, string> = {
+  Beverages: 'เครื่องดื่ม',
+  Snacks: 'ขนม',
+  Household: 'ของใช้ในบ้าน',
+  Stationery: 'เครื่องเขียน',
+  'Installation parts': 'อะไหล่งานติดตั้ง',
+};
+const LEGACY_TEMPLATES: Record<string, string> = {
+  'Split-type AC installation': 'ติดตั้งแอร์แยกส่วน',
+  'Preventive maintenance (AC)': 'ล้างและบำรุงรักษาแอร์',
+  'Network point installation': 'ติดตั้งจุดแลน',
+};
+
+async function renameLegacy() {
+  for (const [from, to] of Object.entries(LEGACY_CATEGORIES)) {
+    const exists = await prisma.category.findUnique({ where: { name: to } });
+    if (!exists) {
+      await prisma.category.updateMany({
+        where: { name: from },
+        data: { name: to },
+      });
+    }
+  }
+  for (const [from, to] of Object.entries(LEGACY_TEMPLATES)) {
+    const exists = await prisma.checklistTemplate.findUnique({
+      where: { name: to },
+    });
+    if (!exists) {
+      await prisma.checklistTemplate.updateMany({
+        where: { name: from },
+        data: { name: to },
+      });
+    }
+  }
+}
+
 async function main() {
+  await renameLegacy();
   await upsertUser(
     'admin@stockflow.dev',
-    'Admin',
+    'ผู้ดูแลระบบ',
     Role.ADMIN,
     process.env.SEED_ADMIN_PASSWORD ?? 'Admin1234!',
   );
   await upsertUser(
     'staff@stockflow.dev',
-    'Staff',
+    'สมชาย (คลังสินค้า)',
     Role.STAFF,
     process.env.SEED_STAFF_PASSWORD ?? 'Staff1234!',
   );
@@ -34,29 +72,29 @@ async function main() {
   const techPassword = process.env.SEED_TECH_PASSWORD ?? 'Tech1234!';
   await upsertUser(
     'tech@stockflow.dev',
-    'Niran (Technician)',
+    'นิรันดร์ (ช่าง)',
     Role.TECHNICIAN,
     techPassword,
   );
   await upsertUser(
     'tech2@stockflow.dev',
-    'Ploy (Technician)',
+    'พลอย (ช่าง)',
     Role.TECHNICIAN,
     techPassword,
   );
   await upsertUser(
     'supervisor@stockflow.dev',
-    'Kanya (Supervisor)',
+    'กัญญา (หัวหน้างาน)',
     Role.SUPERVISOR,
     process.env.SEED_SUPERVISOR_PASSWORD ?? 'Super1234!',
   );
 
   const categories = [
-    'Beverages',
-    'Snacks',
-    'Household',
-    'Stationery',
-    'Installation parts',
+    'เครื่องดื่ม',
+    'ขนม',
+    'ของใช้ในบ้าน',
+    'เครื่องเขียน',
+    'อะไหล่งานติดตั้ง',
   ];
   const cat: Record<string, string> = {};
   for (const name of categories) {
@@ -73,107 +111,107 @@ async function main() {
     {
       sku: 'BEV-001',
       barcode: '8850999320014',
-      name: 'Drinking water 600ml',
-      unit: 'bottle',
+      name: 'น้ำดื่ม 600 มล.',
+      unit: 'ขวด',
       minStock: 24,
-      category: 'Beverages',
+      category: 'เครื่องดื่ม',
     },
     {
       sku: 'BEV-002',
       barcode: '8851959132012',
-      name: 'Green tea 500ml',
-      unit: 'bottle',
+      name: 'ชาเขียว 500 มล.',
+      unit: 'ขวด',
       minStock: 12,
-      category: 'Beverages',
+      category: 'เครื่องดื่ม',
     },
     {
       sku: 'BEV-003',
       barcode: '8850228000016',
-      name: 'Instant coffee 3in1',
-      unit: 'pack',
+      name: 'กาแฟสำเร็จรูป 3in1',
+      unit: 'แพ็ก',
       minStock: 10,
-      category: 'Beverages',
+      category: 'เครื่องดื่ม',
     },
     {
       sku: 'SNK-001',
       barcode: '8850718801015',
-      name: 'Potato chips 50g',
-      unit: 'bag',
+      name: 'มันฝรั่งทอดกรอบ 50 ก.',
+      unit: 'ถุง',
       minStock: 20,
-      category: 'Snacks',
+      category: 'ขนม',
     },
     {
       sku: 'SNK-002',
       barcode: '8851727001014',
-      name: 'Wafer biscuits',
-      unit: 'box',
+      name: 'เวเฟอร์',
+      unit: 'กล่อง',
       minStock: 10,
-      category: 'Snacks',
+      category: 'ขนม',
     },
     {
       sku: 'HH-001',
       barcode: '8850002010013',
-      name: 'Dishwashing liquid 500ml',
-      unit: 'bottle',
+      name: 'น้ำยาล้างจาน 500 มล.',
+      unit: 'ขวด',
       minStock: 6,
-      category: 'Household',
+      category: 'ของใช้ในบ้าน',
     },
     {
       sku: 'HH-002',
       barcode: '8850002020012',
-      name: 'Tissue roll (6 pack)',
-      unit: 'pack',
+      name: 'กระดาษทิชชูม้วน (แพ็ก 6)',
+      unit: 'แพ็ก',
       minStock: 8,
-      category: 'Household',
+      category: 'ของใช้ในบ้าน',
     },
     {
       sku: 'ST-001',
       barcode: '8851234000011',
-      name: 'Ballpoint pen blue',
-      unit: 'pcs',
+      name: 'ปากกาลูกลื่นสีน้ำเงิน',
+      unit: 'ชิ้น',
       minStock: 50,
-      category: 'Stationery',
+      category: 'เครื่องเขียน',
     },
     {
       sku: 'ST-002',
       barcode: '8851234000028',
-      name: 'A4 paper 80gsm',
-      unit: 'ream',
+      name: 'กระดาษ A4 80 แกรม',
+      unit: 'รีม',
       minStock: 5,
-      category: 'Stationery',
+      category: 'เครื่องเขียน',
     },
     // Materials used by field work orders.
     {
       sku: 'INS-001',
       barcode: '8859000100011',
-      name: 'Copper pipe set 1/4" + 3/8" (4 m)',
-      unit: 'set',
+      name: 'ชุดท่อทองแดง 1/4" + 3/8" (4 ม.)',
+      unit: 'ชุด',
       minStock: 5,
-      category: 'Installation parts',
+      category: 'อะไหล่งานติดตั้ง',
     },
     {
       sku: 'INS-002',
       barcode: '8859000100028',
-      name: 'Outdoor unit wall bracket',
-      unit: 'pcs',
+      name: 'ขาแขวนคอยล์ร้อน',
+      unit: 'ชิ้น',
       minStock: 4,
-      category: 'Installation parts',
+      category: 'อะไหล่งานติดตั้ง',
     },
     {
       sku: 'INS-003',
       barcode: '8859000100035',
-      name: 'Insulation tape roll',
-      unit: 'roll',
+      name: 'เทปพันท่อ',
+      unit: 'ม้วน',
       minStock: 10,
-      category: 'Installation parts',
+      category: 'อะไหล่งานติดตั้ง',
     },
     {
       sku: 'INS-004',
       barcode: '8859000100042',
-      name: 'Cable ties (100 pack)',
-      unit: 'pack',
+      name: 'เคเบิลไทร์ (แพ็ก 100)',
+      unit: 'แพ็ก',
       minStock: 5,
-      category: 'Installation parts',
+      category: 'อะไหล่งานติดตั้ง',
     },
   ];
   for (const { category, ...p } of products) {
@@ -191,44 +229,52 @@ async function main() {
     items: [string, boolean][];
   }[] = [
     {
-      name: 'Split-type AC installation',
-      description: 'Indoor and outdoor unit, piping and test run',
+      name: 'ติดตั้งแอร์แยกส่วน',
+      description: 'คอยล์เย็น คอยล์ร้อน เดินท่อ และทดสอบการทำงาน',
       items: [
-        ['Confirm location with customer', true],
-        ['Mount indoor unit level', true],
-        ['Install outdoor unit bracket', true],
-        ['Connect and insulate copper pipes', true],
-        ['Vacuum and leak test', true],
-        ['Test run: cooling and drain', true],
-        ['Clean up work area', false],
+        ['ยืนยันตำแหน่งติดตั้งกับลูกค้า', true],
+        ['ติดตั้งคอยล์เย็นให้ได้ระดับ', true],
+        ['ติดตั้งขาแขวนคอยล์ร้อน', true],
+        ['ต่อและหุ้มฉนวนท่อทองแดง', true],
+        ['แวคคั่มและตรวจรอยรั่ว', true],
+        ['ทดสอบความเย็นและการระบายน้ำ', true],
+        ['เก็บกวาดพื้นที่ทำงาน', false],
       ],
     },
     {
-      name: 'Preventive maintenance (AC)',
-      description: 'Routine service visit',
+      name: 'ล้างและบำรุงรักษาแอร์',
+      description: 'เข้าบริการตามรอบ',
       items: [
-        ['Clean filters', true],
-        ['Clean coil and drain tray', true],
-        ['Check refrigerant pressure', true],
-        ['Check electrical connections', true],
-        ['Record readings in note', false],
+        ['ล้างฟิลเตอร์', true],
+        ['ล้างคอยล์และถาดน้ำทิ้ง', true],
+        ['วัดแรงดันน้ำยา', true],
+        ['ตรวจจุดต่อไฟฟ้า', true],
+        ['จดค่าที่วัดได้ในหมายเหตุ', false],
       ],
     },
     {
-      name: 'Network point installation',
-      description: 'Cable run, termination and test',
+      name: 'ติดตั้งจุดแลน',
+      description: 'เดินสาย เข้าหัว และทดสอบ',
       items: [
-        ['Run cable and fix with ties', true],
-        ['Terminate both ends', true],
-        ['Test with cable tester', true],
-        ['Label point', false],
+        ['เดินสายและรัดด้วยเคเบิลไทร์', true],
+        ['เข้าหัวทั้งสองฝั่ง', true],
+        ['ทดสอบด้วยเครื่องเทสสาย', true],
+        ['ติดป้ายชื่อจุด', false],
       ],
     },
   ];
   for (const t of templates) {
     await prisma.checklistTemplate.upsert({
       where: { name: t.name },
-      update: { description: t.description },
+      update: {
+        description: t.description,
+        items: {
+          updateMany: t.items.map(([title, required], i) => ({
+            where: { position: i + 1 },
+            data: { title, required },
+          })),
+        },
+      },
       create: {
         name: t.name,
         description: t.description,

@@ -85,9 +85,9 @@ async function main() {
       where: { name },
       include: { items: { orderBy: { position: 'asc' } } },
     });
-  const acInstall = await tpl('Split-type AC installation');
-  const acService = await tpl('Preventive maintenance (AC)');
-  const network = await tpl('Network point installation');
+  const acInstall = await tpl('ติดตั้งแอร์แยกส่วน');
+  const acService = await tpl('ล้างและบำรุงรักษาแอร์');
+  const network = await tpl('ติดตั้งจุดแลน');
   const sku = (s: string) =>
     prisma.product.findUniqueOrThrow({ where: { sku: s } });
   const [pipe, bracket, tape, ties] = await Promise.all(
@@ -111,7 +111,7 @@ async function main() {
           type: TxType.RECEIVE,
           status: TxStatus.CONFIRMED,
           referenceNo: 'PO-PARTS-001',
-          note: 'Demo: installation parts',
+          note: 'ตัวอย่าง: รับอะไหล่งานติดตั้ง',
           createdById: staff.id,
           confirmedById: admin.id,
           createdAt: ago(80),
@@ -220,7 +220,7 @@ async function main() {
         ev(t0, E.CREATED, admin.id, { toStatus: S.OPEN });
         if (spec.assignee) {
           ev(t0 - 0.1, E.ASSIGNED, admin.id, {
-            note: `Technician: ${spec.assignee.name} · Reviewer: any supervisor`,
+            note: `ช่าง: ${spec.assignee.name} · ผู้ตรวจ: หัวหน้างานคนใดก็ได้`,
           });
         }
         if (started)
@@ -230,7 +230,7 @@ async function main() {
           });
         spec.template.items.slice(0, done).forEach((i) =>
           ev(t0 - 3, E.CHECKLIST_UPDATED, spec.assignee!.id, {
-            note: `Done: ${i.title}`,
+            note: `เสร็จ: ${i.title}`,
           }),
         );
         if (submitted)
@@ -249,7 +249,7 @@ async function main() {
           ev(t0 - 6, E.APPROVED, sup.id, {
             fromStatus: S.SUBMITTED,
             toStatus: S.APPROVED,
-            note: 'Neat work, thanks',
+            note: 'งานเรียบร้อย ขอบคุณครับ',
           });
         }
         await db.workOrderEvent.createMany({ data: events });
@@ -257,11 +257,11 @@ async function main() {
       }
 
       const inProgress = await order({
-        title: 'Install 18,000 BTU split AC – meeting room',
-        siteName: 'Ratchada office tower, 12F',
-        siteAddress: 'Ratchadaphisek Rd, Bangkok',
+        title: 'ติดตั้งแอร์ 18,000 BTU – ห้องประชุม',
+        siteName: 'อาคารสำนักงานรัชดา ชั้น 12',
+        siteAddress: 'ถนนรัชดาภิเษก กรุงเทพฯ',
         description:
-          'Customer wants the indoor unit above the window. Parking at B2.',
+          'ลูกค้าต้องการติดคอยล์เย็นเหนือหน้าต่าง จอดรถได้ที่ชั้น B2',
         priority: WorkOrderPriority.HIGH,
         dueInHours: 6,
         template: acInstall,
@@ -310,14 +310,14 @@ async function main() {
           workOrderId: inProgress.id,
           actorId: admin.id,
           type: E.MATERIAL_ISSUED,
-          note: 'Issued 1 × INS-001, 1 × INS-002, 2 × INS-003 (REQ-WO-001)',
+          note: 'เบิก INS-001 ×1, INS-002 ×1, INS-003 ×2 (REQ-WO-001)',
           createdAt: ago(24.5),
         },
       });
 
       await order({
-        title: 'Install split AC – bedroom 2',
-        siteName: 'Baan Suan village, house 45/7',
+        title: 'ติดตั้งแอร์ – ห้องนอน 2',
+        siteName: 'หมู่บ้านบ้านสวน บ้านเลขที่ 45/7',
         priority: WorkOrderPriority.NORMAL,
         dueInHours: 30,
         template: acInstall,
@@ -333,8 +333,8 @@ async function main() {
         createdHoursAgo: 4,
       });
       await order({
-        title: 'Quarterly AC service – 4 units',
-        siteName: 'Green Leaf café, Ari',
+        title: 'ล้างแอร์ตามรอบไตรมาส – 4 เครื่อง',
+        siteName: 'ร้านกาแฟกรีนลีฟ อารีย์',
         priority: WorkOrderPriority.LOW,
         dueInHours: 72,
         template: acService,
@@ -342,8 +342,8 @@ async function main() {
         createdHoursAgo: 2,
       });
       await order({
-        title: 'Add 2 network points – reception',
-        siteName: 'Sathorn clinic',
+        title: 'เพิ่มจุดแลน 2 จุด – แผนกต้อนรับ',
+        siteName: 'คลินิกสาทร',
         priority: WorkOrderPriority.NORMAL,
         dueInHours: -2,
         template: network,
@@ -354,21 +354,20 @@ async function main() {
         createdHoursAgo: 30,
       });
       await order({
-        title: 'AC service – server room',
-        siteName: 'Bang Na warehouse office',
+        title: 'ล้างแอร์ – ห้องเซิร์ฟเวอร์',
+        siteName: 'สำนักงานคลังสินค้าบางนา',
         priority: WorkOrderPriority.URGENT,
         dueInHours: 3,
         template: acService,
         assignee: tech,
         status: S.NEEDS_REVISION,
         doneItems: acService.items.length,
-        reviewNote:
-          'Please record the refrigerant pressure reading in the note.',
+        reviewNote: 'กรุณาจดค่าแรงดันน้ำยาไว้ในหมายเหตุด้วย',
         createdHoursAgo: 20,
       });
       await order({
-        title: 'Install split AC – manager office',
-        siteName: 'Ratchada office tower, 12F',
+        title: 'ติดตั้งแอร์ – ห้องผู้จัดการ',
+        siteName: 'อาคารสำนักงานรัชดา ชั้น 12',
         priority: WorkOrderPriority.NORMAL,
         dueInHours: -48,
         template: acInstall,

@@ -72,7 +72,8 @@ work-order step is auditable.
   sleeping serverless database
 - Loading, empty and error states with retry on every screen; Swagger API docs
 - App in **English and Thai** (Flutter gen-l10n, IBM Plex Sans Thai): follows the
-  device language, or pick one on the login screen or in Profile
+  device language, or pick one on the login screen or in Profile. The API
+  answers in Thai for `Accept-Language: th`, and the demo data is Thai
 
 Docs: [architecture](docs/architecture.md) · [work orders](docs/work-orders.md) ·
 [offline sync](docs/offline-sync.md) · [security](docs/security.md) ·

@@ -1,6 +1,10 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import {
+  LocalizedErrorFilter,
+  LocalizedResponseInterceptor,
+} from './common/i18n.js';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AttachmentsModule } from './attachments/attachments.module.js';
 import { AuthModule } from './auth/auth.module.js';
@@ -35,7 +39,11 @@ import { WorkOrdersModule } from './work-orders/work-orders.module.js';
     UsersModule,
   ],
   controllers: [HealthController],
-  providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
+  providers: [
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+    { provide: APP_FILTER, useClass: LocalizedErrorFilter },
+    { provide: APP_INTERCEPTOR, useClass: LocalizedResponseInterceptor },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
