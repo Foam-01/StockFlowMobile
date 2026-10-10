@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -238,125 +239,134 @@ class _Header extends StatelessWidget {
     const fg = Colors.white;
     final soft = Colors.white.withValues(alpha: 0.72);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: const BorderRadius.vertical(bottom: Radius.circular(28)),
-      ),
-      child: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'StockFlow',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            color: fg,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        if (userName != null)
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light,
+      child: Container(
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: const BorderRadius.vertical(
+            bottom: Radius.circular(28),
+          ),
+        ),
+        child: SafeArea(
+          bottom: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                           Text(
-                            'Hello, $userName',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: soft,
+                            'StockFlow',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              color: fg,
+                              fontWeight: FontWeight.w700,
                             ),
                           ),
+                          if (userName != null)
+                            Text(
+                              'Hello, $userName',
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: soft,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      width: 40,
+                      height: 40,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.14),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Text(
+                        (userName ?? '?').characters.first.toUpperCase(),
+                        style: theme.textTheme.titleMedium?.copyWith(color: fg),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 28),
+                Text(
+                  'Units on hand',
+                  style: theme.textTheme.labelLarge?.copyWith(color: soft),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${totals.unitsOnHand}',
+                  style: theme.textTheme.displayMedium?.copyWith(
+                    color: fg,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: -1.5,
+                    height: 1.1,
+                    fontFeatures: AppTheme.tabular,
+                  ),
+                ),
+                InkWell(
+                  key: const Key('tile_products'),
+                  onTap: onProducts,
+                  borderRadius: BorderRadius.circular(8),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          'across ${totals.products} products',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: soft,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Icon(
+                          Icons.arrow_forward_rounded,
+                          size: 16,
+                          color: soft,
+                        ),
                       ],
                     ),
                   ),
-                  Container(
-                    width: 40,
-                    height: 40,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.14),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Text(
-                      (userName ?? '?').characters.first.toUpperCase(),
-                      style: theme.textTheme.titleMedium?.copyWith(color: fg),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 28),
-              Text(
-                'Units on hand',
-                style: theme.textTheme.labelLarge?.copyWith(color: soft),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                '${totals.unitsOnHand}',
-                style: theme.textTheme.displayMedium?.copyWith(
-                  color: fg,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -1.5,
-                  height: 1.1,
-                  fontFeatures: AppTheme.tabular,
                 ),
-              ),
-              InkWell(
-                key: const Key('tile_products'),
-                onTap: onProducts,
-                borderRadius: BorderRadius.circular(8),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'across ${totals.products} products',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: soft,
-                        ),
+                const SizedBox(height: 22),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _QuickAction(
+                        key: const Key('quick_receive'),
+                        icon: Icons.south_west_rounded,
+                        label: 'Receive',
+                        onTap: onReceive,
                       ),
-                      const SizedBox(width: 4),
-                      Icon(Icons.arrow_forward_rounded, size: 16, color: soft),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: _QuickAction(
+                        key: const Key('quick_issue'),
+                        icon: Icons.north_east_rounded,
+                        label: 'Issue',
+                        onTap: onIssue,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: _QuickAction(
+                        key: const Key('quick_scan'),
+                        icon: Icons.qr_code_scanner_rounded,
+                        label: 'Scan',
+                        onTap: onScan,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 22),
-              Row(
-                children: [
-                  Expanded(
-                    child: _QuickAction(
-                      key: const Key('quick_receive'),
-                      icon: Icons.south_west_rounded,
-                      label: 'Receive',
-                      onTap: onReceive,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _QuickAction(
-                      key: const Key('quick_issue'),
-                      icon: Icons.north_east_rounded,
-                      label: 'Issue',
-                      onTap: onIssue,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _QuickAction(
-                      key: const Key('quick_scan'),
-                      icon: Icons.qr_code_scanner_rounded,
-                      label: 'Scan',
-                      onTap: onScan,
-                    ),
-                  ),
-                ],
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

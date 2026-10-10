@@ -71,6 +71,7 @@ cp .env.example .env      # fill in DATABASE_URL, DIRECT_URL, JWT_SECRET, CLOUDI
 npx prisma migrate deploy
 npx prisma db seed        # demo accounts and products
 npm run seed:history      # optional: 6 days of demo movements for the dashboard
+npm run seed:images       # optional: product photos to Cloudinary (see docs/image-credits.md)
 npm run start:dev
 ```
 

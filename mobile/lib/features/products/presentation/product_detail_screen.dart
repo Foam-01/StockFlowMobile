@@ -50,6 +50,21 @@ class _Details extends StatelessWidget {
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(16),
       children: [
+        if (product.imageUrl case final url? when url.isNotEmpty) ...[
+          ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: AspectRatio(
+              aspectRatio: 4 / 3,
+              child: Image.network(
+                url.replaceFirst('w_400,h_400', 'w_800,h_600'),
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) =>
+                    ColoredBox(color: theme.colorScheme.surfaceContainerHigh),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+        ],
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
