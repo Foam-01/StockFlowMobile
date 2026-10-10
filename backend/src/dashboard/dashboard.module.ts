@@ -8,7 +8,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { Role, TxStatus } from '@prisma/client';
+import { Role, TxStatus, WorkOrderStatus } from '@prisma/client';
 import { Roles } from '../auth/decorators/index.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { dailyFlow, stockUrgency } from './dashboard-logic.js';
@@ -24,49 +24,68 @@ export class DashboardService {
     const now = new Date();
     const since = new Date(now.getTime() - FLOW_DAYS * 86_400_000);
 
-    const [products, pendingDrafts, flowLines, recent] = await Promise.all([
-      db.product.findMany({
-        select: {
-          id: true,
-          sku: true,
-          name: true,
-          unit: true,
-          onHand: true,
-          minStock: true,
-        },
-      }),
-      db.stockTransaction.count({ where: { status: TxStatus.DRAFT } }),
-      db.stockTransactionItem.findMany({
-        where: {
-          transaction: {
-            status: TxStatus.CONFIRMED,
-            confirmedAt: { gte: since },
+    const [products, pendingDrafts, flowLines, recent, woByStatus, woOverdue] =
+      await Promise.all([
+        db.product.findMany({
+          select: {
+            id: true,
+            sku: true,
+            name: true,
+            unit: true,
+            onHand: true,
+            minStock: true,
           },
-        },
-        select: {
-          quantity: true,
-          transaction: { select: { type: true, confirmedAt: true } },
-        },
-      }),
-      db.stockTransaction.findMany({
-        where: { status: TxStatus.CONFIRMED },
-        orderBy: { confirmedAt: 'desc' },
-        take: 5,
-        select: {
-          id: true,
-          type: true,
-          referenceNo: true,
-          confirmedAt: true,
-          confirmedBy: { select: { name: true } },
-          _count: { select: { items: true } },
-        },
-      }),
-    ]);
+        }),
+        db.stockTransaction.count({ where: { status: TxStatus.DRAFT } }),
+        db.stockTransactionItem.findMany({
+          where: {
+            transaction: {
+              status: TxStatus.CONFIRMED,
+              confirmedAt: { gte: since },
+            },
+          },
+          select: {
+            quantity: true,
+            transaction: { select: { type: true, confirmedAt: true } },
+          },
+        }),
+        db.stockTransaction.findMany({
+          where: { status: TxStatus.CONFIRMED },
+          orderBy: { confirmedAt: 'desc' },
+          take: 5,
+          select: {
+            id: true,
+            type: true,
+            referenceNo: true,
+            confirmedAt: true,
+            confirmedBy: { select: { name: true } },
+            _count: { select: { items: true } },
+          },
+        }),
+        db.workOrder.groupBy({ by: ['status'], _count: { _all: true } }),
+        db.workOrder.count({
+          where: {
+            dueAt: { lt: now },
+            status: {
+              notIn: [WorkOrderStatus.APPROVED, WorkOrderStatus.CANCELLED],
+            },
+          },
+        }),
+      ]);
 
     const outOfStock = products.filter((p) => p.onHand <= 0);
     const low = products.filter((p) => p.onHand > 0 && p.onHand <= p.minStock);
 
     return {
+      workOrders: {
+        ...Object.fromEntries(
+          Object.values(WorkOrderStatus).map((st) => [
+            st,
+            woByStatus.find((g) => g.status === st)?._count._all ?? 0,
+          ]),
+        ),
+        overdue: woOverdue,
+      },
       totals: {
         products: products.length,
         unitsOnHand: products.reduce((s, p) => s + p.onHand, 0),

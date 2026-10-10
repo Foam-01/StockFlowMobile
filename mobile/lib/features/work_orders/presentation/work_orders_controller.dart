@@ -84,6 +84,9 @@ class WoListController extends AsyncNotifier<WoListState> {
 
   @override
   Future<WoListState> build() async {
+    // Per user, not just per role: never show the previous account's jobs
+    // after switching users on a shared device.
+    ref.watch(authControllerProvider.select((a) => a.value?.id));
     final q = ref.watch(woQueryProvider);
     final page = await _fetch(q, 1);
     return WoListState(items: page.items, total: page.total, page: 1);

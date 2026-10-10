@@ -98,15 +98,35 @@ class RecentActivity {
   );
 }
 
+/// Work orders per status (server keys), plus overdue.
+class WorkOrderCounts {
+  const WorkOrderCounts(this.byStatus, this.overdue);
+
+  final Map<String, int> byStatus;
+  final int overdue;
+
+  int of(String status) => byStatus[status] ?? 0;
+
+  /// Open, in progress or sent back: work still to be done.
+  int get active => of('OPEN') + of('IN_PROGRESS') + of('NEEDS_REVISION');
+
+  factory WorkOrderCounts.fromJson(Map<String, dynamic> j) => WorkOrderCounts({
+    for (final e in j.entries)
+      if (e.key != 'overdue') e.key: e.value as int,
+  }, j['overdue'] as int? ?? 0);
+}
+
 class DashboardSummary {
   const DashboardSummary({
     required this.totals,
+    this.workOrders,
     required this.flow,
     required this.needsAttention,
     required this.recentActivity,
   });
 
   final DashboardTotals totals;
+  final WorkOrderCounts? workOrders;
   final List<DayFlow> flow;
   final List<AttentionItem> needsAttention;
   final List<RecentActivity> recentActivity;
@@ -116,6 +136,9 @@ class DashboardSummary {
 
   factory DashboardSummary.fromJson(Map<String, dynamic> j) => DashboardSummary(
     totals: DashboardTotals.fromJson(j['totals'] as Map<String, dynamic>),
+    workOrders: j['workOrders'] is Map<String, dynamic>
+        ? WorkOrderCounts.fromJson(j['workOrders'] as Map<String, dynamic>)
+        : null,
     flow: (j['flow'] as List)
         .map((e) => DayFlow.fromJson(e as Map<String, dynamic>))
         .toList(),

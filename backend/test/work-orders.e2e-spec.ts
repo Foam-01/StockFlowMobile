@@ -573,6 +573,29 @@ describe('inventory link', () => {
   });
 });
 
+describe('dashboard', () => {
+  it('counts work orders by status, including overdue', async () => {
+    const before = (await http('admin', 'get', '/dashboard').expect(200)).body
+      .workOrders;
+    await workOrder({ dueAt: new Date(Date.now() - 3_600_000).toISOString() });
+    const after = (await http('sup', 'get', '/dashboard').expect(200)).body
+      .workOrders;
+    expect(after.OPEN).toBe(before.OPEN + 1);
+    expect(after.overdue).toBe(before.overdue + 1);
+    expect(Object.keys(after).sort()).toEqual(
+      [
+        'APPROVED',
+        'CANCELLED',
+        'IN_PROGRESS',
+        'NEEDS_REVISION',
+        'OPEN',
+        'SUBMITTED',
+        'overdue',
+      ].sort(),
+    );
+  });
+});
+
 describe('role boundaries for the new roles', () => {
   it('technicians cannot use inventory documents or the dashboard', async () => {
     const p = await productWithStock(ctx, 5);

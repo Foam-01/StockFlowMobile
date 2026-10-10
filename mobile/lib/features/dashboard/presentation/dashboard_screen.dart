@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../work_orders/presentation/work_orders_controller.dart';
+
 import '../../../core/theme.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../auth/presentation/auth_controller.dart';
@@ -28,7 +30,11 @@ class DashboardScreen extends ConsumerWidget {
         AsyncValue(:final value?, isLoading: false) ||
         AsyncValue(:final value?, hasError: false) => RefreshIndicator(
           onRefresh: () => ref.refresh(dashboardProvider.future),
-          child: _Content(summary: value, userName: user?.name),
+          child: _Content(
+            summary: value,
+            userName: user?.name,
+            canWriteInventory: user?.canWriteInventory ?? false,
+          ),
         ),
         AsyncValue(:final error?, isLoading: false) => SafeArea(
           child: ErrorView(
@@ -43,10 +49,22 @@ class DashboardScreen extends ConsumerWidget {
 }
 
 class _Content extends ConsumerWidget {
-  const _Content({required this.summary, this.userName});
+  const _Content({
+    required this.summary,
+    required this.canWriteInventory,
+    this.userName,
+  });
 
   final DashboardSummary summary;
   final String? userName;
+
+  /// Supervisors see the dashboard but cannot create stock documents.
+  final bool canWriteInventory;
+
+  void _openJobs(BuildContext context, WidgetRef ref, WoFilter filter) {
+    ref.read(woQueryProvider.notifier).setFilter(filter);
+    context.go('/work-orders');
+  }
 
   void _openLowStock(BuildContext context, WidgetRef ref) {
     final filter = ref.read(productFilterProvider);
@@ -74,8 +92,12 @@ class _Content extends ConsumerWidget {
           userName: userName,
           totals: t,
           onProducts: () => context.go('/products'),
-          onReceive: () => context.push('/operations/new?type=RECEIVE'),
-          onIssue: () => context.push('/operations/new?type=ISSUE'),
+          onReceive: canWriteInventory
+              ? () => context.push('/operations/new?type=RECEIVE')
+              : null,
+          onIssue: canWriteInventory
+              ? () => context.push('/operations/new?type=ISSUE')
+              : null,
           onScan: () async {
             final product = await scanProduct(context, ref);
             if (product != null && context.mounted) {
@@ -115,6 +137,13 @@ class _Content extends ConsumerWidget {
                   ),
                 ],
               ),
+              if (summary.workOrders case final wo?) ...[
+                const SizedBox(height: 12),
+                _JobsCard(
+                  counts: wo,
+                  onOpen: (f) => _openJobs(context, ref, f),
+                ),
+              ],
               if (t.pendingDrafts > 0) ...[
                 const SizedBox(height: 12),
                 Material(
@@ -219,16 +248,18 @@ class _Header extends StatelessWidget {
     required this.userName,
     required this.totals,
     required this.onProducts,
-    required this.onReceive,
-    required this.onIssue,
+    this.onReceive,
+    this.onIssue,
     required this.onScan,
   });
 
   final String? userName;
   final DashboardTotals totals;
   final VoidCallback onProducts;
-  final VoidCallback onReceive;
-  final VoidCallback onIssue;
+
+  /// Null hides the action (role cannot create stock documents).
+  final VoidCallback? onReceive;
+  final VoidCallback? onIssue;
   final VoidCallback onScan;
 
   @override
@@ -349,24 +380,28 @@ class _Header extends StatelessWidget {
                 const SizedBox(height: 22),
                 Row(
                   children: [
-                    Expanded(
-                      child: _QuickAction(
-                        key: const Key('quick_receive'),
-                        icon: Icons.south_west_rounded,
-                        label: 'Receive',
-                        onTap: onReceive,
+                    if (onReceive != null) ...[
+                      Expanded(
+                        child: _QuickAction(
+                          key: const Key('quick_receive'),
+                          icon: Icons.south_west_rounded,
+                          label: 'Receive',
+                          onTap: onReceive!,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: _QuickAction(
-                        key: const Key('quick_issue'),
-                        icon: Icons.north_east_rounded,
-                        label: 'Issue',
-                        onTap: onIssue,
+                      const SizedBox(width: 10),
+                    ],
+                    if (onIssue != null) ...[
+                      Expanded(
+                        child: _QuickAction(
+                          key: const Key('quick_issue'),
+                          icon: Icons.north_east_rounded,
+                          label: 'Issue',
+                          onTap: onIssue!,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 10),
+                      const SizedBox(width: 10),
+                    ],
                     Expanded(
                       child: _QuickAction(
                         key: const Key('quick_scan'),
@@ -557,6 +592,114 @@ class _AttentionTile extends StatelessWidget {
             ?.copyWith(fontWeight: FontWeight.w700, color: color),
       ),
       onTap: () => context.push('/products/${item.id}'),
+    );
+  }
+}
+
+/// Field jobs at a glance; each number opens the matching list.
+class _JobsCard extends StatelessWidget {
+  const _JobsCard({required this.counts, required this.onOpen});
+
+  final WorkOrderCounts counts;
+  final ValueChanged<WoFilter> onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    Widget cell(
+      String label,
+      int value,
+      WoFilter filter, {
+      Color? color,
+      Key? key,
+    }) => Expanded(
+      child: InkWell(
+        key: key,
+        borderRadius: BorderRadius.circular(10),
+        onTap: () => onOpen(filter),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Column(
+            children: [
+              Text(
+                '$value',
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: value > 0 ? color : scheme.onSurfaceVariant,
+                  fontFeatures: AppTheme.tabular,
+                ),
+              ),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    return Material(
+      key: const Key('jobs_card'),
+      color: scheme.surfaceContainerLowest,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppTheme.radius),
+        side: BorderSide(color: scheme.outlineVariant),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 12, 14, 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  Icons.assignment_outlined,
+                  size: 18,
+                  color: scheme.primary,
+                ),
+                const SizedBox(width: 8),
+                Text('Field jobs', style: theme.textTheme.titleSmall),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                cell(
+                  'Active',
+                  counts.active,
+                  WoFilter.active,
+                  color: scheme.onSurface,
+                ),
+                cell(
+                  'To review',
+                  counts.of('SUBMITTED'),
+                  WoFilter.toReview,
+                  color: scheme.tertiary,
+                  key: const Key('jobs_to_review'),
+                ),
+                cell(
+                  'Overdue',
+                  counts.overdue,
+                  WoFilter.active,
+                  color: scheme.error,
+                ),
+                cell(
+                  'Approved',
+                  counts.of('APPROVED'),
+                  WoFilter.done,
+                  color: scheme.primary,
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
