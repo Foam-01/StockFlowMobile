@@ -53,6 +53,7 @@
 - ตรวจสิทธิ์ที่ server ทุก endpoint รวมถึงระดับรายการ (ช่างขอดูงานของคนอื่นจะได้ `404`)
 - rate limit, log ที่ไม่บันทึก token หรือข้อมูลที่ส่ง, ลองใหม่อัตโนมัติเมื่อฐานข้อมูลแบบ serverless หลับอยู่
 - ทุกหน้าจอมีสถานะ loading, ว่าง และ error พร้อมปุ่มลองใหม่ และมีเอกสาร API ด้วย Swagger
+- แอปใช้ได้ทั้ง **ภาษาไทยและอังกฤษ** (Flutter gen-l10n, ฟอนต์ IBM Plex Sans Thai) ใช้ภาษาตามเครื่อง หรือเลือกเองได้ที่หน้า login หรือโปรไฟล์
 
 เอกสาร: [สถาปัตยกรรม](docs/architecture.th.md) · [ใบงาน](docs/work-orders.md) · [offline sync](docs/offline-sync.md) · [ความปลอดภัย](docs/security.md) · [การทดสอบ](docs/testing.md) · การตัดสินใจใน [docs/adr](docs/adr)
 

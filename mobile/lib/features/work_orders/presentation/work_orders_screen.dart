@@ -10,6 +10,7 @@ import '../../auth/presentation/auth_controller.dart';
 import '../domain/work_order.dart';
 import 'widgets/wo_badges.dart';
 import 'work_orders_controller.dart';
+import '../../../core/l10n.dart';
 
 class WorkOrdersScreen extends ConsumerStatefulWidget {
   const WorkOrdersScreen({super.key});
@@ -47,9 +48,9 @@ class _WorkOrdersScreenState extends ConsumerState<WorkOrdersScreen> {
     final list = ref.watch(woListProvider);
     final query = ref.watch(woQueryProvider);
     final title = switch (user?.role) {
-      Role.technician => 'My jobs',
-      Role.supervisor => 'Reviews & jobs',
-      _ => 'Work orders',
+      Role.technician => context.l10n.myJobs,
+      Role.supervisor => context.l10n.reviewsJobs,
+      _ => context.l10n.workOrders,
     };
 
     return Scaffold(
@@ -64,7 +65,7 @@ class _WorkOrdersScreenState extends ConsumerState<WorkOrdersScreen> {
                 child: SearchBar(
                   key: const Key('wo_search'),
                   controller: _search,
-                  hintText: 'Search code, title or site',
+                  hintText: context.l10n.searchWo,
                   leading: const Icon(Icons.search),
                   elevation: const WidgetStatePropertyAll(0),
                   onChanged: (v) {
@@ -85,7 +86,7 @@ class _WorkOrdersScreenState extends ConsumerState<WorkOrdersScreen> {
                     for (final f in WoFilter.values) ...[
                       ChoiceChip(
                         key: Key('wo_filter_${f.name}'),
-                        label: Text(f.label),
+                        label: Text(f.tr(context.l10n)),
                         selected: query.filter == f,
                         onSelected: (_) =>
                             ref.read(woQueryProvider.notifier).setFilter(f),
@@ -104,7 +105,7 @@ class _WorkOrdersScreenState extends ConsumerState<WorkOrdersScreen> {
               key: const Key('new_work_order'),
               onPressed: () => context.push('/work-orders/new'),
               icon: const Icon(Icons.add),
-              label: const Text('New'),
+              label: Text(context.l10n.newLabel),
             )
           : null,
       body: switch (list) {
@@ -131,11 +132,11 @@ class _WorkOrdersScreenState extends ConsumerState<WorkOrdersScreen> {
             MessageView(
               icon: Icons.assignment_outlined,
               title: q.text.isNotEmpty
-                  ? 'No matching work orders'
+                  ? context.l10n.noMatchingWo
                   : switch (q.filter) {
-                      WoFilter.toReview => 'Nothing waiting for review',
-                      WoFilter.active => 'No active jobs',
-                      _ => 'No work orders yet',
+                      WoFilter.toReview => context.l10n.nothingToReview,
+                      WoFilter.active => context.l10n.noActiveJobs,
+                      _ => context.l10n.noWoYet,
                     },
             ),
           ],
@@ -231,7 +232,7 @@ class _WoCard extends StatelessWidget {
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
-                      wo.assignee?.name ?? 'Unassigned',
+                      wo.assignee?.name ?? context.l10n.unassigned,
                       style: muted,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -269,4 +270,13 @@ class _WoCard extends StatelessWidget {
       ),
     );
   }
+}
+
+extension on WoFilter {
+  String tr(L10n t) => switch (this) {
+    WoFilter.active => t.filterActive,
+    WoFilter.toReview => t.filterToReview,
+    WoFilter.done => t.filterDone,
+    WoFilter.all => t.all,
+  };
 }

@@ -3,8 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/errors.dart';
+import '../domain/user.dart';
 import 'auth_controller.dart';
 import 'server_settings.dart';
+import '../../../core/l10n.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -109,7 +111,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           if (tall) ...[
                             const SizedBox(height: 8),
                             Text(
-                              'Receive, issue and count stock\nfrom the warehouse floor.',
+                              context.l10n.loginTagline,
                               style: theme.textTheme.bodyLarge?.copyWith(
                                 color: Colors.white.withValues(alpha: 0.75),
                                 height: 1.45,
@@ -141,7 +143,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
                                 Text(
-                                  'Welcome back',
+                                  context.l10n.welcomeBack,
                                   style: theme.textTheme.titleLarge,
                                 ),
                                 const SizedBox(height: 20),
@@ -152,17 +154,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   keyboardType: TextInputType.emailAddress,
                                   textInputAction: TextInputAction.next,
                                   autofillHints: const [AutofillHints.email],
-                                  decoration: const InputDecoration(
-                                    labelText: 'Email',
+                                  decoration: InputDecoration(
+                                    labelText: context.l10n.email,
                                     prefixIcon: Icon(Icons.email_outlined),
                                   ),
                                   validator: (v) {
                                     final value = v?.trim() ?? '';
                                     if (value.isEmpty) {
-                                      return 'Please enter your email';
+                                      return context.l10n.enterEmail;
                                     }
                                     if (!_emailRe.hasMatch(value)) {
-                                      return 'Please enter a valid email';
+                                      return context.l10n.validEmail;
                                     }
                                     return null;
                                   },
@@ -177,12 +179,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   autofillHints: const [AutofillHints.password],
                                   onFieldSubmitted: (_) => _submit(),
                                   decoration: InputDecoration(
-                                    labelText: 'Password',
+                                    labelText: context.l10n.password,
                                     prefixIcon: const Icon(Icons.lock_outline),
                                     suffixIcon: IconButton(
                                       tooltip: _obscure
-                                          ? 'Show password'
-                                          : 'Hide password',
+                                          ? context.l10n.showPassword
+                                          : context.l10n.hidePassword,
                                       icon: Icon(
                                         _obscure
                                             ? Icons.visibility_outlined
@@ -193,7 +195,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     ),
                                   ),
                                   validator: (v) => (v == null || v.isEmpty)
-                                      ? 'Please enter your password'
+                                      ? context.l10n.enterPassword
                                       : null,
                                 ),
                                 if (_error != null) ...[
@@ -214,11 +216,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                             strokeWidth: 2.5,
                                           ),
                                         )
-                                      : const Text('Sign in'),
+                                      : Text(context.l10n.signIn),
                                 ),
                                 const SizedBox(height: 32),
                                 Text(
-                                  'Demo accounts',
+                                  context.l10n.demoAccounts,
                                   textAlign: TextAlign.center,
                                   style: theme.textTheme.labelMedium?.copyWith(
                                     color: theme.colorScheme.onSurfaceVariant,
@@ -231,37 +233,39 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   runSpacing: 8,
                                   children: [
                                     // Seeded demo accounts, one per role.
-                                    for (final (label, icon, email, pw)
-                                        in const [
+                                    for (final (role, icon, email, pw)
+                                        in const <
+                                          (Role, IconData, String, String)
+                                        >[
                                           (
-                                            'Admin',
+                                            Role.admin,
                                             Icons.admin_panel_settings_outlined,
                                             'admin@stockflow.dev',
                                             'Admin1234!',
                                           ),
                                           (
-                                            'Staff',
+                                            Role.staff,
                                             Icons.person_outline,
                                             'staff@stockflow.dev',
                                             'Staff1234!',
                                           ),
                                           (
-                                            'Technician',
+                                            Role.technician,
                                             Icons.engineering_outlined,
                                             'tech@stockflow.dev',
                                             'Tech1234!',
                                           ),
                                           (
-                                            'Supervisor',
+                                            Role.supervisor,
                                             Icons.verified_user_outlined,
                                             'supervisor@stockflow.dev',
                                             'Super1234!',
                                           ),
                                         ])
                                       ActionChip(
-                                        key: Key('demo_${label.toLowerCase()}'),
+                                        key: Key('demo_${role.name}'),
                                         avatar: Icon(icon, size: 18),
-                                        label: Text(label),
+                                        label: Text(role.tr(context.l10n)),
                                         onPressed: _submitting
                                             ? null
                                             : () => _fillDemo(email, pw),
@@ -269,10 +273,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                   ],
                                 ),
                                 const SizedBox(height: 16),
-                                Center(
-                                  child: ServerSettingsButton(
-                                    enabled: !_submitting,
-                                  ),
+                                Wrap(
+                                  alignment: WrapAlignment.center,
+                                  children: [
+                                    ServerSettingsButton(enabled: !_submitting),
+                                    const LanguageToggle(),
+                                  ],
                                 ),
                               ],
                             ),

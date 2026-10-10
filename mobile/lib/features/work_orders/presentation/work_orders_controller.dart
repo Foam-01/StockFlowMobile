@@ -10,18 +10,13 @@ import '../domain/work_order.dart';
 
 /// Status filter presets shown as chips.
 enum WoFilter {
-  active('Active', {
-    WoStatus.open,
-    WoStatus.inProgress,
-    WoStatus.needsRevision,
-  }),
-  toReview('To review', {WoStatus.submitted}),
-  done('Done', {WoStatus.approved}),
-  all('All', {});
+  active({WoStatus.open, WoStatus.inProgress, WoStatus.needsRevision}),
+  toReview({WoStatus.submitted}),
+  done({WoStatus.approved}),
+  all({});
 
-  const WoFilter(this.label, this.statuses);
+  const WoFilter(this.statuses);
 
-  final String label;
   final Set<WoStatus> statuses;
 
   /// Sensible starting view per role.

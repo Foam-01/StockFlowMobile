@@ -8,6 +8,7 @@ import '../domain/stock_transaction.dart';
 import 'evidence_photos.dart';
 import 'operations_controller.dart';
 import 'widgets/tx_widgets.dart';
+import '../../../core/l10n.dart';
 
 class OperationDetailScreen extends ConsumerStatefulWidget {
   const OperationDetailScreen({super.key, required this.txId});
@@ -38,7 +39,7 @@ class _OperationDetailScreenState extends ConsumerState<OperationDetailScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Back'),
+            child: Text(context.l10n.back),
           ),
           FilledButton(
             style: destructive
@@ -75,7 +76,7 @@ class _OperationDetailScreenState extends ConsumerState<OperationDetailScreen> {
     final user = ref.watch(authControllerProvider).value;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Operation')),
+      appBar: AppBar(title: Text(context.l10n.operation)),
       body: tx.when(
         data: (tx) => _Body(
           tx: tx,
@@ -101,18 +102,18 @@ class _OperationDetailScreenState extends ConsumerState<OperationDetailScreen> {
                       onPressed: _busy
                           ? null
                           : () => _run(
-                              title: 'Cancel this draft?',
-                              message: 'It will not affect stock.',
-                              action: 'Cancel draft',
+                              title: context.l10n.cancelDraftQ,
+                              message: context.l10n.noStockEffect,
+                              action: context.l10n.cancelDraft,
                               destructive: true,
-                              done: 'Draft cancelled',
+                              done: context.l10n.draftCancelled,
                               op: () =>
                                   ref.read(txActionsProvider).cancel(t.id),
                             ),
                       style: OutlinedButton.styleFrom(
                         minimumSize: const Size.fromHeight(52),
                       ),
-                      child: const Text('Cancel'),
+                      child: Text(context.l10n.cancel),
                     ),
                   ),
                 if (user.isAdmin) ...[
@@ -124,13 +125,14 @@ class _OperationDetailScreenState extends ConsumerState<OperationDetailScreen> {
                       onPressed: _busy
                           ? null
                           : () => _run(
-                              title: 'Confirm ${t.type.label.toLowerCase()}?',
-                              message:
-                                  'Stock will be updated for ${t.items.length} '
-                                  'product${t.items.length == 1 ? '' : 's'}. '
-                                  'This cannot be undone.',
-                              action: 'Confirm',
-                              done: 'Stock updated',
+                              title: context.l10n.confirmTypeQ(
+                                t.type.tr(context.l10n),
+                              ),
+                              message: context.l10n.confirmStockMsg(
+                                t.items.length,
+                              ),
+                              action: context.l10n.confirm,
+                              done: context.l10n.stockUpdated,
                               op: () =>
                                   ref.read(txActionsProvider).confirm(t.id),
                             ),
@@ -143,15 +145,15 @@ class _OperationDetailScreenState extends ConsumerState<OperationDetailScreen> {
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : const Icon(Icons.check),
-                      label: const Text('Confirm'),
+                      label: Text(context.l10n.confirm),
                     ),
                   ),
                 ] else
-                  const Expanded(
+                  Expanded(
                     flex: 2,
                     child: Padding(
                       padding: EdgeInsets.only(left: 12),
-                      child: Text('Waiting for an admin to confirm'),
+                      child: Text(context.l10n.waitingAdmin),
                     ),
                   ),
               ],
@@ -188,7 +190,10 @@ class _Body extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(tx.type.label, style: theme.textTheme.titleLarge),
+                  Text(
+                    tx.type.tr(context.l10n),
+                    style: theme.textTheme.titleLarge,
+                  ),
                   if (tx.referenceNo != null)
                     Text(tx.referenceNo!, style: muted),
                 ],
@@ -201,18 +206,24 @@ class _Body extends StatelessWidget {
         Card.outlined(
           child: Column(
             children: [
-              _Info('Created by', tx.createdByName),
-              _Info('Created at', formatDateTime(tx.createdAt)),
+              _Info(context.l10n.createdBy, tx.createdByName),
+              _Info(context.l10n.createdAt, formatDateTime(tx.createdAt)),
               if (tx.confirmedByName != null)
-                _Info('Confirmed by', tx.confirmedByName!),
+                _Info(context.l10n.confirmedBy, tx.confirmedByName!),
               if (tx.confirmedAt != null)
-                _Info('Confirmed at', formatDateTime(tx.confirmedAt!)),
-              if (tx.note != null) _Info('Note', tx.note!),
+                _Info(
+                  context.l10n.confirmedAt,
+                  formatDateTime(tx.confirmedAt!),
+                ),
+              if (tx.note != null) _Info(context.l10n.note, tx.note!),
             ],
           ),
         ),
         const SizedBox(height: 16),
-        Text('Items (${tx.items.length})', style: theme.textTheme.titleMedium),
+        Text(
+          context.l10n.itemsWithCount(tx.items.length),
+          style: theme.textTheme.titleMedium,
+        ),
         const SizedBox(height: 8),
         Card.outlined(
           child: Column(

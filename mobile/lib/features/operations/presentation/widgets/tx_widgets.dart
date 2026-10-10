@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/stock_transaction.dart';
+import '../../../../core/l10n.dart';
 
 String formatDateTime(DateTime d) {
   String two(int n) => n.toString().padLeft(2, '0');
@@ -33,7 +34,7 @@ class TxStatusChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
-        status.label,
+        status.tr(context.l10n),
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
           color: fg,
           fontWeight: FontWeight.w600,
@@ -65,7 +66,12 @@ class TxTypeIcon extends StatelessWidget {
         color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Icon(type.icon, size: 22, color: color, semanticLabel: type.label),
+      child: Icon(
+        type.icon,
+        size: 22,
+        color: color,
+        semanticLabel: type.tr(context.l10n),
+      ),
     );
   }
 }

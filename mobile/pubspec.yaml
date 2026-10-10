@@ -44,6 +44,9 @@ dependencies:
   sqflite: ^2.4.4+1
   path: ^1.9.1
   connectivity_plus: ^7.3.2
+  flutter_localizations:
+    sdk: flutter
+  intl: ^0.20.3
 
 dev_dependencies:
   flutter_test:
@@ -63,6 +66,8 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
+  # Generates L10n from lib/l10n/*.arb (see l10n.yaml).
+  generate: true
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
@@ -78,6 +83,16 @@ flutter:
         - asset: assets/fonts/IBMPlexSans-600.ttf
           weight: 600
         - asset: assets/fonts/IBMPlexSans-700.ttf
+          weight: 700
+    # Thai companion of IBM Plex Sans (OFL, assets/fonts/OFL-IBMPlexSansThai.txt).
+    - family: IBMPlexSansThai
+      fonts:
+        - asset: assets/fonts/IBMPlexSansThai-400.ttf
+        - asset: assets/fonts/IBMPlexSansThai-500.ttf
+          weight: 500
+        - asset: assets/fonts/IBMPlexSansThai-600.ttf
+          weight: 600
+        - asset: assets/fonts/IBMPlexSansThai-700.ttf
           weight: 700
 
   # To add assets to your application, add an assets section, like this:

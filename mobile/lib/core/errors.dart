@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 
+import 'l10n.dart';
+
 /// User-facing error derived from a failed API call.
 class ApiException implements Exception {
   ApiException(this.message, {this.statusCode, this.isNetwork = false});
@@ -17,17 +19,14 @@ class ApiException implements Exception {
 
   factory ApiException.from(Object error) {
     if (error is ApiException) return error;
-    if (error is! DioException) return ApiException('Something went wrong');
+    if (error is! DioException) return ApiException(l10nNow.somethingWrong);
 
     switch (error.type) {
       case DioExceptionType.connectionTimeout:
       case DioExceptionType.receiveTimeout:
       case DioExceptionType.sendTimeout:
       case DioExceptionType.connectionError:
-        return ApiException(
-          'Cannot reach the server. Check your connection.',
-          isNetwork: true,
-        );
+        return ApiException(l10nNow.cannotReach, isNetwork: true);
       default:
         break;
     }
@@ -35,7 +34,9 @@ class ApiException implements Exception {
     final res = error.response;
     // NestJS errors look like { message: string | string[], statusCode }.
     final data = res?.data;
-    var message = 'Request failed (${res?.statusCode ?? 'no response'})';
+    var message = l10nNow.requestFailed(
+      '${res?.statusCode ?? l10nNow.noResponse}',
+    );
     if (data is Map && data['message'] != null) {
       final m = data['message'];
       message = m is List ? m.join('\n') : m.toString();

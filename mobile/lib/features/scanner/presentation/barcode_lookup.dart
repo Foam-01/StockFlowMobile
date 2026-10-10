@@ -5,6 +5,7 @@ import '../../../core/errors.dart';
 import '../../products/data/products_repository.dart';
 import '../../products/domain/product.dart';
 import 'scanner_screen.dart';
+import '../../../core/l10n.dart';
 
 /// Opens the scanner and returns the barcode, or null if cancelled.
 /// Overridable in tests (the camera can't run there).
@@ -15,7 +16,8 @@ final barcodeScannerProvider =
               Navigator.of(context, rootNavigator: true).push<String>(
                 MaterialPageRoute(
                   fullscreenDialog: true,
-                  builder: (_) => ScannerScreen(title: title ?? 'Scan barcode'),
+                  builder: (_) =>
+                      ScannerScreen(title: title ?? context.l10n.scanBarcode),
                 ),
               ),
     );
@@ -37,7 +39,7 @@ Future<Product?> scanProduct(
     messenger.showSnackBar(
       SnackBar(
         content: Text(
-          e.statusCode == 404 ? 'No product with barcode $code' : e.message,
+          e.statusCode == 404 ? context.l10n.noProductBarcode(code) : e.message,
         ),
       ),
     );

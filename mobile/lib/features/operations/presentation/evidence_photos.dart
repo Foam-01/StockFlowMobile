@@ -8,6 +8,7 @@ import '../../../core/errors.dart';
 import '../data/attachments_repository.dart';
 import '../domain/stock_transaction.dart';
 import 'operations_controller.dart';
+import '../../../core/l10n.dart';
 
 const maxPhotos = 5;
 
@@ -44,6 +45,7 @@ class _EvidencePhotosState extends ConsumerState<EvidencePhotos> {
   double? _progress; // non-null while uploading
 
   Future<void> _add() async {
+    final t = context.l10n;
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
       useRootNavigator: true,
@@ -54,12 +56,12 @@ class _EvidencePhotosState extends ConsumerState<EvidencePhotos> {
           children: [
             ListTile(
               leading: const Icon(Icons.photo_camera_outlined),
-              title: const Text('Take photo'),
+              title: Text(t.takePhoto),
               onTap: () => Navigator.pop(context, ImageSource.camera),
             ),
             ListTile(
               leading: const Icon(Icons.photo_library_outlined),
-              title: const Text('Choose from gallery'),
+              title: Text(t.chooseGallery),
               onTap: () => Navigator.pop(context, ImageSource.gallery),
             ),
             const SizedBox(height: 8),
@@ -86,7 +88,7 @@ class _EvidencePhotosState extends ConsumerState<EvidencePhotos> {
             },
           );
       ref.invalidate(txDetailProvider(widget.tx.id));
-      messenger.showSnackBar(const SnackBar(content: Text('Photo attached')));
+      messenger.showSnackBar(SnackBar(content: Text(t.photoAttached)));
     } catch (e) {
       messenger.showSnackBar(
         SnackBar(content: Text(ApiException.from(e).message)),
@@ -125,7 +127,7 @@ class _EvidencePhotosState extends ConsumerState<EvidencePhotos> {
         Row(
           children: [
             Text(
-              'Evidence photos (${photos.length}/$maxPhotos)',
+              context.l10n.evidencePhotosCount(photos.length, maxPhotos),
               style: theme.textTheme.titleMedium,
             ),
           ],
@@ -133,7 +135,7 @@ class _EvidencePhotosState extends ConsumerState<EvidencePhotos> {
         const SizedBox(height: 8),
         if (photos.isEmpty && !canAdd && _progress == null)
           Text(
-            'No photos attached',
+            context.l10n.noPhotosAttached,
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),
@@ -171,7 +173,7 @@ class _Thumb extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     return Semantics(
       button: true,
-      label: 'Evidence photo',
+      label: context.l10n.evidencePhoto,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: Material(
@@ -226,7 +228,7 @@ class _AddTile extends StatelessWidget {
           children: [
             Icon(Icons.add_a_photo_outlined, color: scheme.primary),
             const SizedBox(height: 4),
-            const Text('Add photo'),
+            Text(context.l10n.addPhoto),
           ],
         ),
       ),
@@ -261,7 +263,9 @@ class _UploadingTile extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           Text(
-            progress >= 1 ? 'Saving…' : '${(progress * 100).round()}%',
+            progress >= 1
+                ? context.l10n.saving
+                : '${(progress * 100).round()}%',
             style: Theme.of(context).textTheme.labelSmall,
           ),
         ],
@@ -298,15 +302,16 @@ class _PhotoViewerState extends ConsumerState<_PhotoViewer> {
   }
 
   Future<void> _delete() async {
+    final t = context.l10n;
     final ok = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete this photo?'),
-        content: const Text('It will be removed from the transaction.'),
+        title: Text(t.deleteThisPhoto),
+        content: Text(t.removedFromTx),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Back'),
+            child: Text(t.back),
           ),
           FilledButton(
             style: FilledButton.styleFrom(
@@ -314,7 +319,7 @@ class _PhotoViewerState extends ConsumerState<_PhotoViewer> {
               foregroundColor: Theme.of(context).colorScheme.onError,
             ),
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete'),
+            child: Text(t.delete),
           ),
         ],
       ),
@@ -330,7 +335,7 @@ class _PhotoViewerState extends ConsumerState<_PhotoViewer> {
           .delete(widget.tx.id, widget.tx.attachments[_index].id);
       ref.invalidate(txDetailProvider(widget.tx.id));
       navigator.pop();
-      messenger.showSnackBar(const SnackBar(content: Text('Photo deleted')));
+      messenger.showSnackBar(SnackBar(content: Text(t.photoDeleted)));
     } catch (e) {
       messenger.showSnackBar(
         SnackBar(content: Text(ApiException.from(e).message)),
@@ -352,7 +357,7 @@ class _PhotoViewerState extends ConsumerState<_PhotoViewer> {
           if (widget.canDelete && widget.tx.status != TxStatus.cancelled)
             IconButton(
               key: const Key('delete_photo'),
-              tooltip: 'Delete photo',
+              tooltip: context.l10n.deletePhoto,
               onPressed: _deleting ? null : _delete,
               icon: const Icon(Icons.delete_outline),
             ),

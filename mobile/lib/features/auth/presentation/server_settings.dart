@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/config.dart';
+import '../../../core/l10n.dart';
 
 /// Pings `GET /health` on [url]. Returns null when reachable, else a reason.
 /// Overridable in tests.
@@ -15,14 +16,13 @@ final serverHealthCheckProvider = Provider<Future<String?> Function(String)>(
           receiveTimeout: const Duration(seconds: 5),
         ),
       ).get<Map<String, dynamic>>('$url/health');
-      return res.data?['status'] == 'ok' ? null : 'Not a StockFlow server';
+      return res.data?['status'] == 'ok' ? null : l10nNow.notStockflow;
     } on DioException catch (e) {
       return switch (e.type) {
         DioExceptionType.connectionTimeout ||
         DioExceptionType.receiveTimeout ||
-        DioExceptionType.connectionError =>
-          'Cannot reach the server. Same Wi-Fi? Firewall open on port 3000?',
-        _ => 'Not a StockFlow server (HTTP ${e.response?.statusCode ?? '?'})',
+        DioExceptionType.connectionError => l10nNow.serverUnreachable,
+        _ => l10nNow.notStockflowCode('${e.response?.statusCode ?? '?'}'),
       };
     }
   },
@@ -47,7 +47,7 @@ class ServerSettingsButton extends ConsumerWidget {
             )
           : null,
       icon: const Icon(Icons.dns_outlined, size: 18),
-      label: Text('Server: $host'),
+      label: Text(context.l10n.serverHost(host)),
     );
   }
 }
@@ -85,7 +85,7 @@ class _ServerDialogState extends ConsumerState<_ServerDialog> {
     setState(() {
       _checking = false;
       _ok = error == null;
-      _result = error ?? 'Connected';
+      _result = error ?? context.l10n.connected;
     });
   }
 
@@ -104,25 +104,22 @@ class _ServerDialogState extends ConsumerState<_ServerDialog> {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return AlertDialog(
-      title: const Text('Server'),
+      title: Text(context.l10n.server),
       content: Form(
         key: _formKey,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Address of the StockFlow API. On a phone, use your '
-              'computer’s Wi-Fi IP.',
-            ),
+            Text(context.l10n.serverHelp),
             const SizedBox(height: 16),
             TextFormField(
               key: const Key('server_url'),
               controller: _url,
               keyboardType: TextInputType.url,
               autocorrect: false,
-              decoration: const InputDecoration(
-                labelText: 'API URL',
+              decoration: InputDecoration(
+                labelText: context.l10n.apiUrl,
                 hintText: 'http://192.168.1.10:3000',
               ),
               validator: (v) => validateServerUrl(v ?? ''),
@@ -140,7 +137,7 @@ class _ServerDialogState extends ConsumerState<_ServerDialog> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.wifi_tethering, size: 18),
-                  label: const Text('Test connection'),
+                  label: Text(context.l10n.testConnection),
                 ),
               ],
             ),
@@ -170,12 +167,14 @@ class _ServerDialogState extends ConsumerState<_ServerDialog> {
       actions: [
         TextButton(
           onPressed: _reset,
-          child: Text('Default (${Uri.parse(defaultApiBaseUrl).authority})'),
+          child: Text(
+            context.l10n.serverDefault(Uri.parse(defaultApiBaseUrl).authority),
+          ),
         ),
         FilledButton(
           key: const Key('server_save'),
           onPressed: _save,
-          child: const Text('Save'),
+          child: Text(context.l10n.save),
         ),
       ],
     );

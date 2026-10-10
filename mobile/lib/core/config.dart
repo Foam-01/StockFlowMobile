@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
+import 'l10n.dart';
+
 /// Default API URL when the user hasn't set one.
 ///
 /// Override at build time with `--dart-define=API_URL=http://192.168.1.10:3000`,
@@ -71,12 +73,12 @@ String normalizeServerUrl(String input) {
 
 /// Returns an error message, or null if [input] looks like a server URL.
 String? validateServerUrl(String input) {
-  if (input.trim().isEmpty) return 'Enter the server address';
+  if (input.trim().isEmpty) return l10nNow.enterServer;
   final uri = Uri.tryParse(normalizeServerUrl(input));
   if (uri == null ||
       !(uri.scheme == 'http' || uri.scheme == 'https') ||
       uri.host.isEmpty) {
-    return 'e.g. http://192.168.1.10:3000';
+    return l10nNow.serverExample;
   }
   return null;
 }

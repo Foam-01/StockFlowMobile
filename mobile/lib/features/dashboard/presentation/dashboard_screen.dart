@@ -16,6 +16,7 @@ import '../../scanner/presentation/barcode_lookup.dart';
 import '../data/dashboard_repository.dart';
 import '../domain/dashboard.dart';
 import 'flow_chart.dart';
+import '../../../core/l10n.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -115,7 +116,7 @@ class _Content extends ConsumerWidget {
                   Expanded(
                     child: _AlertTile(
                       key: const Key('tile_low'),
-                      label: 'Low stock',
+                      label: context.l10n.lowStock,
                       value: t.lowStock,
                       icon: Icons.trending_down_rounded,
                       color: scheme.tertiary,
@@ -127,7 +128,7 @@ class _Content extends ConsumerWidget {
                   Expanded(
                     child: _AlertTile(
                       key: const Key('tile_out'),
-                      label: 'Out of stock',
+                      label: context.l10n.outOfStock,
                       value: t.outOfStock,
                       icon: Icons.block_rounded,
                       color: scheme.error,
@@ -167,10 +168,7 @@ class _Content extends ConsumerWidget {
                         color: scheme.onPrimaryContainer,
                       ),
                     ),
-                    title: Text(
-                      '${t.pendingDrafts} draft${t.pendingDrafts == 1 ? '' : 's'} '
-                      'waiting for confirmation',
-                    ),
+                    title: Text(context.l10n.draftsWaiting(t.pendingDrafts)),
                     trailing: const Icon(Icons.chevron_right_rounded),
                     onTap: () => _openDrafts(context, ref),
                   ),
@@ -178,9 +176,11 @@ class _Content extends ConsumerWidget {
               ],
               const SizedBox(height: 28),
               _Section(
-                title: 'Last 7 days',
-                subtitle:
-                    '${summary.weekReceived} received · ${summary.weekIssued} issued',
+                title: context.l10n.last7Days,
+                subtitle: context.l10n.weekFlow(
+                  summary.weekReceived,
+                  summary.weekIssued,
+                ),
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 8, 16),
                   child: FlowChart(flow: summary.flow),
@@ -188,12 +188,12 @@ class _Content extends ConsumerWidget {
               ),
               const SizedBox(height: 28),
               _Section(
-                title: 'Needs attention',
+                title: context.l10n.needsAttention,
                 child: summary.needsAttention.isEmpty
-                    ? const Padding(
-                        padding: EdgeInsets.all(24),
+                    ? Padding(
+                        padding: const EdgeInsets.all(24),
                         child: Text(
-                          'All products are above their minimum stock',
+                          context.l10n.allAboveMin,
                           textAlign: TextAlign.center,
                         ),
                       )
@@ -206,12 +206,12 @@ class _Content extends ConsumerWidget {
               ),
               const SizedBox(height: 28),
               _Section(
-                title: 'Recent activity',
+                title: context.l10n.recentActivity,
                 child: summary.recentActivity.isEmpty
-                    ? const Padding(
-                        padding: EdgeInsets.all(24),
+                    ? Padding(
+                        padding: const EdgeInsets.all(24),
                         child: Text(
-                          'No confirmed operations yet',
+                          context.l10n.noConfirmedOps,
                           textAlign: TextAlign.center,
                         ),
                       )
@@ -220,13 +220,15 @@ class _Content extends ConsumerWidget {
                           for (final a in summary.recentActivity)
                             ListTile(
                               leading: TxTypeIcon(type: a.type),
-                              title: Text(a.referenceNo ?? a.type.label),
+                              title: Text(
+                                a.referenceNo ?? a.type.tr(context.l10n),
+                              ),
                               subtitle: Text(
                                 '${formatDateTime(a.confirmedAt)}'
                                 '${a.confirmedBy == null ? '' : ' · ${a.confirmedBy}'}',
                               ),
                               trailing: Text(
-                                '${a.itemCount} item${a.itemCount == 1 ? '' : 's'}',
+                                context.l10n.itemsCount(a.itemCount),
                               ),
                               onTap: () => context.push('/operations/${a.id}'),
                             ),
@@ -301,7 +303,7 @@ class _Header extends StatelessWidget {
                           ),
                           if (userName != null)
                             Text(
-                              'Hello, $userName',
+                              context.l10n.hello(userName!),
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 color: soft,
                               ),
@@ -312,7 +314,7 @@ class _Header extends StatelessWidget {
                     // Profile lives here for roles whose tab bar is full.
                     Semantics(
                       button: true,
-                      label: 'Profile',
+                      label: context.l10n.navProfile,
                       child: InkWell(
                         key: const Key('open_profile'),
                         customBorder: const CircleBorder(),
@@ -338,7 +340,7 @@ class _Header extends StatelessWidget {
                 ),
                 const SizedBox(height: 28),
                 Text(
-                  'Units on hand',
+                  context.l10n.unitsOnHand,
                   style: theme.textTheme.labelLarge?.copyWith(color: soft),
                 ),
                 const SizedBox(height: 2),
@@ -362,7 +364,7 @@ class _Header extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Text(
-                          'across ${totals.products} products',
+                          context.l10n.acrossProducts(totals.products),
                           style: theme.textTheme.bodyMedium?.copyWith(
                             color: soft,
                           ),
@@ -385,7 +387,7 @@ class _Header extends StatelessWidget {
                         child: _QuickAction(
                           key: const Key('quick_receive'),
                           icon: Icons.south_west_rounded,
-                          label: 'Receive',
+                          label: context.l10n.receive,
                           onTap: onReceive!,
                         ),
                       ),
@@ -396,7 +398,7 @@ class _Header extends StatelessWidget {
                         child: _QuickAction(
                           key: const Key('quick_issue'),
                           icon: Icons.north_east_rounded,
-                          label: 'Issue',
+                          label: context.l10n.issue,
                           onTap: onIssue!,
                         ),
                       ),
@@ -406,7 +408,7 @@ class _Header extends StatelessWidget {
                       child: _QuickAction(
                         key: const Key('quick_scan'),
                         icon: Icons.qr_code_scanner_rounded,
-                        label: 'Scan',
+                        label: context.l10n.scan,
                         onTap: onScan,
                       ),
                     ),
@@ -580,12 +582,12 @@ class _AttentionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final (color, label, icon) = item.isOut
-        ? (scheme.error, 'Out of stock', Icons.block_rounded)
-        : (scheme.tertiary, 'Low stock', Icons.trending_down_rounded);
+        ? (scheme.error, context.l10n.outOfStock, Icons.block_rounded)
+        : (scheme.tertiary, context.l10n.lowStock, Icons.trending_down_rounded);
     return ListTile(
       leading: Icon(icon, color: color, semanticLabel: label),
       title: Text(item.name),
-      subtitle: Text('${item.sku} · min ${item.minStock} ${item.unit}'),
+      subtitle: Text(context.l10n.skuMin(item.sku, item.minStock, item.unit)),
       trailing: Text(
         '${item.onHand} ${item.unit}',
         style: Theme.of(context).textTheme.titleSmall
@@ -664,33 +666,33 @@ class _JobsCard extends StatelessWidget {
                   color: scheme.primary,
                 ),
                 const SizedBox(width: 8),
-                Text('Field jobs', style: theme.textTheme.titleSmall),
+                Text(context.l10n.fieldJobs, style: theme.textTheme.titleSmall),
               ],
             ),
             const SizedBox(height: 4),
             Row(
               children: [
                 cell(
-                  'Active',
+                  context.l10n.filterActive,
                   counts.active,
                   WoFilter.active,
                   color: scheme.onSurface,
                 ),
                 cell(
-                  'To review',
+                  context.l10n.filterToReview,
                   counts.of('SUBMITTED'),
                   WoFilter.toReview,
                   color: scheme.tertiary,
                   key: const Key('jobs_to_review'),
                 ),
                 cell(
-                  'Overdue',
+                  context.l10n.overdue,
                   counts.overdue,
                   WoFilter.active,
                   color: scheme.error,
                 ),
                 cell(
-                  'Approved',
+                  context.l10n.woApproved,
                   counts.of('APPROVED'),
                   WoFilter.done,
                   color: scheme.primary,

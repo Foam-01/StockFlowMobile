@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../operations/presentation/widgets/tx_widgets.dart';
 import '../domain/pending_op.dart';
 import 'sync_controller.dart';
+import '../../../core/l10n.dart';
 
 /// Offline banner + documents waiting to sync, shown above the operations
 /// list. Renders nothing when online with an empty queue.
@@ -11,20 +12,21 @@ class SyncSection extends ConsumerWidget {
   const SyncSection({super.key});
 
   Future<void> _sync(BuildContext context, WidgetRef ref) async {
+    final t = context.l10n;
     final messenger = ScaffoldMessenger.of(context);
     final report = await ref.read(syncControllerProvider.notifier).syncNow();
     if (report == null) return;
     final parts = [
-      if (report.synced > 0) '${report.synced} synced',
-      if (report.failed > 0) '${report.failed} need attention',
-      if (report.stoppedOffline) 'server not reachable, will retry',
+      if (report.synced > 0) t.syncedCount(report.synced),
+      if (report.failed > 0) t.needAttentionCount(report.failed),
+      if (report.stoppedOffline) t.serverRetryLater,
     ];
     // Replace any earlier sync message rather than queueing behind it.
     messenger
       ..hideCurrentSnackBar()
       ..showSnackBar(
         SnackBar(
-          content: Text(parts.isEmpty ? 'Nothing to sync' : parts.join(' · ')),
+          content: Text(parts.isEmpty ? t.nothingToSync : parts.join(' · ')),
         ),
       );
   }
@@ -37,19 +39,19 @@ class SyncSection extends ConsumerWidget {
     final action = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Could not sync'),
+        title: Text(context.l10n.couldNotSync),
         content: Text(
-          '${op.error ?? 'The server rejected this document.'}\n\n'
-          'Retry if the problem was fixed, or discard it.',
+          '${op.error ?? context.l10n.serverRejected}\n\n'
+          '${context.l10n.retryOrDiscard}',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, 'discard'),
-            child: const Text('Discard'),
+            child: Text(context.l10n.discard),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(context, 'retry'),
-            child: const Text('Retry'),
+            child: Text(context.l10n.retry),
           ),
         ],
       ),
@@ -84,7 +86,7 @@ class SyncSection extends ConsumerWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'You’re offline. New documents are saved on this device.',
+                    context.l10n.offlineBanner,
                     style: theme.textTheme.bodySmall,
                   ),
                 ),
@@ -104,7 +106,7 @@ class SyncSection extends ConsumerWidget {
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Waiting to sync (${queue.length})',
+                    context.l10n.waitingToSync(queue.length),
                     style: theme.textTheme.titleSmall,
                   ),
                 ),
@@ -117,7 +119,9 @@ class SyncSection extends ConsumerWidget {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.sync, size: 18),
-                  label: Text(syncing ? 'Syncing…' : 'Sync now'),
+                  label: Text(
+                    syncing ? context.l10n.syncing : context.l10n.syncNow,
+                  ),
                 ),
               ],
             ),
@@ -149,17 +153,19 @@ class _PendingTile extends StatelessWidget {
     final first = op.lines.first;
     final summary = op.lines.length == 1
         ? first.productName
-        : '${first.productName} +${op.lines.length - 1} more';
+        : context.l10n.moreCount(first.productName, op.lines.length - 1);
 
     return ListTile(
       key: Key('pending_${op.clientUuid}'),
       dense: true,
       leading: TxTypeIcon(type: op.type),
       title: Text(
-        op.referenceNo?.isNotEmpty == true ? op.referenceNo! : op.type.label,
+        op.referenceNo?.isNotEmpty == true
+            ? op.referenceNo!
+            : op.type.tr(context.l10n),
       ),
       subtitle: Text(
-        failed ? (op.error ?? 'Rejected by server') : summary,
+        failed ? (op.error ?? context.l10n.rejectedByServer) : summary,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: failed ? TextStyle(color: scheme.error) : null,
@@ -170,7 +176,10 @@ class _PendingTile extends StatelessWidget {
               children: [
                 Icon(Icons.error_outline, color: scheme.error, size: 18),
                 const SizedBox(width: 4),
-                Text('Failed', style: TextStyle(color: scheme.error)),
+                Text(
+                  context.l10n.failed,
+                  style: TextStyle(color: scheme.error),
+                ),
               ],
             )
           : Row(
@@ -178,7 +187,7 @@ class _PendingTile extends StatelessWidget {
               children: [
                 Icon(Icons.schedule, size: 18, color: scheme.onSurfaceVariant),
                 const SizedBox(width: 4),
-                const Text('Pending'),
+                Text(context.l10n.pending),
               ],
             ),
       onTap: onTap,

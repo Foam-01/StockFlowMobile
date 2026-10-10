@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../domain/dashboard.dart';
+import '../../../core/l10n.dart';
 
 /// Series colours (validated categorical slots 1–2, light and dark steps).
 class FlowColors {
@@ -12,9 +13,7 @@ class FlowColors {
       b == Brightness.dark ? const Color(0xFFDB8F63) : const Color(0xFFC26A3D);
 }
 
-const _weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
-String _dayLabel(DateTime d) => _weekdays[d.weekday - 1];
+String _dayLabel(DateTime d) => l10nNow.weekdays.split(',')[d.weekday - 1];
 
 /// Received vs issued units per day: grouped bars on a single axis.
 /// Tap a day to see its values; the table toggle offers the same data as text.
@@ -42,13 +41,19 @@ class _FlowChartState extends State<FlowChart> {
       children: [
         Row(
           children: [
-            _LegendItem(color: FlowColors.received(b), label: 'Received'),
+            _LegendItem(
+              color: FlowColors.received(b),
+              label: context.l10n.received,
+            ),
             const SizedBox(width: 16),
-            _LegendItem(color: FlowColors.issued(b), label: 'Issued'),
+            _LegendItem(
+              color: FlowColors.issued(b),
+              label: context.l10n.issued,
+            ),
             const Spacer(),
             IconButton(
               key: const Key('flow_table_toggle'),
-              tooltip: _table ? 'Show chart' : 'Show table',
+              tooltip: _table ? context.l10n.showChart : context.l10n.showTable,
               visualDensity: VisualDensity.compact,
               icon: Icon(_table ? Icons.bar_chart : Icons.table_rows_outlined),
               onPressed: () => setState(() => _table = !_table),
@@ -133,9 +138,9 @@ class _Readout extends StatelessWidget {
           style: theme.textTheme.titleSmall,
         ),
         const SizedBox(width: 16),
-        value(FlowColors.received(b), 'In', day.received),
+        value(FlowColors.received(b), context.l10n.inShort, day.received),
         const SizedBox(width: 12),
-        value(FlowColors.issued(b), 'Out', day.issued),
+        value(FlowColors.issued(b), context.l10n.outShort, day.issued),
       ],
     );
   }
@@ -275,9 +280,11 @@ class _DayGroup extends StatelessWidget {
     return Semantics(
       button: true,
       selected: selected,
-      label:
-          '${_dayLabel(day.date)} ${day.date.day}/${day.date.month}: '
-          'received ${day.received}, issued ${day.issued}',
+      label: context.l10n.dayFlowA11y(
+        '${_dayLabel(day.date)} ${day.date.day}/${day.date.month}',
+        day.received,
+        day.issued,
+      ),
       excludeSemantics: true,
       child: InkWell(
         // Whole column is the hit target, bigger than the bars.
@@ -361,7 +368,11 @@ class _FlowTable extends StatelessWidget {
     );
     return Table(
       children: [
-        row(['Day', 'Received', 'Issued'], header: true),
+        row([
+          context.l10n.day,
+          context.l10n.received,
+          context.l10n.issued,
+        ], header: true),
         for (final d in flow.reversed)
           row([
             '${_dayLabel(d.date)} ${d.date.day}/${d.date.month}',

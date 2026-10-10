@@ -1,5 +1,6 @@
 import '../../products/domain/product.dart';
 import 'stock_transaction.dart';
+import '../../../core/l10n.dart';
 
 /// A line on the new-transaction form.
 class DraftLine {
@@ -20,24 +21,24 @@ class DraftLine {
   List<DraftLine> lines,
 ) {
   final errors = <String, String>{};
-  if (lines.isEmpty) return (form: 'Add at least one product', lines: errors);
+  if (lines.isEmpty) return (form: l10nNow.addOneProduct, lines: errors);
 
   for (final l in lines) {
     final id = l.product.id;
     switch (type) {
       case TxType.receive:
-        if (l.quantity <= 0) errors[id] = 'Must be greater than 0';
+        if (l.quantity <= 0) errors[id] = l10nNow.mustBePositive;
       case TxType.issue:
         if (l.quantity <= 0) {
-          errors[id] = 'Must be greater than 0';
+          errors[id] = l10nNow.mustBePositive;
         } else if (l.quantity > l.product.onHand) {
-          errors[id] = 'Only ${l.product.onHand} ${l.product.unit} on hand';
+          errors[id] = l10nNow.onlyOnHand(l.product.onHand, l.product.unit);
         }
       case TxType.adjust:
         if (l.quantity == 0) {
-          errors[id] = 'Must not be 0';
+          errors[id] = l10nNow.mustNotBeZero;
         } else if (l.product.onHand + l.quantity < 0) {
-          errors[id] = 'Would go below 0 (on hand ${l.product.onHand})';
+          errors[id] = l10nNow.wouldGoNegative(l.product.onHand);
         }
     }
   }

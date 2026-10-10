@@ -15,6 +15,7 @@ import '../domain/stock_transaction.dart';
 import 'operations_controller.dart';
 import 'product_picker_sheet.dart';
 import 'widgets/tx_widgets.dart';
+import '../../../core/l10n.dart';
 
 class NewOperationScreen extends ConsumerStatefulWidget {
   const NewOperationScreen({
@@ -74,7 +75,11 @@ class _NewOperationScreenState extends ConsumerState<NewOperationScreen> {
 
   /// Scanning an item already on the list adds 1 to it, like a till.
   Future<void> _scanProduct() async {
-    final product = await scanProduct(context, ref, title: 'Scan item');
+    final product = await scanProduct(
+      context,
+      ref,
+      title: context.l10n.scanItem,
+    );
     if (product == null || !mounted) return;
     final i = _lines.indexWhere((l) => l.product.id == product.id);
     setState(() {
@@ -91,7 +96,7 @@ class _NewOperationScreenState extends ConsumerState<NewOperationScreen> {
           duration: const Duration(seconds: 2),
           content: Text(
             i == -1
-                ? 'Added ${product.name}'
+                ? context.l10n.addedProduct(product.name)
                 : '${product.name}: ${_lines[i].quantity}',
           ),
         ),
@@ -122,11 +127,9 @@ class _NewOperationScreenState extends ConsumerState<NewOperationScreen> {
       if (widget.forWorkOrder != null) {
         // Back to the work order, which now lists the new document.
         ref.invalidate(woDetailProvider(widget.forWorkOrder!.workOrderId));
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Issue draft created for the work order'),
-          ),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(context.l10n.issueDraftForWo)));
         context.pop();
         return;
       }
@@ -170,11 +173,8 @@ class _NewOperationScreenState extends ConsumerState<NewOperationScreen> {
           ),
         );
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Saved on this device. It will sync when online.'),
-      ),
-    );
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(context.l10n.savedOnDevice)));
     context.pop();
   }
 
@@ -185,7 +185,13 @@ class _NewOperationScreenState extends ConsumerState<NewOperationScreen> {
     final showErrors = _submitted;
 
     return Scaffold(
-      appBar: AppBar(title: Text('New ${_type.label.toLowerCase()}')),
+      appBar: AppBar(
+        title: Text(switch (_type) {
+          TxType.receive => context.l10n.newReceive,
+          TxType.issue => context.l10n.newIssue,
+          TxType.adjust => context.l10n.newAdjust,
+        }),
+      ),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
         children: [
@@ -195,7 +201,7 @@ class _NewOperationScreenState extends ConsumerState<NewOperationScreen> {
               child: Chip(
                 key: const Key('linked_work_order'),
                 avatar: const Icon(Icons.assignment_outlined, size: 18),
-                label: Text('For ${widget.forWorkOrder!.code}'),
+                label: Text(context.l10n.forWo(widget.forWorkOrder!.code)),
               ),
             ),
           SegmentedButton<TxType>(
@@ -203,7 +209,7 @@ class _NewOperationScreenState extends ConsumerState<NewOperationScreen> {
               for (final t in TxType.values)
                 ButtonSegment(
                   value: t,
-                  label: Text(t.label),
+                  label: Text(t.tr(context.l10n)),
                   icon: Icon(t.icon),
                 ),
             ],
@@ -216,10 +222,9 @@ class _NewOperationScreenState extends ConsumerState<NewOperationScreen> {
           const SizedBox(height: 8),
           Text(
             switch (_type) {
-              TxType.receive => 'Quantities are added to stock.',
-              TxType.issue => 'Quantities are removed from stock.',
-              TxType.adjust =>
-                'Enter the difference: positive adds, negative removes.',
+              TxType.receive => context.l10n.hintReceive,
+              TxType.issue => context.l10n.hintIssue,
+              TxType.adjust => context.l10n.hintAdjust,
             },
             style: theme.textTheme.bodySmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
@@ -229,9 +234,9 @@ class _NewOperationScreenState extends ConsumerState<NewOperationScreen> {
           TextField(
             controller: _reference,
             enabled: !_saving,
-            decoration: const InputDecoration(
-              labelText: 'Reference no. (optional)',
-              hintText: 'e.g. PO-2026-0001',
+            decoration: InputDecoration(
+              labelText: context.l10n.referenceOptional,
+              hintText: context.l10n.referenceHint,
             ),
           ),
           const SizedBox(height: 12),
@@ -239,24 +244,24 @@ class _NewOperationScreenState extends ConsumerState<NewOperationScreen> {
             controller: _note,
             enabled: !_saving,
             maxLines: 2,
-            decoration: const InputDecoration(labelText: 'Note (optional)'),
+            decoration: InputDecoration(labelText: context.l10n.noteOptional),
           ),
           const SizedBox(height: 24),
           Row(
             children: [
-              Text('Items', style: theme.textTheme.titleMedium),
+              Text(context.l10n.items, style: theme.textTheme.titleMedium),
               const Spacer(),
               TextButton.icon(
                 key: const Key('scan_item'),
                 onPressed: _saving ? null : _scanProduct,
                 icon: const Icon(Icons.qr_code_scanner),
-                label: const Text('Scan'),
+                label: Text(context.l10n.scan),
               ),
               TextButton.icon(
                 key: const Key('add_item'),
                 onPressed: _saving ? null : _addProduct,
                 icon: const Icon(Icons.add),
-                label: const Text('Add'),
+                label: Text(context.l10n.add),
               ),
             ],
           ),
@@ -264,7 +269,7 @@ class _NewOperationScreenState extends ConsumerState<NewOperationScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 24),
               child: Text(
-                'No products added',
+                context.l10n.noProductsAdded,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   color: showErrors && v.form != null
@@ -300,7 +305,7 @@ class _NewOperationScreenState extends ConsumerState<NewOperationScreen> {
                     dimension: 22,
                     child: CircularProgressIndicator(strokeWidth: 2.5),
                   )
-                : const Text('Save as draft'),
+                : Text(context.l10n.saveDraft),
           ),
         ),
       ),
@@ -378,7 +383,12 @@ class _LineCardState extends State<_LineCard> {
                     children: [
                       Text(p.name, style: theme.textTheme.titleSmall),
                       Text(
-                        '${p.sku} · on hand ${p.onHand} → $projected ${p.unit}',
+                        context.l10n.lineProjection(
+                          p.sku,
+                          p.onHand,
+                          projected,
+                          p.unit,
+                        ),
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
@@ -387,7 +397,7 @@ class _LineCardState extends State<_LineCard> {
                   ),
                 ),
                 IconButton(
-                  tooltip: 'Remove',
+                  tooltip: context.l10n.remove,
                   onPressed: widget.enabled ? widget.onRemove : null,
                   icon: const Icon(Icons.delete_outline),
                 ),
@@ -397,7 +407,7 @@ class _LineCardState extends State<_LineCard> {
             Row(
               children: [
                 IconButton.outlined(
-                  tooltip: 'Decrease',
+                  tooltip: context.l10n.decrease,
                   onPressed: widget.enabled ? () => _step(-1) : null,
                   icon: const Icon(Icons.remove),
                 ),
@@ -423,7 +433,7 @@ class _LineCardState extends State<_LineCard> {
                 ),
                 const SizedBox(width: 8),
                 IconButton.outlined(
-                  tooltip: 'Increase',
+                  tooltip: context.l10n.increase,
                   onPressed: widget.enabled ? () => _step(1) : null,
                   icon: const Icon(Icons.add),
                 ),

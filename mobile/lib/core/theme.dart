@@ -85,6 +85,8 @@ abstract final class AppTheme {
     final base = ThemeData(
       colorScheme: s,
       fontFamily: fontFamily,
+      // Thai glyphs come from the matching IBM Plex Sans Thai.
+      fontFamilyFallback: const ['IBMPlexSansThai'],
       useMaterial3: true,
     );
     final t = base.textTheme;

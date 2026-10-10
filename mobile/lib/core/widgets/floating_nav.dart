@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n.dart';
+
 class NavItem {
   const NavItem({
     required this.icon,
@@ -78,7 +80,7 @@ class FloatingNav extends StatelessWidget {
               top: -14,
               child: Semantics(
                 button: true,
-                label: 'Scan barcode',
+                label: context.l10n.scanBarcode,
                 child: Material(
                   key: const Key('nav_scan'),
                   color: scheme.primary,

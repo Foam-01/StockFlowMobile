@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../operations/presentation/widgets/tx_widgets.dart';
 import '../domain/movement.dart';
+import '../../../core/l10n.dart';
 
 class MovementTile extends StatelessWidget {
   const MovementTile({super.key, required this.movement, required this.unit});
@@ -20,7 +21,7 @@ class MovementTile extends StatelessWidget {
 
     return ListTile(
       leading: TxTypeIcon(type: m.type),
-      title: Text(m.referenceNo ?? m.type.label),
+      title: Text(m.referenceNo ?? m.type.tr(context.l10n)),
       subtitle: Text(
         '${formatDateTime(m.confirmedAt)} · $by',
         style: theme.textTheme.bodySmall,
@@ -31,7 +32,7 @@ class MovementTile extends StatelessWidget {
         children: [
           SignedQty(value: m.change),
           Text(
-            'bal. ${m.balanceAfter} $unit',
+            context.l10n.balanceAfter(m.balanceAfter, unit),
             style: theme.textTheme.labelSmall?.copyWith(
               color: theme.colorScheme.onSurfaceVariant,
             ),

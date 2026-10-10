@@ -7,6 +7,7 @@ import '../../offline/presentation/sync_section.dart';
 import '../domain/stock_transaction.dart';
 import 'operations_controller.dart';
 import 'widgets/tx_widgets.dart';
+import '../../../core/l10n.dart';
 
 class OperationsScreen extends ConsumerStatefulWidget {
   const OperationsScreen({super.key});
@@ -46,11 +47,11 @@ class _OperationsScreenState extends ConsumerState<OperationsScreen> {
             for (final t in TxType.values)
               ListTile(
                 leading: TxTypeIcon(type: t),
-                title: Text(t.label),
+                title: Text(t.tr(context.l10n)),
                 subtitle: Text(switch (t) {
-                  TxType.receive => 'Goods coming into stock',
-                  TxType.issue => 'Goods going out of stock',
-                  TxType.adjust => 'Correct stock after a count',
+                  TxType.receive => context.l10n.descReceive,
+                  TxType.issue => context.l10n.descIssue,
+                  TxType.adjust => context.l10n.descAdjust,
                 }),
                 onTap: () => Navigator.pop(context, t),
               ),
@@ -71,7 +72,7 @@ class _OperationsScreenState extends ConsumerState<OperationsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Stock operations'),
+        title: Text(context.l10n.stockOperations),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(48),
           child: SizedBox(
@@ -82,7 +83,7 @@ class _OperationsScreenState extends ConsumerState<OperationsScreen> {
               children: [
                 for (final s in <TxStatus?>[null, ...TxStatus.values]) ...[
                   ChoiceChip(
-                    label: Text(s?.label ?? 'All'),
+                    label: Text(s?.tr(context.l10n) ?? context.l10n.all),
                     selected: status == s,
                     onSelected: (_) =>
                         ref.read(txStatusFilterProvider.notifier).set(s),
@@ -98,7 +99,7 @@ class _OperationsScreenState extends ConsumerState<OperationsScreen> {
         key: const Key('new_operation'),
         onPressed: _newOperation,
         icon: const Icon(Icons.add),
-        label: const Text('New'),
+        label: Text(context.l10n.newLabel),
       ),
       body: Column(
         children: [
@@ -134,9 +135,9 @@ class _OperationsScreenState extends ConsumerState<OperationsScreen> {
             MessageView(
               icon: Icons.receipt_long_outlined,
               title: status == null
-                  ? 'No operations yet'
-                  : 'No ${status.label.toLowerCase()} operations',
-              message: 'Tap New to receive, issue or adjust stock.',
+                  ? context.l10n.noOperations
+                  : context.l10n.noOperationsStatus(status.tr(context.l10n)),
+              message: context.l10n.tapNewHint,
             ),
           ],
         ),
@@ -176,7 +177,7 @@ class _TxTile extends StatelessWidget {
     final first = tx.items.first;
     final summary = tx.items.length == 1
         ? first.productName
-        : '${first.productName} +${tx.items.length - 1} more';
+        : context.l10n.moreCount(first.productName, tx.items.length - 1);
 
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -185,7 +186,7 @@ class _TxTile extends StatelessWidget {
         children: [
           Flexible(
             child: Text(
-              tx.referenceNo ?? tx.type.label,
+              tx.referenceNo ?? tx.type.tr(context.l10n),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -203,7 +204,7 @@ class _TxTile extends StatelessWidget {
       isThreeLine: true,
       trailing: tx.items.length == 1
           ? SignedQty(value: tx.signedQuantity(first))
-          : Text('${tx.items.length} items'),
+          : Text(context.l10n.itemsCount(tx.items.length)),
       onTap: () => context.push('/operations/${tx.id}'),
     );
   }

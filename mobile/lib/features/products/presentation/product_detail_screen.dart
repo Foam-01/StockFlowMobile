@@ -8,6 +8,7 @@ import '../../history/presentation/movement_tile.dart';
 import '../domain/product.dart';
 import 'products_controller.dart';
 import 'widgets/stock_badge.dart';
+import '../../../core/l10n.dart';
 
 class ProductDetailScreen extends ConsumerWidget {
   const ProductDetailScreen({super.key, required this.productId});
@@ -19,7 +20,7 @@ class ProductDetailScreen extends ConsumerWidget {
     final product = ref.watch(productDetailProvider(productId));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Product')),
+      appBar: AppBar(title: Text(context.l10n.product)),
       body: product.when(
         data: (p) => RefreshIndicator(
           onRefresh: () {
@@ -75,7 +76,7 @@ class _Details extends StatelessWidget {
                   Text(product.name, style: theme.textTheme.headlineSmall),
                   const SizedBox(height: 4),
                   Text(
-                    product.category?.name ?? 'Uncategorized',
+                    product.category?.name ?? context.l10n.uncategorized,
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
@@ -92,14 +93,14 @@ class _Details extends StatelessWidget {
           child: Column(
             children: [
               _Row(label: 'SKU', value: product.sku),
-              _Row(label: 'Barcode', value: product.barcode ?? '—'),
-              _Row(label: 'Unit', value: product.unit),
+              _Row(label: context.l10n.barcode, value: product.barcode ?? '—'),
+              _Row(label: context.l10n.unit, value: product.unit),
               _Row(
-                label: 'On hand',
+                label: context.l10n.onHand,
                 value: '${product.onHand} ${product.unit}',
               ),
               _Row(
-                label: 'Minimum stock',
+                label: context.l10n.minimumStock,
                 value: '${product.minStock} ${product.unit}',
               ),
             ],
@@ -127,7 +128,10 @@ class _RecentMovements extends ConsumerWidget {
       children: [
         Row(
           children: [
-            Text('Recent movements', style: theme.textTheme.titleMedium),
+            Text(
+              context.l10n.recentMovements,
+              style: theme.textTheme.titleMedium,
+            ),
             const Spacer(),
             if ((recent.value?.total ?? 0) > 0)
               TextButton(
@@ -136,7 +140,7 @@ class _RecentMovements extends ConsumerWidget {
                   '/products/${product.id}/history',
                   extra: product.name,
                 ),
-                child: Text('View all (${recent.value!.total})'),
+                child: Text(context.l10n.viewAll(recent.value!.total)),
               ),
           ],
         ),
@@ -145,10 +149,10 @@ class _RecentMovements extends ConsumerWidget {
           clipBehavior: Clip.antiAlias,
           child: recent.when(
             data: (page) => page.items.isEmpty
-                ? const Padding(
+                ? Padding(
                     padding: EdgeInsets.all(24),
                     child: Text(
-                      'No confirmed movements yet',
+                      context.l10n.noConfirmedMovements,
                       textAlign: TextAlign.center,
                     ),
                   )
@@ -160,11 +164,11 @@ class _RecentMovements extends ConsumerWidget {
                   ),
             error: (e, _) => ListTile(
               leading: const Icon(Icons.error_outline),
-              title: const Text('Could not load movements'),
+              title: Text(context.l10n.couldNotLoadMovements),
               trailing: TextButton(
                 onPressed: () =>
                     ref.invalidate(recentMovementsProvider(product.id)),
-                child: const Text('Retry'),
+                child: Text(context.l10n.retry),
               ),
             ),
             loading: () => const Padding(

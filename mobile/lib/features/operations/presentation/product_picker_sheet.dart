@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../products/domain/product.dart';
 import 'operations_controller.dart';
+import '../../../core/l10n.dart';
 
 /// Bottom sheet to search and pick a product. Returns the chosen [Product].
 Future<Product?> showProductPicker(
@@ -51,8 +52,8 @@ class _ProductPickerState extends ConsumerState<_ProductPicker> {
             child: TextField(
               key: const Key('picker_search'),
               autofocus: true,
-              decoration: const InputDecoration(
-                hintText: 'Search product',
+              decoration: InputDecoration(
+                hintText: context.l10n.searchProduct,
                 prefixIcon: Icon(Icons.search),
               ),
               onChanged: (v) {
@@ -71,9 +72,9 @@ class _ProductPickerState extends ConsumerState<_ProductPicker> {
                     .where((p) => !widget.exclude.contains(p.id))
                     .toList();
                 if (visible.isEmpty) {
-                  return const MessageView(
+                  return MessageView(
                     icon: Icons.search_off,
-                    title: 'No products found',
+                    title: context.l10n.noProductsFound,
                   );
                 }
                 return ListView.builder(

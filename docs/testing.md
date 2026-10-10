@@ -8,7 +8,7 @@ How StockFlow is tested, how to run it, and what is **not** covered yet.
 |---|---|---|---|
 | Backend unit tests (Vitest) | `backend/src/**/*.spec.ts` | 48 | ✅ |
 | Backend API tests (Vitest + supertest, real Postgres) | `backend/test/*.e2e-spec.ts` | 54 | ✅ (Postgres service container) |
-| Flutter widget + unit tests | `mobile/test/` | 65 | ✅ |
+| Flutter widget + unit tests | `mobile/test/` | 69 | ✅ |
 | Release APK build | `mobile/` | — | ✅ (artifact `stockflow-apk`) |
 
 Counts are from the latest local run; CI runs the same suites on every push
@@ -92,6 +92,7 @@ fails.
 | `dashboard_test.dart` | KPIs, chart readout per day, table view, deep links to filtered lists, error/retry |
 | `evidence_test.dart` | attach from camera, upload failure message, permissions, delete |
 | `work_orders_test.dart` | tabs per role; default list per role; start → checklist tick (server state shown); submit disabled while blockers listed; server refusal shown; review note; request changes requires a reason; approve; admin create with validation; staff issues remaining materials linked to the job |
+| `dashboard_roles_test.dart` | dashboard shortcuts per role, field-jobs counts open the matching list, no stale jobs after switching users, switching the app to Thai and back |
 | `server_settings_test.dart` | URL normalisation/validation, test connection, save |
 | `offline_logic_test.dart` | sync engine rules, SQLite outbox and product cache (in-memory SQLite), offline fallback that never hides server errors |
 | `offline_flow_test.dart` | save offline → queued → sync fails → sync succeeds with the **same clientUuid**; rejected item marked failed and discarded; offline banner; server errors not queued |

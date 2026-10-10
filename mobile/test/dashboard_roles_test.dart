@@ -199,4 +199,23 @@ void main() {
     expect(find.text('Job of T1'), findsNothing);
     expect(find.text('Job of T2'), findsOneWidget);
   });
+
+  testWidgets('switching to Thai in Profile translates the app', (
+    tester,
+  ) async {
+    when(() => auth.me()).thenAnswer((_) async => user('admin', Role.admin));
+    await pump(tester);
+    await tester.tap(find.byKey(const Key('open_profile')));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('ไทย'));
+    await tester.pumpAndSettle();
+    expect(find.text('ออกจากระบบ'), findsOneWidget);
+    expect(find.text('Sign out'), findsNothing);
+    expect(navTab('ภาพรวม'), findsOneWidget);
+
+    await tester.tap(find.text('English'));
+    await tester.pumpAndSettle();
+    expect(find.text('Sign out'), findsOneWidget);
+  });
 }

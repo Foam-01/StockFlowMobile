@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme.dart';
 import '../../domain/product.dart';
+import '../../../../core/l10n.dart';
 
 /// On-hand quantity. Healthy stock stays neutral; low and out of stock add a
 /// coloured status line so the eye only stops where action is needed.
@@ -16,10 +17,10 @@ class StockBadge extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
     final (color, label) = product.isOutOfStock
-        ? (scheme.error, 'Out of stock')
+        ? (scheme.error, context.l10n.outOfStock)
         : product.isLowStock
-        ? (scheme.tertiary, 'Low stock')
-        : (scheme.primary, 'In stock');
+        ? (scheme.tertiary, context.l10n.lowStock)
+        : (scheme.primary, context.l10n.inStock);
     final alert = product.isOutOfStock || product.isLowStock;
 
     return Semantics(

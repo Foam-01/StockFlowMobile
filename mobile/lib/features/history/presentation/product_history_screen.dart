@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/widgets/state_views.dart';
 import 'history_controller.dart';
 import 'movement_tile.dart';
+import '../../../core/l10n.dart';
 
 class ProductHistoryScreen extends ConsumerStatefulWidget {
   const ProductHistoryScreen({
@@ -50,7 +51,7 @@ class _ProductHistoryScreenState extends ConsumerState<ProductHistoryScreen> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Stock history'),
+            Text(context.l10n.stockHistory),
             if (widget.productName != null)
               Text(widget.productName!, style: theme.textTheme.bodySmall),
           ],
@@ -62,12 +63,12 @@ class _ProductHistoryScreenState extends ConsumerState<ProductHistoryScreen> {
           child: s.items.isEmpty
               ? ListView(
                   physics: const AlwaysScrollableScrollPhysics(),
-                  children: const [
+                  children: [
                     SizedBox(height: 80),
                     MessageView(
                       icon: Icons.history,
-                      title: 'No movements yet',
-                      message: 'Confirmed operations will appear here.',
+                      title: context.l10n.noMovements,
+                      message: context.l10n.confirmedAppearHere,
                     ),
                   ],
                 )
@@ -83,8 +84,11 @@ class _ProductHistoryScreenState extends ConsumerState<ProductHistoryScreen> {
                       return Padding(
                         padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
                         child: Text(
-                          '${s.total} movement${s.total == 1 ? '' : 's'} · '
-                          'on hand ${s.onHand} ${s.unit}',
+                          context.l10n.movementsOnHand(
+                            s.total,
+                            s.onHand,
+                            s.unit,
+                          ),
                           style: theme.textTheme.labelLarge?.copyWith(
                             color: theme.colorScheme.onSurfaceVariant,
                           ),

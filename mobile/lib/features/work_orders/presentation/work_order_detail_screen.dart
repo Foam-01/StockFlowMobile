@@ -13,6 +13,7 @@ import '../domain/work_order.dart';
 import 'issue_materials.dart';
 import 'widgets/wo_badges.dart';
 import 'work_orders_controller.dart';
+import '../../../core/l10n.dart';
 
 class WorkOrderDetailScreen extends ConsumerStatefulWidget {
   const WorkOrderDetailScreen({super.key, required this.id});
@@ -69,7 +70,7 @@ class _WorkOrderDetailScreenState extends ConsumerState<WorkOrderDetailScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Back'),
+              child: Text(context.l10n.back),
             ),
             FilledButton(
               key: const Key('confirm_action'),
@@ -99,51 +100,53 @@ class _WorkOrderDetailScreenState extends ConsumerState<WorkOrderDetailScreen> {
   );
 
   Future<void> _submit(WorkOrder wo) async {
-    final ok = await _confirm(
-      'Submit for review?',
-      'A supervisor will check the checklist and photos. You can’t change '
-          'them after submitting unless changes are requested.',
-      'Submit',
-    );
-    if (ok) await _run('submit', _ctl.submit, success: 'Submitted for review');
+    final t = context.l10n;
+    final ok = await _confirm(t.submitForReviewQ, t.submitExplain, t.submit);
+    if (ok) {
+      await _run('submit', _ctl.submit, success: t.submittedForReview);
+    }
   }
 
   Future<void> _approve() async {
+    final t = context.l10n;
     final note = await _askText(
-      title: 'Approve work',
-      label: 'Comment (optional)',
-      action: 'Approve',
+      title: t.approveWork,
+      label: t.commentOptional,
+      action: t.approve,
       required: false,
     );
     if (note == null) return;
-    await _run('approve', () => _ctl.approve(note: note), success: 'Approved');
+    await _run('approve', () => _ctl.approve(note: note), success: t.approved);
   }
 
   Future<void> _requestChanges() async {
+    final t = context.l10n;
     final reason = await _askText(
-      title: 'Request changes',
-      label: 'What needs to change?',
-      action: 'Send back',
+      title: t.requestChanges,
+      label: t.whatToChange,
+      action: t.sendBack,
     );
     if (reason == null) return;
     await _run(
       'requestChanges',
       () => _ctl.requestChanges(reason),
-      success: 'Sent back to the technician',
+      success: t.sentBack,
     );
   }
 
   Future<void> _cancel() async {
+    final t = context.l10n;
     final reason = await _askText(
-      title: 'Cancel work order',
-      label: 'Reason',
-      action: 'Cancel work order',
+      title: t.cancelWorkOrder,
+      label: t.reason,
+      action: t.cancelWorkOrder,
     );
     if (reason == null) return;
-    await _run('cancel', () => _ctl.cancel(reason), success: 'Cancelled');
+    await _run('cancel', () => _ctl.cancel(reason), success: t.cancelled);
   }
 
   Future<void> _assign(WorkOrder wo) async {
+    final t = context.l10n;
     final result = await showDialog<({String? assigneeId, String? reviewerId})>(
       context: context,
       builder: (_) => _AssignDialog(wo: wo),
@@ -155,15 +158,15 @@ class _WorkOrderDetailScreenState extends ConsumerState<WorkOrderDetailScreen> {
         assigneeId: result.assigneeId,
         reviewerId: result.reviewerId,
       ),
-      success: 'Assignment updated',
+      success: t.assignmentUpdated,
     );
   }
 
   Future<void> _editNote(ChecklistItem item) async {
     final note = await _askText(
       title: item.title,
-      label: 'Note',
-      action: 'Save',
+      label: context.l10n.note,
+      action: context.l10n.save,
       required: false,
       initial: item.note,
     );
@@ -187,7 +190,7 @@ class _WorkOrderDetailScreenState extends ConsumerState<WorkOrderDetailScreen> {
               ListTile(
                 key: Key('photo_category_${c.name}'),
                 leading: const Icon(Icons.label_outline),
-                title: Text('${c.label} work'),
+                title: Text(c.tr(context.l10n)),
                 onTap: () => Navigator.pop(context, c),
               ),
           ],
@@ -205,12 +208,12 @@ class _WorkOrderDetailScreenState extends ConsumerState<WorkOrderDetailScreen> {
           children: [
             ListTile(
               leading: const Icon(Icons.photo_camera_outlined),
-              title: const Text('Take photo'),
+              title: Text(context.l10n.takePhoto),
               onTap: () => Navigator.pop(context, ImageSource.camera),
             ),
             ListTile(
               leading: const Icon(Icons.photo_library_outlined),
-              title: const Text('Choose from gallery'),
+              title: Text(context.l10n.chooseGallery),
               onTap: () => Navigator.pop(context, ImageSource.gallery),
             ),
           ],
@@ -231,7 +234,7 @@ class _WorkOrderDetailScreenState extends ConsumerState<WorkOrderDetailScreen> {
           if (mounted) setState(() => _uploadProgress = p);
         },
       ),
-      success: 'Photo added',
+      success: context.l10n.photoAdded,
     );
     if (mounted) setState(() => _uploadProgress = null);
   }
@@ -244,16 +247,17 @@ class _WorkOrderDetailScreenState extends ConsumerState<WorkOrderDetailScreen> {
           photo: photo,
           canDelete: wo.can(WoAction.manageEvidence),
           onDelete: () async {
+            final t = context.l10n;
             final ok = await _confirm(
-              'Delete photo?',
-              'It will be removed from the work order.',
-              'Delete',
+              t.deletePhotoQ,
+              t.removedFromWo,
+              t.delete,
             );
             if (!ok) return false;
             await _run(
               'delete_${photo.id}',
               () => _ctl.removeEvidence(photo.id),
-              success: 'Photo deleted',
+              success: t.photoDeleted,
             );
             return true;
           },
@@ -270,12 +274,12 @@ class _WorkOrderDetailScreenState extends ConsumerState<WorkOrderDetailScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(wo?.code ?? 'Work order'),
+        title: Text(wo?.code ?? context.l10n.workOrder),
         actions: [
           if (wo != null)
             IconButton(
               key: const Key('wo_activity'),
-              tooltip: 'Activity',
+              tooltip: context.l10n.activity,
               icon: const Icon(Icons.history),
               onPressed: () => context.push(
                 '/work-orders/${wo.id}/activity',
@@ -289,11 +293,14 @@ class _WorkOrderDetailScreenState extends ConsumerState<WorkOrderDetailScreen> {
               onSelected: (v) => v == 'assign' ? _assign(wo) : _cancel(),
               itemBuilder: (_) => [
                 if (wo.can(WoAction.assign))
-                  const PopupMenuItem(value: 'assign', child: Text('Assign…')),
+                  PopupMenuItem(
+                    value: 'assign',
+                    child: Text(context.l10n.assignMenu),
+                  ),
                 if (wo.can(WoAction.cancel))
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'cancel',
-                    child: Text('Cancel work order…'),
+                    child: Text(context.l10n.cancelWoMenu),
                   ),
               ],
             ),
@@ -337,10 +344,15 @@ class _WorkOrderDetailScreenState extends ConsumerState<WorkOrderDetailScreen> {
               : () => _run(
                   'start',
                   _ctl.start,
-                  success: resume ? 'Back in progress' : 'Work started',
+                  success: resume
+                      ? context.l10n.backInProgress
+                      : context.l10n.workStarted,
                 ),
           icon: const Icon(Icons.play_arrow_rounded),
-          label: busyLabel('start', resume ? 'Resume work' : 'Start work'),
+          label: busyLabel(
+            'start',
+            resume ? context.l10n.resumeWork : context.l10n.startWork,
+          ),
         ),
       );
     }
@@ -354,7 +366,7 @@ class _WorkOrderDetailScreenState extends ConsumerState<WorkOrderDetailScreen> {
               ? null
               : () => _submit(wo),
           icon: const Icon(Icons.send_rounded),
-          label: busyLabel('submit', 'Submit for review'),
+          label: busyLabel('submit', context.l10n.submitForReview),
         ),
       );
     }
@@ -363,7 +375,7 @@ class _WorkOrderDetailScreenState extends ConsumerState<WorkOrderDetailScreen> {
         OutlinedButton(
           key: const Key('wo_request_changes'),
           onPressed: _busy != null ? null : _requestChanges,
-          child: busyLabel('requestChanges', 'Request changes'),
+          child: busyLabel('requestChanges', context.l10n.requestChanges),
         ),
       );
     }
@@ -373,7 +385,7 @@ class _WorkOrderDetailScreenState extends ConsumerState<WorkOrderDetailScreen> {
           key: const Key('wo_approve'),
           onPressed: _busy != null ? null : _approve,
           icon: const Icon(Icons.check_rounded),
-          label: busyLabel('approve', 'Approve'),
+          label: busyLabel('approve', context.l10n.approve),
         ),
       );
     }
@@ -422,11 +434,15 @@ class _WorkOrderDetailScreenState extends ConsumerState<WorkOrderDetailScreen> {
           _IconLine(icon: Icons.map_outlined, text: wo.siteAddress!),
         _IconLine(
           icon: Icons.engineering_outlined,
-          text: 'Technician: ${wo.assignee?.name ?? 'unassigned'}',
+          text: context.l10n.technicianIs(
+            wo.assignee?.name ?? context.l10n.unassignedLower,
+          ),
         ),
         _IconLine(
           icon: Icons.verified_user_outlined,
-          text: 'Reviewer: ${wo.reviewer?.name ?? 'any supervisor'}',
+          text: context.l10n.reviewerIs(
+            wo.reviewer?.name ?? context.l10n.anySupervisorLower,
+          ),
         ),
         if (wo.description != null) ...[
           const SizedBox(height: 12),
@@ -434,12 +450,15 @@ class _WorkOrderDetailScreenState extends ConsumerState<WorkOrderDetailScreen> {
         ],
         ..._banners(wo),
         _Section(
-          title: 'Checklist',
+          title: context.l10n.checklist,
           trailing: wo.checklist.isEmpty
               ? null
-              : '${wo.checklistDone}/${wo.checklist.length} done',
+              : context.l10n.checklistDone(
+                  wo.checklistDone,
+                  wo.checklist.length,
+                ),
           child: wo.checklist.isEmpty
-              ? const _Empty('No checklist for this job')
+              ? _Empty(context.l10n.noChecklistJob)
               : Column(
                   children: [
                     for (final item in wo.checklist)
@@ -460,10 +479,12 @@ class _WorkOrderDetailScreenState extends ConsumerState<WorkOrderDetailScreen> {
                 ),
         ),
         _Section(
-          title: 'Photos',
+          title: context.l10n.photos,
           trailing: wo.requiredEvidence.isEmpty
               ? null
-              : 'Required: ${wo.requiredEvidence.map((c) => c.label.toLowerCase()).join(', ')}',
+              : context.l10n.requiredList(
+                  wo.requiredEvidence.map((c) => c.tr(context.l10n)).join(', '),
+                ),
           child: _EvidenceGrid(
             wo: wo,
             uploading: _uploadProgress,
@@ -474,7 +495,7 @@ class _WorkOrderDetailScreenState extends ConsumerState<WorkOrderDetailScreen> {
           ),
         ),
         _Section(
-          title: 'Materials',
+          title: context.l10n.materials,
           action:
               canIssue &&
                   !wo.status.isClosed &&
@@ -486,27 +507,27 @@ class _WorkOrderDetailScreenState extends ConsumerState<WorkOrderDetailScreen> {
                     extra: IssueForWorkOrder.fromWorkOrder(wo),
                   ),
                   icon: const Icon(Icons.outbox_outlined, size: 18),
-                  label: const Text('Issue'),
+                  label: Text(context.l10n.issue),
                 )
               : null,
           child: wo.materials.isEmpty
-              ? const _Empty('No materials planned')
+              ? _Empty(context.l10n.noMaterialsPlanned)
               : Column(
                   children: [for (final m in wo.materials) _MaterialTile(m: m)],
                 ),
         ),
         if (wo.documents.isNotEmpty)
           _Section(
-            title: 'Stock documents',
+            title: context.l10n.stockDocuments,
             child: Column(
               children: [
                 for (final d in wo.documents)
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: TxTypeIcon(type: d.type),
-                    title: Text(d.referenceNo ?? d.type.label),
+                    title: Text(d.referenceNo ?? d.type.tr(context.l10n)),
                     subtitle: Text(
-                      '${d.itemCount} item${d.itemCount == 1 ? '' : 's'} · '
+                      '${context.l10n.itemsCount(d.itemCount)} · '
                       '${formatDateTime(d.createdAt)}',
                     ),
                     trailing: TxStatusChip(status: d.status),
@@ -548,7 +569,12 @@ class _WorkOrderDetailScreenState extends ConsumerState<WorkOrderDetailScreen> {
       if (wo.status == WoStatus.needsRevision && wo.reviewNote != null)
         banner(
           Icons.feedback_outlined,
-          'Changes requested${wo.reviewedBy == null ? '' : ' by ${wo.reviewedBy!.name}'}: ${wo.reviewNote}',
+          wo.reviewedBy == null
+              ? context.l10n.changesRequested(wo.reviewNote!)
+              : context.l10n.changesRequestedBy(
+                  wo.reviewedBy!.name,
+                  wo.reviewNote!,
+                ),
           scheme.errorContainer,
           scheme.onErrorContainer,
           key: const Key('review_note'),
@@ -556,7 +582,7 @@ class _WorkOrderDetailScreenState extends ConsumerState<WorkOrderDetailScreen> {
       if (wo.status == WoStatus.approved)
         banner(
           Icons.verified_outlined,
-          'Approved${wo.reviewedBy == null ? '' : ' by ${wo.reviewedBy!.name}'}'
+          '${wo.reviewedBy == null ? context.l10n.woApproved : context.l10n.approvedBy(wo.reviewedBy!.name)}'
           '${wo.reviewedAt == null ? '' : ' · ${formatDateTime(wo.reviewedAt!)}'}',
           scheme.primaryContainer,
           scheme.onPrimaryContainer,
@@ -564,22 +590,22 @@ class _WorkOrderDetailScreenState extends ConsumerState<WorkOrderDetailScreen> {
       if (wo.status == WoStatus.cancelled)
         banner(
           Icons.block,
-          'Cancelled: ${wo.cancelReason ?? ''}',
+          context.l10n.cancelledReason(wo.cancelReason ?? ''),
           scheme.surfaceContainerHighest,
           scheme.onSurfaceVariant,
         ),
       if (wo.status == WoStatus.submitted)
         banner(
           Icons.hourglass_top_rounded,
-          'Waiting for review'
-          '${wo.submittedAt == null ? '' : ' · submitted ${formatDateTime(wo.submittedAt!)}'}',
+          '${context.l10n.waitingReview}'
+          '${wo.submittedAt == null ? '' : ' · ${context.l10n.submittedAt(formatDateTime(wo.submittedAt!))}'}',
           scheme.tertiaryContainer,
           scheme.onTertiaryContainer,
         ),
       if (wo.submissionProblems.isNotEmpty)
         banner(
           Icons.checklist_rounded,
-          'Before you can submit:\n${wo.submissionProblems.map((p) => '• $p').join('\n')}',
+          '${context.l10n.beforeSubmit}\n${wo.submissionProblems.map((p) => '• $p').join('\n')}',
           scheme.surfaceContainerHigh,
           scheme.onSurface,
           key: const Key('submission_problems'),
@@ -690,8 +716,8 @@ class _ChecklistTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final subtitle = [
-      if (!item.required) 'Optional',
-      if (item.note != null) 'Note: ${item.note}',
+      if (!item.required) context.l10n.optional,
+      if (item.note != null) context.l10n.noteIs(item.note!),
     ].join(' · ');
     return ListTile(
       key: Key('check_${item.id}'),
@@ -720,7 +746,7 @@ class _ChecklistTile extends StatelessWidget {
       trailing: onNote == null
           ? null
           : IconButton(
-              tooltip: 'Add note',
+              tooltip: context.l10n.addNote,
               icon: const Icon(Icons.edit_note_rounded),
               onPressed: enabled ? onNote : null,
             ),
@@ -750,7 +776,12 @@ class _MaterialTile extends StatelessWidget {
               children: [
                 Text(m.name, style: theme.textTheme.bodyLarge),
                 Text(
-                  '${m.sku} · planned ${m.plannedQty} · issued ${m.issuedQty} ${m.unit}',
+                  context.l10n.materialLine(
+                    m.sku,
+                    m.plannedQty,
+                    m.issuedQty,
+                    m.unit,
+                  ),
                   style: muted,
                 ),
                 if (m.shortage > 0)
@@ -763,7 +794,7 @@ class _MaterialTile extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        'Short by ${m.shortage} (on hand ${m.onHand})',
+                        context.l10n.shortBy(m.shortage, m.onHand),
                         style: theme.textTheme.labelMedium?.copyWith(
                           color: theme.colorScheme.error,
                         ),
@@ -774,7 +805,9 @@ class _MaterialTile extends StatelessWidget {
             ),
           ),
           Text(
-            m.remainingQty == 0 ? 'Issued' : '${m.remainingQty} to issue',
+            m.remainingQty == 0
+                ? context.l10n.issued
+                : context.l10n.toIssue(m.remainingQty),
             style: theme.textTheme.labelLarge?.copyWith(
               color: m.remainingQty == 0
                   ? theme.colorScheme.primary
@@ -804,7 +837,7 @@ class _EvidenceGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     if (wo.evidence.isEmpty && onAdd == null && uploading == null) {
-      return const _Empty('No photos yet');
+      return _Empty(context.l10n.noPhotosYet);
     }
     const size = 96.0;
     return Wrap(
@@ -848,7 +881,7 @@ class _EvidenceGrid extends StatelessWidget {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      p.category.label,
+                      p.category.tr(context.l10n),
                       style: const TextStyle(color: Colors.white, fontSize: 11),
                     ),
                   ),
@@ -882,7 +915,7 @@ class _EvidenceGrid extends StatelessWidget {
                 children: [
                   Icon(Icons.add_a_photo_outlined, color: scheme.primary),
                   const SizedBox(height: 4),
-                  const Text('Add photo'),
+                  Text(context.l10n.addPhoto),
                 ],
               ),
             ),
@@ -910,12 +943,12 @@ class _PhotoView extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
-        title: Text('${photo.category.label} work'),
+        title: Text(photo.category.tr(context.l10n)),
         actions: [
           if (canDelete)
             IconButton(
               key: const Key('wo_delete_photo'),
-              tooltip: 'Delete photo',
+              tooltip: context.l10n.deletePhoto,
               icon: const Icon(Icons.delete_outline),
               onPressed: () async {
                 final navigator = Navigator.of(context);
@@ -989,8 +1022,8 @@ class _TextDialogState extends State<_TextDialog> {
           validator: (v) {
             if (!widget.required) return null;
             final t = v?.trim() ?? '';
-            if (t.isEmpty) return 'Please add a reason';
-            if (t.length < 5) return 'A few more words, please';
+            if (t.isEmpty) return context.l10n.addReason;
+            if (t.length < 5) return context.l10n.moreWords;
             return null;
           },
         ),
@@ -998,7 +1031,7 @@ class _TextDialogState extends State<_TextDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Back'),
+          child: Text(context.l10n.back),
         ),
         FilledButton(
           key: const Key('dialog_submit'),
@@ -1032,16 +1065,19 @@ class _AssignDialogState extends ConsumerState<_AssignDialog> {
     final techs = ref.watch(peopleProvider('TECHNICIAN')).value ?? const [];
     final sups = ref.watch(peopleProvider('SUPERVISOR')).value ?? const [];
     return AlertDialog(
-      title: const Text('Assign'),
+      title: Text(context.l10n.assign),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           DropdownButtonFormField<String?>(
             key: const Key('assign_tech'),
             initialValue: _tech,
-            decoration: const InputDecoration(labelText: 'Technician'),
+            decoration: InputDecoration(labelText: context.l10n.technician),
             items: [
-              const DropdownMenuItem(value: null, child: Text('Unassigned')),
+              DropdownMenuItem(
+                value: null,
+                child: Text(context.l10n.unassigned),
+              ),
               for (final p in techs)
                 DropdownMenuItem(value: p.id, child: Text(p.name)),
             ],
@@ -1050,11 +1086,11 @@ class _AssignDialogState extends ConsumerState<_AssignDialog> {
           const SizedBox(height: 12),
           DropdownButtonFormField<String?>(
             initialValue: _reviewer,
-            decoration: const InputDecoration(labelText: 'Reviewer'),
+            decoration: InputDecoration(labelText: context.l10n.reviewer),
             items: [
-              const DropdownMenuItem(
+              DropdownMenuItem(
                 value: null,
-                child: Text('Any supervisor'),
+                child: Text(context.l10n.anySupervisor),
               ),
               for (final p in sups)
                 DropdownMenuItem(value: p.id, child: Text(p.name)),
@@ -1066,7 +1102,7 @@ class _AssignDialogState extends ConsumerState<_AssignDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Back'),
+          child: Text(context.l10n.back),
         ),
         FilledButton(
           key: const Key('assign_save'),
@@ -1074,7 +1110,7 @@ class _AssignDialogState extends ConsumerState<_AssignDialog> {
             assigneeId: _tech,
             reviewerId: _reviewer,
           )),
-          child: const Text('Save'),
+          child: Text(context.l10n.save),
         ),
       ],
     );

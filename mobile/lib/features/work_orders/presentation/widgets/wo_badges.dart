@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/work_order.dart';
+import '../../../../core/l10n.dart';
 
 String formatDue(DateTime d) {
   String two(int n) => n.toString().padLeft(2, '0');
@@ -31,7 +32,7 @@ class WoStatusChip extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
-        status.label,
+        status.tr(context.l10n),
         style: Theme.of(context).textTheme.labelSmall
             ?.copyWith(color: fg, fontWeight: FontWeight.w600),
       ),
@@ -62,7 +63,7 @@ class WoPriorityBadge extends StatelessWidget {
           color: color,
         ),
         Text(
-          priority.label,
+          priority.tr(context.l10n),
           style: Theme.of(context).textTheme.labelSmall
               ?.copyWith(color: color, fontWeight: FontWeight.w700),
         ),
@@ -95,7 +96,9 @@ class WoDue extends StatelessWidget {
         ),
         const SizedBox(width: 4),
         Text(
-          '${overdue ? 'Overdue · ' : 'Due '}${formatDue(dueAt!)}',
+          overdue
+              ? context.l10n.overdueAt(formatDue(dueAt!))
+              : context.l10n.dueAt(formatDue(dueAt!)),
           style: theme.textTheme.labelMedium?.copyWith(
             color: color,
             fontWeight: overdue ? FontWeight.w700 : null,

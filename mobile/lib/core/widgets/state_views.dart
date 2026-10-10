@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../errors.dart';
+import '../l10n.dart';
 
 /// Centered message used for empty and error states.
 class MessageView extends StatelessWidget {
@@ -60,12 +61,12 @@ class ErrorView extends StatelessWidget {
   @override
   Widget build(BuildContext context) => MessageView(
     icon: Icons.cloud_off_outlined,
-    title: 'Could not load data',
+    title: context.l10n.couldNotLoad,
     message: ApiException.from(error).message,
     action: FilledButton.tonalIcon(
       onPressed: onRetry,
       icon: const Icon(Icons.refresh),
-      label: const Text('Try again'),
+      label: Text(context.l10n.tryAgain),
     ),
   );
 }

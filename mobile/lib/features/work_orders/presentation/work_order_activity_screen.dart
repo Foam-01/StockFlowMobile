@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../operations/presentation/widgets/tx_widgets.dart';
 import 'work_orders_controller.dart';
+import '../../../core/l10n.dart';
 
 /// Server-side audit trail of a work order, oldest first.
 class WorkOrderActivityScreen extends ConsumerWidget {
@@ -31,10 +32,16 @@ class WorkOrderActivityScreen extends ConsumerWidget {
     final events = ref.watch(woEventsProvider(id));
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text(code == null ? 'Activity' : '$code activity')),
+      appBar: AppBar(
+        title: Text(
+          code == null
+              ? context.l10n.activity
+              : context.l10n.codeActivity(code!),
+        ),
+      ),
       body: events.when(
         data: (list) => list.isEmpty
-            ? const MessageView(icon: Icons.history, title: 'No activity yet')
+            ? MessageView(icon: Icons.history, title: context.l10n.noActivity)
             : RefreshIndicator(
                 onRefresh: () => ref.refresh(woEventsProvider(id).future),
                 child: ListView.builder(
@@ -77,13 +84,13 @@ class WorkOrderActivityScreen extends ConsumerWidget {
                                 children: [
                                   Text(
                                     e.toStatus == null
-                                        ? e.label
-                                        : '${e.label} → ${e.toStatus!.label}',
+                                        ? e.tr(context.l10n)
+                                        : '${e.tr(context.l10n)} → ${e.toStatus!.tr(context.l10n)}',
                                     style: theme.textTheme.titleSmall,
                                   ),
                                   if (e.note != null) Text(e.note!),
                                   Text(
-                                    '${e.actor?.name ?? 'System'} · ${formatDateTime(e.createdAt)}',
+                                    '${e.actor?.name ?? context.l10n.system} · ${formatDateTime(e.createdAt)}',
                                     style: theme.textTheme.bodySmall?.copyWith(
                                       color: theme.colorScheme.onSurfaceVariant,
                                     ),

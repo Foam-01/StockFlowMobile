@@ -22,6 +22,7 @@ import '../features/work_orders/presentation/work_order_activity_screen.dart';
 import '../features/work_orders/presentation/work_order_detail_screen.dart';
 import '../features/work_orders/presentation/work_orders_screen.dart';
 import 'widgets/floating_nav.dart';
+import 'l10n.dart';
 
 final _rootKey = GlobalKey<NavigatorState>();
 
@@ -201,32 +202,32 @@ class _HomeShell extends ConsumerWidget {
 
   final StatefulNavigationShell shell;
 
-  NavItem _item(_Branch b, int queued) => switch (b) {
-    _Branch.dashboard => const NavItem(
+  NavItem _item(L10n t, _Branch b, int queued) => switch (b) {
+    _Branch.dashboard => NavItem(
       icon: Icons.space_dashboard_outlined,
       selectedIcon: Icons.space_dashboard_rounded,
-      label: 'Dashboard',
+      label: t.navDashboard,
     ),
-    _Branch.products => const NavItem(
+    _Branch.products => NavItem(
       icon: Icons.inventory_2_outlined,
       selectedIcon: Icons.inventory_2_rounded,
-      label: 'Products',
+      label: t.navProducts,
     ),
     _Branch.operations => NavItem(
       icon: Icons.swap_vert_rounded,
       selectedIcon: Icons.swap_vert_circle_rounded,
-      label: 'Operations',
+      label: t.navOperations,
       badge: queued,
     ),
-    _Branch.workOrders => const NavItem(
+    _Branch.workOrders => NavItem(
       icon: Icons.assignment_outlined,
       selectedIcon: Icons.assignment_rounded,
-      label: 'Jobs',
+      label: t.navJobs,
     ),
-    _Branch.profile => const NavItem(
+    _Branch.profile => NavItem(
       icon: Icons.person_outline_rounded,
       selectedIcon: Icons.person_rounded,
-      label: 'Profile',
+      label: t.navProfile,
     ),
   };
 
@@ -258,7 +259,7 @@ class _HomeShell extends ConsumerWidget {
             context.push('/products/${product.id}');
           }
         },
-        items: [for (final b in tabs) _item(b, queued)],
+        items: [for (final b in tabs) _item(context.l10n, b, queued)],
       ),
     );
   }

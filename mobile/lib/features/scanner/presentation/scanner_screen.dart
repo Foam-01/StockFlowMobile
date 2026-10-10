@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
+import '../../../core/l10n.dart';
+
 /// Full-screen camera scanner. Pops with the scanned (or typed) barcode.
 class ScannerScreen extends StatefulWidget {
-  const ScannerScreen({super.key, this.title = 'Scan barcode'});
+  const ScannerScreen({super.key, this.title});
 
-  final String title;
+  /// Defaults to "Scan barcode" in the current language.
+  final String? title;
 
   @override
   State<ScannerScreen> createState() => _ScannerScreenState();
@@ -71,14 +74,14 @@ class _ScannerScreenState extends State<ScannerScreen> {
       backgroundColor: Colors.black,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(widget.title ?? context.l10n.scanBarcode),
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
         actions: [
           ValueListenableBuilder(
             valueListenable: _controller,
             builder: (context, state, _) => IconButton(
-              tooltip: 'Flashlight',
+              tooltip: context.l10n.flashlight,
               icon: Icon(
                 state.torchState == TorchState.on
                     ? Icons.flash_on
@@ -108,8 +111,8 @@ class _ScannerScreenState extends State<ScannerScreen> {
             bottom: 48,
             child: Column(
               children: [
-                const Text(
-                  'Point the camera at a product barcode',
+                Text(
+                  context.l10n.pointCamera,
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Colors.white),
                 ),
@@ -118,7 +121,7 @@ class _ScannerScreenState extends State<ScannerScreen> {
                   key: const Key('manual_barcode'),
                   onPressed: _typeManually,
                   icon: const Icon(Icons.keyboard),
-                  label: const Text('Type barcode'),
+                  label: Text(context.l10n.typeBarcode),
                 ),
               ],
             ),
@@ -154,9 +157,8 @@ class _CameraError extends StatelessWidget {
               const SizedBox(height: 16),
               Text(
                 denied
-                    ? 'Camera permission is needed to scan.\n'
-                          'Allow it in system settings, or type the barcode.'
-                    : 'Camera is not available on this device.',
+                    ? context.l10n.cameraPermission
+                    : context.l10n.cameraUnavailable,
                 textAlign: TextAlign.center,
                 style: const TextStyle(color: Colors.white),
               ),
@@ -221,7 +223,7 @@ class _ManualEntryDialogState extends State<_ManualEntryDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Enter barcode'),
+      title: Text(context.l10n.enterBarcode),
       content: TextField(
         key: const Key('manual_barcode_field'),
         controller: _text,
@@ -233,9 +235,9 @@ class _ManualEntryDialogState extends State<_ManualEntryDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(context.l10n.cancel),
         ),
-        FilledButton(onPressed: _submit, child: const Text('Find')),
+        FilledButton(onPressed: _submit, child: Text(context.l10n.find)),
       ],
     );
   }

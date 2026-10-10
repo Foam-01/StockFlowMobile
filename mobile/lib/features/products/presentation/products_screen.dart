@@ -11,6 +11,7 @@ import '../domain/product.dart';
 import 'products_controller.dart';
 import 'widgets/stock_badge.dart';
 import 'widgets/product_thumb.dart';
+import '../../../core/l10n.dart';
 
 class ProductsScreen extends ConsumerStatefulWidget {
   const ProductsScreen({super.key});
@@ -65,11 +66,11 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Products'),
+        title: Text(context.l10n.navProducts),
         actions: [
           IconButton(
             key: const Key('scan_product'),
-            tooltip: 'Scan barcode',
+            tooltip: context.l10n.scanBarcode,
             icon: const Icon(Icons.qr_code_scanner),
             onPressed: () async {
               final product = await scanProduct(context, ref);
@@ -88,13 +89,13 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                 child: SearchBar(
                   key: const Key('product_search'),
                   controller: _search,
-                  hintText: 'Search name, SKU or barcode',
+                  hintText: context.l10n.searchProducts,
                   leading: const Icon(Icons.search),
                   onChanged: _onSearchChanged,
                   trailing: [
                     if (_search.text.isNotEmpty)
                       IconButton(
-                        tooltip: 'Clear search',
+                        tooltip: context.l10n.clearSearch,
                         icon: const Icon(Icons.close),
                         onPressed: _clearSearch,
                       ),
@@ -133,20 +134,20 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
             isFiltered
                 ? MessageView(
                     icon: Icons.search_off,
-                    title: 'No matching products',
-                    message: 'Try a different search or clear the filters.',
+                    title: context.l10n.noMatchingProducts,
+                    message: context.l10n.tryDifferentSearch,
                     action: OutlinedButton(
                       onPressed: () {
                         _clearSearch();
                         ref.invalidate(productFilterProvider);
                       },
-                      child: const Text('Clear filters'),
+                      child: Text(context.l10n.clearFilters),
                     ),
                   )
-                : const MessageView(
+                : MessageView(
                     icon: Icons.inventory_2_outlined,
-                    title: 'No products yet',
-                    message: 'Products added by an admin will appear here.',
+                    title: context.l10n.noProductsYet,
+                    message: context.l10n.productsByAdmin,
                   ),
           ],
         ),
@@ -168,7 +169,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
             return Padding(
               padding: const EdgeInsets.fromLTRB(20, 14, 20, 4),
               child: Text(
-                '${state.total} product${state.total == 1 ? '' : 's'}',
+                context.l10n.productsCount(state.total),
                 style: Theme.of(context).textTheme.labelLarge?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
@@ -205,13 +206,13 @@ class _FilterBar extends ConsumerWidget {
           FilterChip(
             key: const Key('filter_low_stock'),
             avatar: const Icon(Icons.warning_amber_rounded, size: 18),
-            label: const Text('Low stock'),
+            label: Text(context.l10n.lowStock),
             selected: filter.lowStock,
             onSelected: (_) => notifier.toggleLowStock(),
           ),
           const SizedBox(width: 8),
           ChoiceChip(
-            label: const Text('All'),
+            label: Text(context.l10n.all),
             selected: filter.categoryId == null,
             onSelected: (_) => notifier.setCategory(null),
           ),
@@ -301,7 +302,7 @@ class _ListFooter extends StatelessWidget {
         child: Column(
           children: [
             Text(ApiException.from(state.loadMoreError!).message),
-            TextButton(onPressed: onRetry, child: const Text('Retry')),
+            TextButton(onPressed: onRetry, child: Text(context.l10n.retry)),
           ],
         ),
       );

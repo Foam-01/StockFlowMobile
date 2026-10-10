@@ -1,0 +1,738 @@
+{
+  "@@locale": "en",
+  "appTitle": "StockFlow",
+  "retry": "Retry",
+  "tryAgain": "Try again",
+  "back": "Back",
+  "save": "Save",
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "confirm": "Confirm",
+  "add": "Add",
+  "newLabel": "New",
+  "all": "All",
+  "remove": "Remove",
+  "scan": "Scan",
+  "required": "Required",
+  "note": "Note",
+  "couldNotLoad": "Could not load data",
+  "somethingWrong": "Something went wrong",
+  "cannotReach": "Cannot reach the server. Check your connection.",
+  "requestFailed": "Request failed ({code})",
+  "@requestFailed": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "noResponse": "no response",
+  "itemsCount": "{count, plural, =1{1 item} other{{count} items}}",
+  "@itemsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "moreCount": "{name} +{count} more",
+  "@moreCount": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "qtyUnit": "{qty} {unit}",
+  "@qtyUnit": {
+    "placeholders": {
+      "qty": {
+        "type": "int"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "navDashboard": "Dashboard",
+  "navProducts": "Products",
+  "navOperations": "Operations",
+  "navJobs": "Jobs",
+  "navProfile": "Profile",
+  "scanBarcode": "Scan barcode",
+  "roleAdmin": "Admin",
+  "roleStaff": "Warehouse",
+  "roleTechnician": "Technician",
+  "roleSupervisor": "Supervisor",
+  "language": "Language",
+  "languageSystem": "System",
+  "signOut": "Sign out",
+  "loginTagline": "Receive, issue and count stock\nfrom the warehouse floor.",
+  "welcomeBack": "Welcome back",
+  "email": "Email",
+  "enterEmail": "Please enter your email",
+  "validEmail": "Please enter a valid email",
+  "password": "Password",
+  "showPassword": "Show password",
+  "hidePassword": "Hide password",
+  "enterPassword": "Please enter your password",
+  "signIn": "Sign in",
+  "demoAccounts": "Demo accounts",
+  "serverHost": "Server: {host}",
+  "@serverHost": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "server": "Server",
+  "serverHelp": "Address of the StockFlow API. On a phone, use your computer’s Wi-Fi IP.",
+  "apiUrl": "API URL",
+  "testConnection": "Test connection",
+  "serverDefault": "Default ({host})",
+  "@serverDefault": {
+    "placeholders": {
+      "host": {
+        "type": "String"
+      }
+    }
+  },
+  "connected": "Connected",
+  "notStockflow": "Not a StockFlow server",
+  "notStockflowCode": "Not a StockFlow server (HTTP {code})",
+  "@notStockflowCode": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "serverUnreachable": "Cannot reach the server. Same Wi-Fi? Firewall open on port 3000?",
+  "enterServer": "Enter the server address",
+  "serverExample": "e.g. http://192.168.1.10:3000",
+  "hello": "Hello, {name}",
+  "@hello": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "unitsOnHand": "Units on hand",
+  "acrossProducts": "across {count} products",
+  "@acrossProducts": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "receive": "Receive",
+  "issue": "Issue",
+  "adjust": "Adjust",
+  "lowStock": "Low stock",
+  "outOfStock": "Out of stock",
+  "inStock": "In stock",
+  "draftsWaiting": "{count, plural, =1{1 draft waiting for confirmation} other{{count} drafts waiting for confirmation}}",
+  "@draftsWaiting": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "last7Days": "Last 7 days",
+  "weekFlow": "{received} received · {issued} issued",
+  "@weekFlow": {
+    "placeholders": {
+      "received": {
+        "type": "int"
+      },
+      "issued": {
+        "type": "int"
+      }
+    }
+  },
+  "needsAttention": "Needs attention",
+  "allAboveMin": "All products are above their minimum stock",
+  "recentActivity": "Recent activity",
+  "noConfirmedOps": "No confirmed operations yet",
+  "skuMin": "{sku} · min {min} {unit}",
+  "@skuMin": {
+    "placeholders": {
+      "sku": {
+        "type": "String"
+      },
+      "min": {
+        "type": "int"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "fieldJobs": "Field jobs",
+  "filterActive": "Active",
+  "filterToReview": "To review",
+  "overdue": "Overdue",
+  "filterDone": "Done",
+  "received": "Received",
+  "issued": "Issued",
+  "inShort": "In",
+  "outShort": "Out",
+  "day": "Day",
+  "showChart": "Show chart",
+  "showTable": "Show table",
+  "weekdays": "Mon,Tue,Wed,Thu,Fri,Sat,Sun",
+  "dayFlowA11y": "{day}: received {received}, issued {issued}",
+  "@dayFlowA11y": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      },
+      "received": {
+        "type": "int"
+      },
+      "issued": {
+        "type": "int"
+      }
+    }
+  },
+  "stockHistory": "Stock history",
+  "noMovements": "No movements yet",
+  "confirmedAppearHere": "Confirmed operations will appear here.",
+  "movementsOnHand": "{count, plural, =1{1 movement} other{{count} movements}} · on hand {onHand} {unit}",
+  "@movementsOnHand": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "onHand": {
+        "type": "int"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "balanceAfter": "bal. {qty} {unit}",
+  "@balanceAfter": {
+    "placeholders": {
+      "qty": {
+        "type": "int"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "syncedCount": "{count} synced",
+  "@syncedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "needAttentionCount": "{count} need attention",
+  "@needAttentionCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "serverRetryLater": "server not reachable, will retry",
+  "nothingToSync": "Nothing to sync",
+  "couldNotSync": "Could not sync",
+  "serverRejected": "The server rejected this document.",
+  "retryOrDiscard": "Retry if the problem was fixed, or discard it.",
+  "discard": "Discard",
+  "offlineBanner": "You’re offline. New documents are saved on this device.",
+  "waitingToSync": "Waiting to sync ({count})",
+  "@waitingToSync": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "syncing": "Syncing…",
+  "syncNow": "Sync now",
+  "rejectedByServer": "Rejected by server",
+  "failed": "Failed",
+  "pending": "Pending",
+  "addOneProduct": "Add at least one product",
+  "mustBePositive": "Must be greater than 0",
+  "onlyOnHand": "Only {qty} {unit} on hand",
+  "@onlyOnHand": {
+    "placeholders": {
+      "qty": {
+        "type": "int"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "mustNotBeZero": "Must not be 0",
+  "wouldGoNegative": "Would go below 0 (on hand {qty})",
+  "@wouldGoNegative": {
+    "placeholders": {
+      "qty": {
+        "type": "int"
+      }
+    }
+  },
+  "takePhoto": "Take photo",
+  "chooseGallery": "Choose from gallery",
+  "photoAttached": "Photo attached",
+  "evidencePhotosCount": "Evidence photos ({count}/{max})",
+  "@evidencePhotosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "noPhotosAttached": "No photos attached",
+  "evidencePhoto": "Evidence photo",
+  "addPhoto": "Add photo",
+  "saving": "Saving…",
+  "deleteThisPhoto": "Delete this photo?",
+  "removedFromTx": "It will be removed from the transaction.",
+  "photoDeleted": "Photo deleted",
+  "deletePhoto": "Delete photo",
+  "scanItem": "Scan item",
+  "addedProduct": "Added {name}",
+  "@addedProduct": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "issueDraftForWo": "Issue draft created for the work order",
+  "savedOnDevice": "Saved on this device. It will sync when online.",
+  "newReceive": "New receive",
+  "newIssue": "New issue",
+  "newAdjust": "New adjustment",
+  "forWo": "For {code}",
+  "@forWo": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "hintReceive": "Quantities are added to stock.",
+  "hintIssue": "Quantities are removed from stock.",
+  "hintAdjust": "Enter the difference: positive adds, negative removes.",
+  "referenceOptional": "Reference no. (optional)",
+  "referenceHint": "e.g. PO-2026-0001",
+  "noteOptional": "Note (optional)",
+  "items": "Items",
+  "noProductsAdded": "No products added",
+  "saveDraft": "Save as draft",
+  "lineProjection": "{sku} · on hand {onHand} → {next} {unit}",
+  "@lineProjection": {
+    "placeholders": {
+      "sku": {
+        "type": "String"
+      },
+      "onHand": {
+        "type": "int"
+      },
+      "next": {
+        "type": "int"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "decrease": "Decrease",
+  "increase": "Increase",
+  "descReceive": "Goods coming into stock",
+  "descIssue": "Goods going out of stock",
+  "descAdjust": "Correct stock after a count",
+  "stockOperations": "Stock operations",
+  "noOperations": "No operations yet",
+  "noOperationsStatus": "No {status} operations",
+  "@noOperationsStatus": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "tapNewHint": "Tap New to receive, issue or adjust stock.",
+  "createdByAt": "{name} · {time}",
+  "@createdByAt": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "operation": "Operation",
+  "cancelDraftQ": "Cancel this draft?",
+  "noStockEffect": "It will not affect stock.",
+  "cancelDraft": "Cancel draft",
+  "draftCancelled": "Draft cancelled",
+  "confirmTypeQ": "Confirm {type}?",
+  "@confirmTypeQ": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "confirmStockMsg": "{count, plural, =1{Stock will be updated for 1 product. This cannot be undone.} other{Stock will be updated for {count} products. This cannot be undone.}}",
+  "@confirmStockMsg": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "stockUpdated": "Stock updated",
+  "waitingAdmin": "Waiting for an admin to confirm",
+  "createdBy": "Created by",
+  "createdAt": "Created at",
+  "confirmedBy": "Confirmed by",
+  "confirmedAt": "Confirmed at",
+  "itemsWithCount": "Items ({count})",
+  "@itemsWithCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "searchProduct": "Search product",
+  "noProductsFound": "No products found",
+  "txDraft": "Draft",
+  "txConfirmed": "Confirmed",
+  "txCancelled": "Cancelled",
+  "searchProducts": "Search name, SKU or barcode",
+  "clearSearch": "Clear search",
+  "noMatchingProducts": "No matching products",
+  "tryDifferentSearch": "Try a different search or clear the filters.",
+  "clearFilters": "Clear filters",
+  "noProductsYet": "No products yet",
+  "productsByAdmin": "Products added by an admin will appear here.",
+  "productsCount": "{count, plural, =1{1 product} other{{count} products}}",
+  "@productsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "product": "Product",
+  "uncategorized": "Uncategorized",
+  "barcode": "Barcode",
+  "unit": "Unit",
+  "onHand": "On hand",
+  "minimumStock": "Minimum stock",
+  "recentMovements": "Recent movements",
+  "viewAll": "View all ({count})",
+  "@viewAll": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noConfirmedMovements": "No confirmed movements yet",
+  "couldNotLoadMovements": "Could not load movements",
+  "noProductBarcode": "No product with barcode {code}",
+  "@noProductBarcode": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "flashlight": "Flashlight",
+  "pointCamera": "Point the camera at a product barcode",
+  "typeBarcode": "Type barcode",
+  "cameraPermission": "Camera permission is needed to scan.\nAllow it in system settings, or type the barcode.",
+  "cameraUnavailable": "Camera is not available on this device.",
+  "enterBarcode": "Enter barcode",
+  "find": "Find",
+  "woOpen": "Open",
+  "woInProgress": "In progress",
+  "woSubmitted": "Submitted",
+  "woNeedsRevision": "Needs revision",
+  "woApproved": "Approved",
+  "woCancelled": "Cancelled",
+  "prLow": "Low",
+  "prNormal": "Normal",
+  "prHigh": "High",
+  "prUrgent": "Urgent",
+  "evBefore": "Before work",
+  "evAfter": "After work",
+  "evOther": "Other",
+  "evtCreated": "Created",
+  "evtAssigned": "Assignment",
+  "evtStarted": "Work started",
+  "evtChecklist": "Checklist",
+  "evtPhotoAdded": "Photo added",
+  "evtPhotoRemoved": "Photo removed",
+  "evtSubmitted": "Submitted for review",
+  "evtChangesRequested": "Changes requested",
+  "evtMaterials": "Materials",
+  "myJobs": "My jobs",
+  "reviewsJobs": "Reviews & jobs",
+  "workOrders": "Work orders",
+  "searchWo": "Search code, title or site",
+  "noMatchingWo": "No matching work orders",
+  "nothingToReview": "Nothing waiting for review",
+  "noActiveJobs": "No active jobs",
+  "noWoYet": "No work orders yet",
+  "unassigned": "Unassigned",
+  "woCreated": "{code} created",
+  "@woCreated": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "newWorkOrder": "New work order",
+  "title": "Title",
+  "titleHint": "e.g. Install split AC – meeting room",
+  "site": "Site",
+  "addressOptional": "Address (optional)",
+  "instructionsOptional": "Instructions (optional)",
+  "priority": "Priority",
+  "noDueDate": "No due date",
+  "dueAt": "Due {date}",
+  "@dueAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "overdueAt": "Overdue · {date}",
+  "@overdueAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "set": "Set",
+  "clearDueDate": "Clear due date",
+  "checklist": "Checklist",
+  "noChecklist": "No checklist",
+  "technician": "Technician",
+  "assignLater": "Assign later",
+  "reviewer": "Reviewer",
+  "anySupervisor": "Any supervisor",
+  "requiredPhotos": "Required photos",
+  "materials": "Materials",
+  "noMaterialsOk": "None: work without parts is fine",
+  "skuOnHand": "{sku} · on hand {qty} {unit}",
+  "@skuOnHand": {
+    "placeholders": {
+      "sku": {
+        "type": "String"
+      },
+      "qty": {
+        "type": "int"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "createWorkOrder": "Create work order",
+  "submitForReviewQ": "Submit for review?",
+  "submitExplain": "A supervisor will check the checklist and photos. You can’t change them after submitting unless changes are requested.",
+  "submit": "Submit",
+  "submittedForReview": "Submitted for review",
+  "approveWork": "Approve work",
+  "commentOptional": "Comment (optional)",
+  "approve": "Approve",
+  "approved": "Approved",
+  "requestChanges": "Request changes",
+  "whatToChange": "What needs to change?",
+  "sendBack": "Send back",
+  "sentBack": "Sent back to the technician",
+  "cancelWorkOrder": "Cancel work order",
+  "reason": "Reason",
+  "cancelled": "Cancelled",
+  "assignmentUpdated": "Assignment updated",
+  "photoAdded": "Photo added",
+  "deletePhotoQ": "Delete photo?",
+  "removedFromWo": "It will be removed from the work order.",
+  "workOrder": "Work order",
+  "activity": "Activity",
+  "codeActivity": "{code} activity",
+  "@codeActivity": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "noActivity": "No activity yet",
+  "system": "System",
+  "assignMenu": "Assign…",
+  "cancelWoMenu": "Cancel work order…",
+  "backInProgress": "Back in progress",
+  "workStarted": "Work started",
+  "resumeWork": "Resume work",
+  "startWork": "Start work",
+  "submitForReview": "Submit for review",
+  "technicianIs": "Technician: {name}",
+  "@technicianIs": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "reviewerIs": "Reviewer: {name}",
+  "@reviewerIs": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "unassignedLower": "unassigned",
+  "anySupervisorLower": "any supervisor",
+  "checklistDone": "{done}/{total} done",
+  "@checklistDone": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "noChecklistJob": "No checklist for this job",
+  "photos": "Photos",
+  "requiredList": "Required: {list}",
+  "@requiredList": {
+    "placeholders": {
+      "list": {
+        "type": "String"
+      }
+    }
+  },
+  "noMaterialsPlanned": "No materials planned",
+  "stockDocuments": "Stock documents",
+  "changesRequestedBy": "Changes requested by {name}: {note}",
+  "@changesRequestedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "note": {
+        "type": "String"
+      }
+    }
+  },
+  "changesRequested": "Changes requested: {note}",
+  "@changesRequested": {
+    "placeholders": {
+      "note": {
+        "type": "String"
+      }
+    }
+  },
+  "approvedBy": "Approved by {name}",
+  "@approvedBy": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "cancelledReason": "Cancelled: {reason}",
+  "@cancelledReason": {
+    "placeholders": {
+      "reason": {
+        "type": "String"
+      }
+    }
+  },
+  "waitingReview": "Waiting for review",
+  "submittedAt": "submitted {time}",
+  "@submittedAt": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "beforeSubmit": "Before you can submit:",
+  "optional": "Optional",
+  "noteIs": "Note: {note}",
+  "@noteIs": {
+    "placeholders": {
+      "note": {
+        "type": "String"
+      }
+    }
+  },
+  "addNote": "Add note",
+  "materialLine": "{sku} · planned {planned} · issued {issued} {unit}",
+  "@materialLine": {
+    "placeholders": {
+      "sku": {
+        "type": "String"
+      },
+      "planned": {
+        "type": "int"
+      },
+      "issued": {
+        "type": "int"
+      },
+      "unit": {
+        "type": "String"
+      }
+    }
+  },
+  "shortBy": "Short by {short} (on hand {onHand})",
+  "@shortBy": {
+    "placeholders": {
+      "short": {
+        "type": "int"
+      },
+      "onHand": {
+        "type": "int"
+      }
+    }
+  },
+  "toIssue": "{count} to issue",
+  "@toIssue": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "noPhotosYet": "No photos yet",
+  "addReason": "Please add a reason",
+  "moreWords": "A few more words, please",
+  "assign": "Assign"
+}
