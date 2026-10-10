@@ -2,6 +2,12 @@
 
 **English** | [ภาษาไทย](architecture.th.md)
 
+Related docs: [testing](testing.md) · [security](security.md) ·
+[offline sync](offline-sync.md) · decisions:
+[001 offline storage](adr/001-offline-storage.md),
+[002 idempotency](adr/002-idempotency.md),
+[003 stock concurrency](adr/003-stock-concurrency.md)
+
 ## System overview
 
 ```mermaid
