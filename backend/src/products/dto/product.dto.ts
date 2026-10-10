@@ -13,22 +13,22 @@ import {
 } from 'class-validator';
 
 export class CreateProductDto {
-  @ApiProperty({ example: 'BEV-001' })
+  @ApiProperty({ example: 'AC-012' })
   @IsString()
   @IsNotEmpty()
   sku: string;
 
-  @ApiPropertyOptional({ example: '8850999320014' })
+  @ApiPropertyOptional({ example: '8859000500028' })
   @IsOptional()
   @IsString()
   barcode?: string;
 
-  @ApiProperty({ example: 'Drinking water 600ml' })
+  @ApiProperty({ example: 'Wall-mounted AC 12,000 BTU inverter' })
   @IsString()
   @IsNotEmpty()
   name: string;
 
-  @ApiPropertyOptional({ example: 'bottle', default: 'pcs' })
+  @ApiPropertyOptional({ example: 'unit', default: 'pcs' })
   @IsOptional()
   @IsString()
   unit?: string;

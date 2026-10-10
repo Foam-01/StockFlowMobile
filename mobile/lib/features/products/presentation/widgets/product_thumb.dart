@@ -20,23 +20,19 @@ class ProductThumb extends StatelessWidget {
 
   static IconData _icon(String? category) {
     final c = (category ?? '').toLowerCase();
-    if (c.contains('bever') ||
-        c.contains('drink') ||
-        c.contains('เครื่องดื่ม')) {
-      return Icons.local_drink_outlined;
+    if (c.contains('ปรับอากาศ') || c.contains('air') || c.contains('แอร์')) {
+      return Icons.ac_unit_rounded;
     }
-    if (c.contains('snack') || c.contains('food') || c.contains('ขนม')) {
-      return Icons.cookie_outlined;
+    if (c.contains('ท่อ') || c.contains('pipe')) return Icons.plumbing_rounded;
+    if (c.contains('ไฟฟ้า') || c.contains('electric')) {
+      return Icons.electrical_services_rounded;
     }
-    if (c.contains('house') || c.contains('clean') || c.contains('ของใช้')) {
-      return Icons.cleaning_services_outlined;
+    if (c.contains('น้ำยา') || c.contains('refrigerant')) {
+      return Icons.propane_tank_outlined;
     }
-    if (c.contains('station') ||
-        c.contains('office') ||
-        c.contains('เครื่องเขียน')) {
-      return Icons.edit_outlined;
-    }
-    if (c.contains('install') || c.contains('อะไหล่')) {
+    if (c.contains('ติดตั้ง') ||
+        c.contains('install') ||
+        c.contains('อะไหล่')) {
       return Icons.build_outlined;
     }
     return Icons.inventory_2_outlined;

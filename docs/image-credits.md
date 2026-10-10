@@ -5,12 +5,16 @@ Cloudinary by `npm run seed:images` (backend). They are cropped to squares.
 
 | SKU | Photo | Author | License |
 |---|---|---|---|
-| BEV-001 | [Bottle of Water](https://commons.wikimedia.org/wiki/File:Bottle_of_Water.jpg) | Jiafei Slay Queen | CC0 |
-| BEV-002 | [Green tea glass bottles](https://commons.wikimedia.org/wiki/File:Green_tea_glass_bottles.jpg) | おいでやす千年の都 | CC0 |
-| BEV-003 | [Korean coffee mix Maxim](https://commons.wikimedia.org/wiki/File:Korean_coffee_mix_Maxim.jpg) | Startandstar | CC0 |
-| SNK-001 | [Opened bag of Ruffles All Dressed potato chips (cropped)](https://commons.wikimedia.org/wiki/File:Opened_bag_of_Ruffles_All_Dressed_potato_chips_(cropped).jpg) | Ser Amantio di Nicolao | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
-| SNK-002 | [Milk flavored peanut wafer biscuits](https://commons.wikimedia.org/wiki/File:Milk_flavored_peanut_wafer_biscuits.jpg) | Fumikas Sagisavas | CC0 |
-| HH-001 | [Tesco and Sainsburys own dishwashing liquid](https://commons.wikimedia.org/wiki/File:Tesco_and_Sainsburys_own_dishwashing_liquid.jpg) | Kai Hendry | [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) |
-| HH-002 | [Toilet paper roll](https://commons.wikimedia.org/wiki/File:Toilet_paper_roll.jpg) | Cmann999 | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
-| ST-001 | [Ballpoint Pen](https://commons.wikimedia.org/wiki/File:Ballpoint_Pen.jpg) | Ryan Hodnett | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
-| ST-002 | [15 reams of paper stacked on the floor](https://commons.wikimedia.org/wiki/File:15_reams_of_paper_stacked_on_the_floor.jpg) | Sage Ross (WMF) | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) |
+| AC-009 | [HYUNDAI air conditioner mini split](https://commons.wikimedia.org/wiki/File:HYUNDAI_-_Air_conditioner_mini_split_(model_BMS-12HD).jpg) | AbchyZa22 | CC0 |
+| AC-012 | [Panasonic air conditioner indoor unit](https://commons.wikimedia.org/wiki/File:Panasonic_AIR_CONDITIONER_INDOOR_UNIT_CS-C10KJ2.jpg) | Dinkun Chen | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
+| AC-018 | [Modern split-type air conditioner at a school](https://commons.wikimedia.org/wiki/File:Modern_split-type_air_conditioner_at_a_school.jpg) | Curpharar | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
+| INS-001 | [Copper pipes with and without fibreglass insulation](https://commons.wikimedia.org/wiki/File:Copper_pipes_with_and_without_fibreglass_insulation_asj.jpg) | Achim Hering | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) |
+| INS-002 | [Mitsubishi Electric aircon outdoor unit](https://commons.wikimedia.org/wiki/File:Mitsubishi_Electric_aircon_outdoor_unit_PU24NEK.jpg) | Solomon203 | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) |
+| INS-003 | [Electrical insulation tape](https://commons.wikimedia.org/wiki/File:Electrical-Insulation-Tape_122912-480x360_(4999892165).jpg) | Emilian Robert Vicol | [CC BY 2.0](https://creativecommons.org/licenses/by/2.0/) |
+| INS-004 | [Cable ties](https://commons.wikimedia.org/wiki/File:Cable_ties.jpg) | Silverxxx | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) |
+| INS-005 | [Air conditioner Armaflex insulation](https://commons.wikimedia.org/wiki/File:Air_conditioner_armaflex_insulation.jpg) | Achim Hering | [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/) |
+| INS-006 | [Wall plugs](https://commons.wikimedia.org/wiki/File:Tasselli_wall_plug.jpg) | Alessio Sbarbaro | [CC BY-SA 2.5](https://creativecommons.org/licenses/by-sa/2.5/) |
+| PIP-004 | [1 inch PVC valve and pipe](https://commons.wikimedia.org/wiki/File:1_inch_PVC_Valve_and_pipe-IMG_1061.jpg) | Bijay Chaurasia | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
+| ELE-001 | [Electric cable 3×2.5 mm](https://commons.wikimedia.org/wiki/File:Electric_guide_3%C3%972.5_mm.jpg) | Petar Milošević | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |
+| ELE-002 | [Circuit breaker, 2 pole, on DIN rail](https://commons.wikimedia.org/wiki/File:Circuit_breaker_2_pole_on_DIN_rail.JPG) | Kae | [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) |
+| REF-001 | [Refillable refrigerant cylinder](https://commons.wikimedia.org/wiki/File:Refillable_refrigerant_cylinder.png) | Лобачев Владимир | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) |

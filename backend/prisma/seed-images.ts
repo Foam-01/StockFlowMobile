@@ -15,16 +15,19 @@ const UA = 'StockFlowDemo/1.0 (portfolio project)';
 
 /** SKU -> Commons file title. */
 const IMAGES: Record<string, string> = {
-  'BEV-001': 'File:Bottle of Water.jpg',
-  'BEV-002': 'File:Green tea glass bottles.jpg',
-  'BEV-003': 'File:Korean coffee mix Maxim.jpg',
-  'SNK-001':
-    'File:Opened bag of Ruffles All Dressed potato chips (cropped).jpg',
-  'SNK-002': 'File:Milk flavored peanut wafer biscuits.jpg',
-  'HH-001': 'File:Tesco and Sainsburys own dishwashing liquid.jpg',
-  'HH-002': 'File:Toilet paper roll.jpg',
-  'ST-001': 'File:Ballpoint Pen.jpg',
-  'ST-002': 'File:15 reams of paper stacked on the floor.jpg',
+  'AC-009': 'File:HYUNDAI - Air conditioner mini split (model BMS-12HD).jpg',
+  'AC-012': 'File:Panasonic AIR CONDITIONER INDOOR UNIT CS-C10KJ2.jpg',
+  'AC-018': 'File:Modern split-type air conditioner at a school.jpg',
+  'INS-001': 'File:Copper pipes with and without fibreglass insulation asj.jpg',
+  'INS-002': 'File:Mitsubishi Electric aircon outdoor unit PU24NEK.jpg',
+  'INS-003': 'File:Electrical-Insulation-Tape 122912-480x360 (4999892165).jpg',
+  'INS-004': 'File:Cable ties.jpg',
+  'INS-005': 'File:Air conditioner armaflex insulation.jpg',
+  'INS-006': 'File:Tasselli wall plug.jpg',
+  'PIP-004': 'File:1 inch PVC Valve and pipe-IMG 1061.jpg',
+  'ELE-001': 'File:Electric guide 3×2.5 mm.jpg',
+  'ELE-002': 'File:Circuit breaker 2 pole on DIN rail.JPG',
+  'REF-001': 'File:Refillable refrigerant cylinder.png',
 };
 
 async function commonsImage(title: string): Promise<Buffer> {
@@ -94,6 +97,8 @@ async function main() {
       console.warn(`skip ${sku}: no such product`);
       continue;
     }
+    // Wikimedia rate-limits bursts of API calls.
+    await new Promise((r) => setTimeout(r, 1500));
     const url = await upload(sku, await commonsImage(title));
     await prisma.product.update({ where: { sku }, data: { imageUrl: url } });
     console.log(`${sku} -> ${url}`);
