@@ -29,14 +29,49 @@ jobs:
           cache-dependency-path: backend/package-lock.json
       - run: npm ci
       - run: npx prisma generate
+      # Build first: the API test helpers type-import the compiled app.
+      - name: Build
+        run: npm run build
       - name: Typecheck
         run: npx tsc --noEmit -p tsconfig.json
       - name: Lint
         run: npm run lint
       - name: Unit tests
         run: npm test
-      - name: Build
-        run: npm run build
+
+  backend-api:
+    name: Backend API tests (Postgres)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: stockflow_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgresql://test:test@localhost:5432/stockflow_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - run: npx prisma generate
+      # Fresh database: migrations build the schema, then auth, roles,
+      # validation, ledger, rollback, idempotency and concurrency are tested
+      # through the real HTTP API.
+      - name: API tests
+        run: npm run test:e2e
 
   mobile:
     name: Mobile (Flutter)
