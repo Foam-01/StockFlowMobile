@@ -2,7 +2,7 @@
 
 **English** | [ภาษาไทย](architecture.th.md)
 
-Related docs: [testing](testing.md) · [security](security.md) ·
+Related docs: [work orders](work-orders.md) · [testing](testing.md) · [security](security.md) ·
 [offline sync](offline-sync.md) · decisions:
 [001 offline storage](adr/001-offline-storage.md),
 [002 idempotency](adr/002-idempotency.md),
@@ -22,7 +22,7 @@ flowchart LR
 
   subgraph API["NestJS API"]
     Guards["JwtAuthGuard → RolesGuard"]
-    Modules["auth · products · stock<br/>dashboard · attachments"]
+    Modules["auth · products · stock · dashboard<br/>attachments · work-orders · users"]
     Logic["Pure domain logic<br/>(stock rules, ledger, flow)"]
     Prisma["Prisma client<br/>+ retry on transient errors"]
     Guards --> Modules --> Logic

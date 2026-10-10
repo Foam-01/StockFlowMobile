@@ -6,9 +6,9 @@ How StockFlow is tested, how to run it, and what is **not** covered yet.
 
 | Suite | Where | Count | Runs in CI |
 |---|---|---|---|
-| Backend unit tests (Vitest) | `backend/src/**/*.spec.ts` | 33 | ✅ |
-| Backend API tests (Vitest + supertest, real Postgres) | `backend/test/*.e2e-spec.ts` | 27 | ✅ (Postgres service container) |
-| Flutter widget + unit tests | `mobile/test/` | 54 | ✅ |
+| Backend unit tests (Vitest) | `backend/src/**/*.spec.ts` | 48 | ✅ |
+| Backend API tests (Vitest + supertest, real Postgres) | `backend/test/*.e2e-spec.ts` | 54 | ✅ (Postgres service container) |
+| Flutter widget + unit tests | `mobile/test/` | 65 | ✅ |
 | Release APK build | `mobile/` | — | ✅ (artifact `stockflow-apk`) |
 
 Counts are from the latest local run; CI runs the same suites on every push
@@ -44,6 +44,7 @@ can never touch a real database. Override the URL with `TEST_DATABASE_URL`.
 | `stock/stock-logic.spec.ts` | signed quantities, item validation, net deltas, "never below zero", ledger balance, running balances, allowed status transitions |
 | `dashboard/dashboard-logic.spec.ts` | 7-day buckets in the client's time zone, ADJUST excluded, attention ordering |
 | `attachments/cloudinary.spec.ts` | signature matches Cloudinary's published example; upload asset validation (host, account, folder, traversal); format/size limits are inside the signature |
+| `work-orders/work-order-logic.spec.ts` | who may do what in which state (every role × status), resume after changes requested, named reviewer, terminal states, transition table, submit requirements, issued-materials arithmetic |
 | `prisma/retry.spec.ts` | transient DB errors are retried with backoff; business errors are not; retry limit |
 
 ### Backend API tests: real HTTP, real Postgres
@@ -61,6 +62,20 @@ can never touch a real database. Override the URL with `TEST_DATABASE_URL`.
 | Evidence photos | only images in this transaction's folder on our account; creator/admin only; not on cancelled documents; signed fields carry the limits and never the secret |
 | Rate limiting | repeated wrong logins → 429 while `/health` stays available |
 
+#### Work orders (`test/work-orders.e2e-spec.ts`, 27 tests)
+
+| Area | Tests |
+|---|---|
+| Creating | checklist snapshot (independent of later template edits), materials, code, events; admin only; assignee must be a technician, reviewer a supervisor; status can't be set directly; `clientUuid` idempotent |
+| Visibility | technicians see only their own (others → **404**, not 403) in detail, events, actions and list; reassigning moves access; search by code and site |
+| Doing the work | starting never touches stock; start idempotent; only the assignee works, only while in progress; checklist items of another job rejected; submit refused until required items **and** required photos exist (exact list returned); submitted work is frozen |
+| Photos | only images in this job's folder on our account, only from the assignee; signed fields carry format/size limits, never the secret |
+| Review | only reviewers approve; approval recorded once; terminal after approval; named reviewer; request changes needs a reason → resume → resubmit → approve, with the full event sequence checked |
+| **Concurrency** | 5 parallel approvals → one event; approve racing request-changes → exactly one wins (200/409), one decision event |
+| Cancelling | admin only, with a reason; never after submission |
+| Inventory link | linked ISSUE draft doesn't move stock; confirm moves it once, shows planned vs issued, records `MATERIAL_ISSUED`; shortage computed; can't link to closed jobs or link adjustments |
+| Role boundaries | technicians can't create/list stock documents or open the dashboard; supervisors read but can't create; user directory admin-only without emails |
+
 The concurrency test was checked to have teeth: with the conditional stock
 update (`WHERE onHand >= qty`) removed, all 10 confirms succeed and the test
 fails.
@@ -76,6 +91,7 @@ fails.
 | `scanner_test.dart` | scan opens product, unknown barcode, cancel, scan-to-add increments |
 | `dashboard_test.dart` | KPIs, chart readout per day, table view, deep links to filtered lists, error/retry |
 | `evidence_test.dart` | attach from camera, upload failure message, permissions, delete |
+| `work_orders_test.dart` | tabs per role; default list per role; start → checklist tick (server state shown); submit disabled while blockers listed; server refusal shown; review note; request changes requires a reason; approve; admin create with validation; staff issues remaining materials linked to the job |
 | `server_settings_test.dart` | URL normalisation/validation, test connection, save |
 | `offline_logic_test.dart` | sync engine rules, SQLite outbox and product cache (in-memory SQLite), offline fallback that never hides server errors |
 | `offline_flow_test.dart` | save offline → queued → sync fails → sync succeeds with the **same clientUuid**; rejected item marked failed and discarded; offline banner; server errors not queued |
@@ -88,6 +104,16 @@ override, so no test needs a device.
 - Live Cloudinary upload: `.txt` rejected (400), upload without
   `allowed_formats` rejected (401 invalid signature), PNG accepted, delete
   removes the asset (checked through the Cloudinary Admin API).
+- **Full field workflow on the live stack** (local API → Neon → Cloudinary):
+  create → other technician gets 404 → linked issue confirmed (stock −1
+  exactly) → start (stock unchanged) → early submit refused with 4 reasons →
+  checklist → real photo upload → submit → technician can't approve →
+  request changes → resume → resubmit → approve → repeat approve (one
+  event). All passed; the test jobs and photos were removed afterwards.
+- **Latency on that run** (API in Bangkok, Neon in us-east-2): median 8.6 s per
+  work-order request before loading relations with joins, 1.9 s after
+  (detail load ~0.3 s). Remaining time is round trips inside write
+  transactions to a distant database region.
 - Request logs contain method, path, status, duration and user id only: no
   token, password or search term (checked on a running instance).
 - Neon cold start: the first requests after idle used to fail with `P1017`;

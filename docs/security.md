@@ -21,13 +21,25 @@ ever exposed to the internet.
 Checked **on the server** for every request (`JwtAuthGuard` → `RolesGuard`),
 never only in the UI:
 
+Roles: `ADMIN` (manager), `STAFF` (warehouse), `TECHNICIAN`, `SUPERVISOR`.
+
 | Action | Who |
 |---|---|
-| Create drafts, scan, view | any signed-in user |
+| View products, scan | all roles |
+| Create stock drafts, cancel own drafts | ADMIN, STAFF |
+| View stock documents, dashboard | ADMIN, STAFF, SUPERVISOR |
 | Confirm a document (changes stock) | ADMIN |
 | Create/edit/delete products, categories; audit | ADMIN |
-| Cancel a draft | its creator or ADMIN |
-| Add/delete evidence photos | the document's creator or ADMIN; never on cancelled documents |
+| Stock document photos | the document's creator or ADMIN; never on cancelled documents |
+| View work orders | ADMIN, STAFF, SUPERVISOR: all · TECHNICIAN: **only assigned to them** (others → 404) |
+| Create, assign, cancel work orders | ADMIN |
+| Start, checklist, photos, submit | the assigned TECHNICIAN, only while the state allows |
+| Approve / request changes | SUPERVISOR (only the named one if set) or ADMIN |
+
+Work-order rules live in pure functions (`work-order-logic.ts`) used for both
+the API checks and the `allowedActions` the app receives, so the UI and the
+server can't disagree. Every transition re-checks the current status inside
+the database update.
 
 All of these are covered by API tests (see [testing.md](testing.md)).
 
@@ -53,7 +65,9 @@ All of these are covered by API tests (see [testing.md](testing.md)).
 - Before saving, the API checks the reported image is `https`, on
   `res.cloudinary.com`, in **our** account and in **this transaction's**
   folder, with no path traversal. Arbitrary URLs can't be attached.
-- At most 5 photos per document. Deleting a photo also deletes the asset.
+- At most 5 photos per stock document and 10 per work order (folder
+  `stockflow/work-orders/<id>`, same checks). Deleting a photo also deletes
+  the asset.
 
 ## Abuse protection
 

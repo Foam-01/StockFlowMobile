@@ -8,6 +8,8 @@ duplicates. Diagram: [architecture.md → Offline mode](architecture.md#offline-
 | Works offline | Online only (on purpose) |
 |---|---|
 | Creating RECEIVE / ISSUE / ADJUST **drafts** | Confirming or cancelling a document |
+| | Drafts linked to a work order (the queue can't carry the link yet, so they are never queued without it) |
+| | Everything in work orders (start, checklist, photos, submit, review) |
 | Searching products, picking items, barcode lookup (from cache) | Dashboard, history, photos |
 
 Confirming changes real stock and needs the server's current balance, so it

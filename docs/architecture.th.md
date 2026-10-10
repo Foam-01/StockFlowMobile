@@ -16,7 +16,7 @@ flowchart LR
 
   subgraph API["NestJS API"]
     Guards["JwtAuthGuard → RolesGuard"]
-    Modules["auth · products · stock<br/>dashboard · attachments"]
+    Modules["auth · products · stock · dashboard<br/>attachments · work-orders · users"]
     Logic["Pure domain logic<br/>(stock rules, ledger, flow)"]
     Prisma["Prisma client<br/>+ retry on transient errors"]
     Guards --> Modules --> Logic

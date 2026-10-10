@@ -4,13 +4,19 @@
 
 [![CI](https://github.com/Foam-01/StockFlowMobile/actions/workflows/ci.yml/badge.svg)](https://github.com/Foam-01/StockFlowMobile/actions/workflows/ci.yml)
 
-A mobile inventory app for receiving, issuing and adjusting stock: barcode
-scanning, photo evidence, a live dashboard and a full, auditable movement
-history per product.
+**Inventory & field operations in one mobile app.** The warehouse receives,
+issues and adjusts stock. Managers create work orders and technicians
+complete them on site: checklist, before/after photos, materials issued from
+stock. Supervisors review and approve. Every stock movement and every
+work-order step is auditable.
 
 - **Mobile:** Flutter · Riverpod · go_router · Dio · mobile_scanner · sqflite
 - **Backend:** NestJS · Prisma · PostgreSQL (Neon) · JWT · Cloudinary
 - Built as a portfolio / demo project, run locally
+
+| Technician: jobs | Technician: job in progress | Supervisor: review |
+|---|---|---|
+| <img src="docs/screenshots/wo-tech-list.png" width="250" alt="Technician job list"> | <img src="docs/screenshots/wo-tech-detail.png" width="250" alt="Job with checklist and submit blockers"> | <img src="docs/screenshots/wo-review-detail.png" width="250" alt="Supervisor reviewing a submitted job"> |
 
 | Dashboard | Products | Product & history |
 |---|---|---|
@@ -20,36 +26,71 @@ history per product.
 |---|---|---|
 | <img src="docs/screenshots/operations.png" width="250" alt="Stock operations"> | <img src="docs/screenshots/new-operation.png" width="250" alt="New issue form"> | <img src="docs/screenshots/login.png" width="250" alt="Sign in"> |
 
+## How it fits together
+
+1. **Admin** creates a work order: site, checklist template, required
+   photos, planned materials, technician, optional reviewer.
+2. **Warehouse staff** issue the materials: an `ISSUE` document linked to the
+   job, pre-filled with what is still needed. Stock moves only when an admin
+   confirms it.
+3. **Technician** starts the job, ticks the checklist, adds notes and
+   before/after photos, and submits. The server refuses submission until
+   every required item and photo is there.
+4. **Supervisor** approves, or requests changes with a reason; the technician
+   resumes and resubmits.
+5. Every step is recorded in an append-only audit trail.
+
 ## Features
 
-- **Roles:** JWT login with `ADMIN` / `STAFF`; the token is kept in secure storage
+**Field operations**
+- Work orders with an explicit state machine
+  (`OPEN → IN_PROGRESS → SUBMITTED → APPROVED`, or `→ NEEDS_REVISION → IN_PROGRESS`; cancel with a reason)
+- Each transition is its own endpoint, checked on the server and applied
+  atomically with its audit event. Repeating a transition is harmless, and
+  concurrent decisions resolve to exactly one.
+- Checklists copied from templates (later template edits never change an
+  existing job); required before/after photos; planned vs issued materials
+  with shortage warnings
+- Role-based app: technicians see only their own jobs; supervisors start on
+  the review queue; buttons follow the server's `allowedActions`
+
+**Inventory**
 - **Dashboard:** stock KPIs, received vs issued over the last 7 days, products that need attention, recent activity
-- **Products:** search, category and low-stock filters, stock-level badges, infinite scroll
+- **Products:** search, category and low-stock filters, product photos, infinite scroll
 - **Barcode scanner:** scan to open a product, or scan items into a document (re-scan adds +1)
 - **Stock documents:** `RECEIVE`, `ISSUE` and `ADJUST`; `DRAFT` → `CONFIRMED` / `CANCELLED`
-  - stock only changes on confirm (admin), and can never be issued below zero, even with concurrent confirms
-  - resending a document with the same `clientUuid` never creates a duplicate
-- **Evidence photos:** camera or gallery, uploaded straight to Cloudinary with server-signed requests
+  - stock only changes on confirm (admin), and can never go below zero, even with concurrent confirms
+  - resending with the same `clientUuid` never creates a duplicate
+- **Evidence photos:** camera or gallery, uploaded straight to Cloudinary with server-signed, format- and size-limited requests
 - **Offline mode:** documents saved without a connection are queued in SQLite and synced automatically (no duplicates); products stay searchable and scannable offline
 - **History & audit:** movements per product with running balance; ledger vs cached stock check
-- Loading, empty and error states with retry on every screen
-- API docs via Swagger
 
-See **[docs/architecture.md](docs/architecture.md)** for diagrams: system overview, confirm flow, upload flow, offline sync and data model.
+**Engineering**
+- Server-side authorization on every endpoint, with resource-level checks (a
+  technician asking for someone else's job gets `404`)
+- Rate limiting, request logs without tokens or bodies, retries for a
+  sleeping serverless database
+- Loading, empty and error states with retry on every screen; Swagger API docs
+
+Docs: [architecture](docs/architecture.md) · [work orders](docs/work-orders.md) ·
+[offline sync](docs/offline-sync.md) · [security](docs/security.md) ·
+[testing](docs/testing.md) · decisions in [docs/adr](docs/adr)
 
 ## Project structure
 
 ```
 .
-├── .github/workflows/ci.yml   # backend + Flutter checks, release APK
+├── .github/workflows/ci.yml   # backend + API (Postgres) + Flutter checks, release APK
 ├── backend/   # NestJS API
-│   ├── prisma/          # schema, migrations, seed, demo history
-│   └── src/             # auth, products, stock, dashboard, attachments
-├── docs/      # architecture diagrams
+│   ├── prisma/          # schema, migrations, seeds (accounts, history, work orders, images)
+│   ├── src/             # auth, products, stock, dashboard, attachments, work-orders, users
+│   └── test/            # API tests against a real Postgres
+├── docs/      # architecture, work orders, security, testing, ADRs, screenshots
 └── mobile/    # Flutter app
     └── lib/
-        ├── core/        # api client, server URL config, router, widgets
-        └── features/    # auth, dashboard, products, operations, history, scanner, offline, profile
+        ├── core/        # api client, server URL config, router, theme, widgets
+        └── features/    # auth, dashboard, products, operations, history, scanner,
+                         # offline, work_orders, profile
 ```
 
 ## Getting started
@@ -69,8 +110,9 @@ cd backend
 npm install
 cp .env.example .env      # fill in DATABASE_URL, DIRECT_URL, JWT_SECRET, CLOUDINARY_*
 npx prisma migrate deploy
-npx prisma db seed        # demo accounts and products
-npm run seed:history      # optional: 6 days of demo movements for the dashboard
+npx prisma db seed        # demo accounts, products, checklist templates
+npm run seed:history      # optional: 6 days of demo stock movements
+npm run seed:work-orders  # optional: one demo work order in every status
 npm run seed:images       # optional: product photos to Cloudinary (see docs/image-credits.md)
 npm run start:dev
 ```
@@ -80,15 +122,17 @@ npm run start:dev
 - Health check: `http://localhost:3000/health`
 
 Without `CLOUDINARY_*`, everything works except photo upload, which reports
-"not configured". `seed:history` is safe to re-run: it replaces its own
-demo rows and keeps the ledger consistent.
+"not configured". The demo seeds are re-runnable: they replace their own rows
+and keep the stock ledger consistent.
 
-**Demo accounts** (passwords come from `SEED_ADMIN_PASSWORD` / `SEED_STAFF_PASSWORD` in `.env`)
+**Demo accounts** (one tap each on the login screen; passwords from `SEED_*_PASSWORD` in `.env`)
 
 | Email | Role | Can |
 |---|---|---|
-| `admin@stockflow.dev` | ADMIN | everything, including confirming documents and editing products |
-| `staff@stockflow.dev` | STAFF | create drafts, scan, attach photos to own documents |
+| `admin@stockflow.dev` | ADMIN | everything: confirm stock documents, manage products, create, assign and cancel work orders, review |
+| `staff@stockflow.dev` | STAFF (warehouse) | stock drafts, scanning, issuing materials for jobs; jobs read-only |
+| `tech@stockflow.dev`, `tech2@stockflow.dev` | TECHNICIAN | own jobs only: start, checklist, photos, submit; product catalogue read-only |
+| `supervisor@stockflow.dev` | SUPERVISOR | review queue: approve or request changes; read stock documents |
 
 ### 2. Mobile
 
@@ -136,27 +180,38 @@ not for Play Store release.
 | GET | `/products` | List / search / filter products |
 | GET | `/products/barcode/:barcode` | Find a product by barcode |
 | POST / PATCH / DELETE | `/products/:id` | Manage products (admin) |
-| POST | `/transactions` | Create a draft (idempotent with `clientUuid`) |
-| GET | `/transactions` | List documents |
+| POST | `/transactions` | Create a stock draft, optionally linked to a work order |
 | POST | `/transactions/:id/confirm` | Confirm, which applies stock (admin) |
 | POST | `/transactions/:id/cancel` | Cancel a draft |
-| POST | `/transactions/:id/attachments/signature` | Sign a photo upload |
-| POST / DELETE | `/transactions/:id/attachments` | Save / delete a photo |
 | GET | `/products/:id/movements` | Movement history with running balance |
-| GET | `/products/:id/audit` | Ledger vs cached stock (admin) |
+| GET | `/work-orders` | Work orders visible to the caller (search, status filter) |
+| POST | `/work-orders` | Create (admin, idempotent with `clientUuid`) |
+| GET | `/work-orders/:id` | Detail with `allowedActions` and submit blockers |
+| POST | `/work-orders/:id/{start,submit,approve,request-changes,cancel}` | State transitions |
+| PUT | `/work-orders/:id/checklist/:itemId` | Tick an item / add a note |
+| POST / DELETE | `/work-orders/:id/evidence[/:id]` | Photos (signed upload) |
+| GET | `/work-orders/:id/events` | Audit trail |
 | GET | `/health` | Liveness check (no auth) |
 
-See Swagger at `/docs` for the full reference.
+The full list is in Swagger at `/docs` and in [docs/work-orders.md](docs/work-orders.md#api).
 
 ## Tests
 
+| Suite | Count |
+|---|---|
+| Backend unit (rules: stock, work orders, dashboard, signing, retry) | 48 |
+| Backend API tests against a real Postgres (auth, roles, transitions, concurrency, idempotency, inventory link) | 54 |
+| Flutter widget / unit tests | 65 |
+
 ```bash
-cd backend && npm test          # unit tests (Vitest): stock rules, ledger, dashboard, signing, retry
-cd mobile && flutter test       # widget / unit tests for every screen and flow
+cd backend && npm test          # unit tests
+cd backend && npm run test:e2e  # API tests; needs a disposable local Postgres (docs/testing.md)
+cd mobile && flutter test
 ```
 
-CI runs typecheck, lint, tests and build for the backend, plus format check,
-analyze and tests for the app, on every push and pull request.
+CI runs all of the above on every push and pull request, plus typecheck,
+lint, format, analyze and a release APK build. What is **not** covered yet
+(on-device testing, UI end-to-end) is listed in [docs/testing.md](docs/testing.md).
 
 ## Demo
 
