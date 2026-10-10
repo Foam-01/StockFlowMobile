@@ -1,5 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { SkipThrottle } from '@nestjs/throttler';
 import { Public } from './auth/decorators/index.js';
 
 /** Lets the app check it can reach the API (no auth, no database). */
@@ -7,6 +8,7 @@ import { Public } from './auth/decorators/index.js';
 @Controller('health')
 export class HealthController {
   @Public()
+  @SkipThrottle()
   @Get()
   check() {
     return { status: 'ok', service: 'stockflow-api' };

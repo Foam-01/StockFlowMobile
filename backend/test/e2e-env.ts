@@ -11,6 +11,9 @@ export const e2eEnv = {
   DIRECT_URL: TEST_DATABASE_URL,
   JWT_SECRET: 'e2e-secret',
   JWT_EXPIRES_IN: '1h',
+  // Tests fire many requests quickly; rate limits get their own test.
+  RATE_LIMIT_PER_MINUTE: '100000',
+  LOGIN_RATE_LIMIT_PER_MINUTE: '100000',
   // Fake account: uploads are verified, never sent to Cloudinary in tests.
   CLOUDINARY_CLOUD_NAME: 'e2e-cloud',
   CLOUDINARY_API_KEY: '000',
