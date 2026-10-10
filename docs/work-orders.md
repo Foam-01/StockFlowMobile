@@ -146,8 +146,29 @@ assignee can add or remove photos, and only while the work order is
 | POST | `/work-orders/:id/cancel` | ADMIN (reason required) |
 | GET | `/checklist-templates` | ADMIN |
 | GET | `/users?role=` | ADMIN (assignment pickers) |
+| GET | `/notifications?unread&page&limit` | own inbox only |
+| GET | `/notifications/unread-count` | own |
+| POST | `/notifications/:id/read` | own (someone else's id → 404) |
+| POST | `/notifications/read-all` | own |
+
+## Notifications (in-app)
+
+Created on the server **in the same transaction as the audit event** that
+causes them, one row per `(event, user)` (unique), so a retried or repeated
+request never notifies twice. Nobody is notified about their own action.
+
+| Event | Who is notified |
+|---|---|
+| assigned (on create or reassignment) | the newly assigned technician |
+| submitted | the named reviewer, or every supervisor if none is named |
+| changes requested / approved / cancelled | the assigned technician |
+
+The app shows a bell with an unread badge on the Jobs screen. There is no
+push service: the badge refreshes when the list is pulled down or the inbox
+is opened, so it is not real-time. Rules: `backend/src/notifications/`.
 
 ## Not in this version
 
-Stock reservation, editable checklist templates, push notifications,
+Stock reservation, editable checklist templates, push notifications
+(in-app only, see above), due-soon and stock-shortage notices,
 offline work-order execution, GPS/maps, multi-level approval, PDF reports.

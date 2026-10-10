@@ -15,6 +15,7 @@ import { HealthController } from './health.controller.js';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { ProductsModule } from './products/products.module.js';
 import { StockModule } from './stock/stock.module.js';
+import { NotificationsModule } from './notifications/notifications.module.js';
 import { UsersModule } from './users/users.module.js';
 import { WorkOrdersModule } from './work-orders/work-orders.module.js';
 
@@ -37,6 +38,7 @@ import { WorkOrdersModule } from './work-orders/work-orders.module.js';
     AttachmentsModule,
     WorkOrdersModule,
     UsersModule,
+    NotificationsModule,
   ],
   controllers: [HealthController],
   providers: [

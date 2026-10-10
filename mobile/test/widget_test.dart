@@ -11,6 +11,7 @@ import 'package:stockflow/features/history/domain/movement.dart';
 import 'package:stockflow/features/products/data/products_repository.dart';
 import 'package:stockflow/features/products/domain/product.dart';
 import 'package:stockflow/features/dashboard/data/dashboard_repository.dart';
+import 'package:stockflow/features/notifications/data/notifications_repository.dart';
 import 'package:stockflow/main.dart';
 
 import 'fakes.dart';
@@ -112,6 +113,9 @@ void main() {
           productsRepositoryProvider.overrideWithValue(products),
           historyRepositoryProvider.overrideWithValue(history),
           tokenStorageProvider.overrideWithValue(storage),
+          notificationsRepositoryProvider.overrideWithValue(
+            FakeNotificationsRepository(),
+          ),
         ],
         child: const StockFlowApp(),
       ),

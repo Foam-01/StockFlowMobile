@@ -1091,4 +1091,47 @@ class L10nEn extends L10n {
   String uploadFailed(String detail) {
     return 'Upload failed: $detail';
   }
+
+  @override
+  String get notifications => 'Notifications';
+
+  @override
+  String notificationsUnread(int count) {
+    return 'Notifications, $count unread';
+  }
+
+  @override
+  String get markAllRead => 'Mark all read';
+
+  @override
+  String get noNotifications => 'No notifications';
+
+  @override
+  String get noNotificationsHint =>
+      'Assignments and review results appear here. Pull down to check for new ones.';
+
+  @override
+  String ntfAssigned(String actor, String code) {
+    return '$actor assigned $code to you';
+  }
+
+  @override
+  String ntfSubmitted(String actor, String code) {
+    return '$actor submitted $code for review';
+  }
+
+  @override
+  String ntfChangesRequested(String actor, String code) {
+    return '$actor asked for changes on $code';
+  }
+
+  @override
+  String ntfApproved(String actor, String code) {
+    return '$actor approved $code';
+  }
+
+  @override
+  String ntfCancelled(String actor, String code) {
+    return '$actor cancelled $code';
+  }
 }

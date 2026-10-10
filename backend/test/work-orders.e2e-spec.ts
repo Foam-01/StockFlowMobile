@@ -650,3 +650,90 @@ describe('role boundaries for the new roles', () => {
     expect(res.body[0].items).toHaveLength(3);
   });
 });
+
+// ---------------------------------------------------------- notifications
+
+/** The caller's notifications about one work order, newest first. */
+async function inbox(who: Who, woId: string) {
+  const res = await http(who, 'get', '/notifications?limit=50').expect(200);
+  return res.body.items.filter((n: any) => n.workOrder.id === woId);
+}
+
+it('notifies each person once, never the one who acted', async () => {
+  // Assigned on create → technician hears about it, admin does not.
+  const wo = await submitted({ reviewerId: ctx.ids.sup });
+  expect((await inbox('tech', wo.id)).map((n: any) => n.type)).toEqual([
+    'ASSIGNED',
+  ]);
+  expect(await inbox('admin', wo.id)).toEqual([]);
+
+  // Submitted with a named reviewer → only that supervisor.
+  expect((await inbox('sup', wo.id)).map((n: any) => n.type)).toEqual([
+    'SUBMITTED',
+  ]);
+  expect(await inbox('sup2', wo.id)).toEqual([]);
+
+  // Approving twice is idempotent: still one APPROVED notice.
+  await http('sup', 'post', `/work-orders/${wo.id}/approve`)
+    .send({})
+    .expect(200);
+  await http('sup', 'post', `/work-orders/${wo.id}/approve`)
+    .send({})
+    .expect(200);
+  const tech = await inbox('tech', wo.id);
+  expect(tech.map((n: any) => n.type)).toEqual(['APPROVED', 'ASSIGNED']);
+  expect(tech[0]).toMatchObject({
+    read: false,
+    actor: { id: ctx.ids.sup },
+    workOrder: { code: wo.code },
+  });
+});
+
+it('without a reviewer, every supervisor hears about a submission', async () => {
+  const wo = await submitted();
+  expect(await inbox('sup', wo.id)).toHaveLength(1);
+  expect(await inbox('sup2', wo.id)).toHaveLength(1);
+});
+
+it('notifications are private and can be marked read', async () => {
+  const wo = await workOrder();
+  const [notice] = await inbox('tech', wo.id);
+
+  // Someone else's notification is invisible.
+  await http('tech2', 'post', `/notifications/${notice.id}/read`).expect(404);
+
+  const before = await http(
+    'tech',
+    'get',
+    '/notifications/unread-count',
+  ).expect(200);
+  const after = await http(
+    'tech',
+    'post',
+    `/notifications/${notice.id}/read`,
+  ).expect(200);
+  expect(after.body.unread).toBe(before.body.unread - 1);
+  expect((await inbox('tech', wo.id))[0].read).toBe(true);
+
+  const unread = await http('tech', 'get', '/notifications?unread=true').expect(
+    200,
+  );
+  expect(unread.body.items.some((n: any) => n.id === notice.id)).toBe(false);
+
+  await http('tech', 'post', '/notifications/read-all').expect(200);
+  const none = await http('tech', 'get', '/notifications/unread-count').expect(
+    200,
+  );
+  expect(none.body.unread).toBe(0);
+});
+
+it('reassigning notifies the new technician only', async () => {
+  const wo = await workOrder();
+  await http('admin', 'patch', `/work-orders/${wo.id}/assignment`)
+    .send({ assigneeId: ctx.ids.tech2 })
+    .expect(200);
+  expect((await inbox('tech2', wo.id)).map((n: any) => n.type)).toEqual([
+    'ASSIGNED',
+  ]);
+  expect(await inbox('tech', wo.id)).toHaveLength(1); // only the original
+});

@@ -14,6 +14,7 @@ import 'package:stockflow/features/operations/data/operations_repository.dart';
 import 'package:stockflow/features/operations/domain/stock_transaction.dart';
 import 'package:stockflow/features/operations/presentation/evidence_photos.dart';
 import 'package:stockflow/features/products/domain/product.dart';
+import 'package:stockflow/features/notifications/data/notifications_repository.dart';
 import 'package:stockflow/main.dart';
 
 import 'fakes.dart';
@@ -102,6 +103,9 @@ void main() {
           operationsRepositoryProvider.overrideWithValue(ops),
           attachmentsRepositoryProvider.overrideWithValue(attachments),
           tokenStorageProvider.overrideWithValue(MemoryTokenStorage()),
+          notificationsRepositoryProvider.overrideWithValue(
+            FakeNotificationsRepository(),
+          ),
           imagePickerProvider.overrideWithValue(
             (source) async =>
                 (bytes: Uint8List.fromList([1, 2, 3]), name: 'proof.jpg'),

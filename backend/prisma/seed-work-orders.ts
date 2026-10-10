@@ -17,6 +17,11 @@ import {
   WorkOrderStatus as S,
 } from '@prisma/client';
 
+import {
+  NOTIFYING_EVENTS,
+  recipientsFor,
+} from '../src/notifications/notification-rules.js';
+
 process.loadEnvFile?.('.env');
 
 const prisma = new PrismaClient();
@@ -61,6 +66,9 @@ async function removePrevious(db: Db) {
   }
   await db.stockTransaction.deleteMany({
     where: { id: { in: docs.map((d) => d.id) } },
+  });
+  await db.notification.deleteMany({
+    where: { event: { workOrderId: { in: orderIds } } },
   });
   await db.workOrderEvent.deleteMany({
     where: { workOrderId: { in: orderIds } },
@@ -376,8 +384,40 @@ async function main() {
         doneItems: acInstall.items.length,
         createdHoursAgo: 70,
       });
+      // Inbox entries derived from the same rules the API uses.
+      const supervisorIds = (
+        await db.user.findMany({
+          where: { role: 'SUPERVISOR' },
+          select: { id: true },
+        })
+      ).map((u) => u.id);
+      const events = await db.workOrderEvent.findMany({
+        where: {
+          workOrder: { clientUuid: { startsWith: DEMO } },
+          type: { in: [...NOTIFYING_EVENTS] },
+        },
+        include: {
+          workOrder: { select: { assigneeId: true, reviewerId: true } },
+        },
+      });
+      const notices = events.flatMap((e) =>
+        recipientsFor(e.type, {
+          actorId: e.actorId,
+          assigneeId: e.workOrder.assigneeId,
+          reviewerId: e.workOrder.reviewerId,
+          supervisorIds,
+        }).map((userId) => ({
+          userId,
+          eventId: e.id,
+          createdAt: e.createdAt,
+          // Anything older than two days has been seen already.
+          readAt: e.createdAt < ago(48) ? e.createdAt : null,
+        })),
+      );
+      await db.notification.createMany({ data: notices });
+
       console.log(
-        `Demo work orders: ${n} (one per status), parts received and issued`,
+        `Demo work orders: ${n} (one per status), parts received and issued, ${notices.length} notifications`,
       );
     },
     { timeout: 300_000, maxWait: 30_000 },

@@ -11,6 +11,8 @@ import '../domain/work_order.dart';
 import 'widgets/wo_badges.dart';
 import 'work_orders_controller.dart';
 import '../../../core/l10n.dart';
+import '../../notifications/presentation/notifications_controller.dart';
+import '../../notifications/presentation/notifications_screen.dart';
 
 class WorkOrdersScreen extends ConsumerStatefulWidget {
   const WorkOrdersScreen({super.key});
@@ -56,6 +58,7 @@ class _WorkOrdersScreenState extends ConsumerState<WorkOrdersScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
+        actions: const [NotificationBell(), SizedBox(width: 8)],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(112),
           child: Column(
@@ -124,7 +127,10 @@ class _WorkOrdersScreenState extends ConsumerState<WorkOrdersScreen> {
     final notifier = ref.read(woListProvider.notifier);
     if (s.items.isEmpty) {
       return RefreshIndicator(
-        onRefresh: notifier.refresh,
+        onRefresh: () {
+          ref.invalidate(unreadCountProvider);
+          return notifier.refresh();
+        },
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
           children: [
@@ -144,7 +150,10 @@ class _WorkOrdersScreenState extends ConsumerState<WorkOrdersScreen> {
       );
     }
     return RefreshIndicator(
-      onRefresh: notifier.refresh,
+      onRefresh: () {
+        ref.invalidate(unreadCountProvider);
+        return notifier.refresh();
+      },
       child: ListView.builder(
         controller: _scroll,
         physics: const AlwaysScrollableScrollPhysics(),

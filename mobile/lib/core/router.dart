@@ -16,6 +16,7 @@ import '../features/products/presentation/product_detail_screen.dart';
 import '../features/products/presentation/products_screen.dart';
 import '../features/profile/presentation/profile_screen.dart';
 import '../features/scanner/presentation/barcode_lookup.dart';
+import '../features/notifications/presentation/notifications_screen.dart';
 import '../features/work_orders/presentation/create_work_order_screen.dart';
 import '../features/work_orders/presentation/issue_materials.dart';
 import '../features/work_orders/presentation/work_order_activity_screen.dart';
@@ -161,6 +162,11 @@ final routerProvider = Provider<GoRouter>((ref) {
                     path: 'new',
                     parentNavigatorKey: _rootKey,
                     builder: (_, _) => const CreateWorkOrderScreen(),
+                  ),
+                  GoRoute(
+                    path: 'notifications',
+                    parentNavigatorKey: _rootKey,
+                    builder: (_, _) => const NotificationsScreen(),
                   ),
                   GoRoute(
                     path: ':id',

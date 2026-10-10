@@ -72,6 +72,7 @@ export async function resetData(prisma: PrismaService) {
   await prisma.attachment.deleteMany();
   await prisma.stockTransactionItem.deleteMany();
   await prisma.stockTransaction.deleteMany();
+  await prisma.notification.deleteMany();
   await prisma.workOrderEvent.deleteMany();
   await prisma.workOrderEvidence.deleteMany();
   await prisma.workOrderMaterial.deleteMany();

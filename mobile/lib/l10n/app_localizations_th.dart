@@ -1082,4 +1082,47 @@ class L10nTh extends L10n {
   String uploadFailed(String detail) {
     return 'อัปโหลดรูปไม่สำเร็จ: $detail';
   }
+
+  @override
+  String get notifications => 'การแจ้งเตือน';
+
+  @override
+  String notificationsUnread(int count) {
+    return 'การแจ้งเตือน ยังไม่อ่าน $count';
+  }
+
+  @override
+  String get markAllRead => 'อ่านทั้งหมดแล้ว';
+
+  @override
+  String get noNotifications => 'ยังไม่มีการแจ้งเตือน';
+
+  @override
+  String get noNotificationsHint =>
+      'งานที่ได้รับมอบหมายและผลการตรวจจะแสดงที่นี่ ดึงลงเพื่อเช็กรายการใหม่';
+
+  @override
+  String ntfAssigned(String actor, String code) {
+    return '$actor มอบหมายงาน $code ให้คุณ';
+  }
+
+  @override
+  String ntfSubmitted(String actor, String code) {
+    return '$actor ส่งงาน $code ให้ตรวจ';
+  }
+
+  @override
+  String ntfChangesRequested(String actor, String code) {
+    return '$actor ขอให้แก้ไขงาน $code';
+  }
+
+  @override
+  String ntfApproved(String actor, String code) {
+    return '$actor อนุมัติงาน $code แล้ว';
+  }
+
+  @override
+  String ntfCancelled(String actor, String code) {
+    return '$actor ยกเลิกงาน $code';
+  }
 }

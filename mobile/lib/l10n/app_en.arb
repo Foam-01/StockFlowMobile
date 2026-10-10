@@ -742,5 +742,72 @@
         "type": "String"
       }
     }
+  },
+  "notifications": "Notifications",
+  "notificationsUnread": "Notifications, {count} unread",
+  "@notificationsUnread": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "markAllRead": "Mark all read",
+  "noNotifications": "No notifications",
+  "noNotificationsHint": "Assignments and review results appear here. Pull down to check for new ones.",
+  "ntfAssigned": "{actor} assigned {code} to you",
+  "@ntfAssigned": {
+    "placeholders": {
+      "actor": {
+        "type": "String"
+      },
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "ntfSubmitted": "{actor} submitted {code} for review",
+  "@ntfSubmitted": {
+    "placeholders": {
+      "actor": {
+        "type": "String"
+      },
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "ntfChangesRequested": "{actor} asked for changes on {code}",
+  "@ntfChangesRequested": {
+    "placeholders": {
+      "actor": {
+        "type": "String"
+      },
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "ntfApproved": "{actor} approved {code}",
+  "@ntfApproved": {
+    "placeholders": {
+      "actor": {
+        "type": "String"
+      },
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "ntfCancelled": "{actor} cancelled {code}",
+  "@ntfCancelled": {
+    "placeholders": {
+      "actor": {
+        "type": "String"
+      },
+      "code": {
+        "type": "String"
+      }
+    }
   }
 }

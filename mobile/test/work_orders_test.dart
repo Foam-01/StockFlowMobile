@@ -15,6 +15,9 @@ import 'package:stockflow/features/work_orders/data/work_orders_repository.dart'
 import 'package:stockflow/features/work_orders/domain/work_order.dart';
 import 'package:stockflow/main.dart';
 
+import 'package:stockflow/features/notifications/data/notifications_repository.dart';
+import 'package:stockflow/features/notifications/domain/app_notification.dart';
+
 import 'fakes.dart';
 
 class MockAuth extends Mock implements AuthRepository {}
@@ -146,6 +149,9 @@ void main() {
     ).thenAnswer((_) async => const Paged(items: [], total: 0, page: 1));
   });
 
+  late FakeNotificationsRepository inbox;
+  setUp(() => inbox = FakeNotificationsRepository());
+
   Future<void> pumpAs(WidgetTester tester, Role role) async {
     when(() => auth.me()).thenAnswer((_) async => _user(role));
     tester.view.physicalSize = const Size(1080, 2400);
@@ -163,6 +169,7 @@ void main() {
           productsRepositoryProvider.overrideWithValue(products),
           operationsRepositoryProvider.overrideWithValue(ops),
           tokenStorageProvider.overrideWithValue(MemoryTokenStorage()),
+          notificationsRepositoryProvider.overrideWithValue(inbox),
         ],
         child: const StockFlowApp(),
       ),
@@ -374,6 +381,56 @@ void main() {
       verify(() => wo.approve('wo1', note: 'Neat')).called(1);
       expect(find.text('Approved'), findsWidgets);
       expect(find.byKey(const Key('wo_approve')), findsNothing);
+    });
+  });
+
+  group('notifications', () {
+    testWidgets('badge shows unread; opening one marks it read', (
+      tester,
+    ) async {
+      inbox.items.add(
+        AppNotification(
+          id: 'n1',
+          type: 'APPROVED',
+          workOrderId: 'wo1',
+          workOrderCode: 'WO-00001',
+          workOrderTitle: 'Install AC',
+          actorName: 'Kanya',
+          read: false,
+          createdAt: DateTime(2026, 10, 10, 9),
+        ),
+      );
+      when(() => wo.get('wo1'))
+          .thenAnswer((_) async => _wo(status: 'APPROVED'));
+      await pumpAs(tester, Role.technician);
+
+      final bell = find.byKey(const Key('notifications_bell'));
+      expect(
+        find.descendant(of: bell, matching: find.text('1')),
+        findsOneWidget,
+      );
+
+      await tester.tap(bell);
+      await tester.pumpAndSettle();
+      expect(find.text('Kanya approved WO-00001'), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('notification_n1')));
+      await tester.pumpAndSettle();
+      expect(inbox.markedRead, ['n1']);
+      expect(find.byKey(const Key('wo_activity')), findsOneWidget);
+
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      expect(find.descendant(of: bell, matching: find.text('1')), findsNothing);
+    });
+
+    testWidgets('empty inbox explains what will appear', (tester) async {
+      await pumpAs(tester, Role.supervisor);
+      await tester.tap(find.byKey(const Key('notifications_bell')));
+      await tester.pumpAndSettle();
+      expect(find.text('No notifications'), findsOneWidget);
     });
   });
 

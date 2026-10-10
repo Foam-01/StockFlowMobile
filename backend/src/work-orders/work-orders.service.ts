@@ -23,6 +23,7 @@ import {
   validateUploadedAsset,
   workOrderFolder,
 } from '../attachments/cloudinary.js';
+import { notifyForEvent } from '../notifications/notifications.module.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { withRetry } from '../prisma/retry.js';
 import {
@@ -260,7 +261,7 @@ export class WorkOrdersService {
           },
         });
         if (dto.assigneeId) {
-          await db.workOrderEvent.create({
+          const assigned = await db.workOrderEvent.create({
             data: {
               workOrderId: wo.id,
               actorId: actor.id,
@@ -271,6 +272,10 @@ export class WorkOrdersService {
                 dto.reviewerId,
               ),
             },
+          });
+          await notifyForEvent(db, assigned, {
+            assigneeId: dto.assigneeId,
+            reviewerId: dto.reviewerId ?? null,
           });
         }
         return wo;
@@ -310,18 +315,24 @@ export class WorkOrdersService {
         if (res.count === 0) {
           throw new ConflictException('Work order can no longer be reassigned');
         }
-        await db.workOrderEvent.create({
+        const assigneeId =
+          dto.assigneeId === undefined ? wo.assigneeId : dto.assigneeId;
+        const event = await db.workOrderEvent.create({
           data: {
             workOrderId: id,
             actorId: actor.id,
             type: WorkOrderEventType.ASSIGNED,
             note: await this.assignmentNote(
               db,
-              dto.assigneeId === undefined ? wo.assigneeId : dto.assigneeId,
+              assigneeId,
               dto.reviewerId === undefined ? wo.reviewerId : dto.reviewerId,
             ),
           },
         });
+        // Only a newly assigned technician needs to hear about it.
+        if (assigneeId && assigneeId !== wo.assigneeId) {
+          await notifyForEvent(db, event, { assigneeId, reviewerId: null });
+        }
       }),
     );
     return this.detail(actor, id);
@@ -435,7 +446,7 @@ export class WorkOrdersService {
           data: { status: to, ...opts.data(wo) },
         });
         if (res.count === 0) return false;
-        await db.workOrderEvent.create({
+        const event = await db.workOrderEvent.create({
           data: {
             workOrderId: id,
             actorId: actor.id,
@@ -444,6 +455,10 @@ export class WorkOrdersService {
             toStatus: to,
             note: opts.note,
           },
+        });
+        await notifyForEvent(db, event, {
+          assigneeId: wo.assigneeId,
+          reviewerId: wo.reviewerId,
         });
         return true;
       }),

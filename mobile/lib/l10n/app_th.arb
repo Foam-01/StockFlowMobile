@@ -313,5 +313,15 @@
   "addReason": "กรุณาระบุเหตุผล",
   "moreWords": "ขอรายละเอียดเพิ่มอีกนิด",
   "assign": "มอบหมาย",
-  "uploadFailed": "อัปโหลดรูปไม่สำเร็จ: {detail}"
+  "uploadFailed": "อัปโหลดรูปไม่สำเร็จ: {detail}",
+  "notifications": "การแจ้งเตือน",
+  "notificationsUnread": "การแจ้งเตือน ยังไม่อ่าน {count}",
+  "markAllRead": "อ่านทั้งหมดแล้ว",
+  "noNotifications": "ยังไม่มีการแจ้งเตือน",
+  "noNotificationsHint": "งานที่ได้รับมอบหมายและผลการตรวจจะแสดงที่นี่ ดึงลงเพื่อเช็กรายการใหม่",
+  "ntfAssigned": "{actor} มอบหมายงาน {code} ให้คุณ",
+  "ntfSubmitted": "{actor} ส่งงาน {code} ให้ตรวจ",
+  "ntfChangesRequested": "{actor} ขอให้แก้ไขงาน {code}",
+  "ntfApproved": "{actor} อนุมัติงาน {code} แล้ว",
+  "ntfCancelled": "{actor} ยกเลิกงาน {code}"
 }

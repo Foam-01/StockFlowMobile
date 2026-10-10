@@ -1980,6 +1980,66 @@ abstract class L10n {
   /// In en, this message translates to:
   /// **'Upload failed: {detail}'**
   String uploadFailed(String detail);
+
+  /// No description provided for @notifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notifications;
+
+  /// No description provided for @notificationsUnread.
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications, {count} unread'**
+  String notificationsUnread(int count);
+
+  /// No description provided for @markAllRead.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark all read'**
+  String get markAllRead;
+
+  /// No description provided for @noNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'No notifications'**
+  String get noNotifications;
+
+  /// No description provided for @noNotificationsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Assignments and review results appear here. Pull down to check for new ones.'**
+  String get noNotificationsHint;
+
+  /// No description provided for @ntfAssigned.
+  ///
+  /// In en, this message translates to:
+  /// **'{actor} assigned {code} to you'**
+  String ntfAssigned(String actor, String code);
+
+  /// No description provided for @ntfSubmitted.
+  ///
+  /// In en, this message translates to:
+  /// **'{actor} submitted {code} for review'**
+  String ntfSubmitted(String actor, String code);
+
+  /// No description provided for @ntfChangesRequested.
+  ///
+  /// In en, this message translates to:
+  /// **'{actor} asked for changes on {code}'**
+  String ntfChangesRequested(String actor, String code);
+
+  /// No description provided for @ntfApproved.
+  ///
+  /// In en, this message translates to:
+  /// **'{actor} approved {code}'**
+  String ntfApproved(String actor, String code);
+
+  /// No description provided for @ntfCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'{actor} cancelled {code}'**
+  String ntfCancelled(String actor, String code);
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

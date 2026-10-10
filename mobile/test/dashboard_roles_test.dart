@@ -11,6 +11,7 @@ import 'package:stockflow/features/products/data/products_repository.dart';
 import 'package:stockflow/features/products/domain/product.dart';
 import 'package:stockflow/features/work_orders/data/work_orders_repository.dart';
 import 'package:stockflow/features/work_orders/domain/work_order.dart';
+import 'package:stockflow/features/notifications/data/notifications_repository.dart';
 import 'package:stockflow/main.dart';
 
 import 'fakes.dart';
@@ -110,6 +111,9 @@ void main() {
           workOrdersRepositoryProvider.overrideWithValue(wo),
           productsRepositoryProvider.overrideWithValue(products),
           tokenStorageProvider.overrideWithValue(storage),
+          notificationsRepositoryProvider.overrideWithValue(
+            FakeNotificationsRepository(),
+          ),
         ],
         child: const StockFlowApp(),
       ),

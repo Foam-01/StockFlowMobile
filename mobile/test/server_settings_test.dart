@@ -5,7 +5,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:stockflow/core/config.dart';
 import 'package:stockflow/core/token_storage.dart';
 import 'package:stockflow/features/auth/presentation/server_settings.dart';
+import 'package:stockflow/features/notifications/data/notifications_repository.dart';
 import 'package:stockflow/main.dart';
+
+import 'fakes.dart';
 
 class EmptyTokenStorage implements TokenStorage {
   @override
@@ -55,6 +58,9 @@ void main() {
           retry: (_, _) => null,
           overrides: [
             tokenStorageProvider.overrideWithValue(EmptyTokenStorage()),
+            notificationsRepositoryProvider.overrideWithValue(
+              FakeNotificationsRepository(),
+            ),
             serverHealthCheckProvider.overrideWithValue((url) async {
               pinged.add(url);
               return url.contains('10.0.0.9') ? null : 'Cannot reach';

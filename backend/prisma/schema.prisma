@@ -83,6 +83,7 @@ model User {
   workOrderEvents    WorkOrderEvent[]
   evidenceUploads    WorkOrderEvidence[]
   checklistDone      WorkOrderChecklistItem[]
+  notifications      Notification[]
 }
 
 model Category {
@@ -262,16 +263,32 @@ model WorkOrderEvidence {
 
 /// Append-only audit trail, written only by the server.
 model WorkOrderEvent {
-  id          String             @id @default(uuid())
-  workOrderId String
-  workOrder   WorkOrder          @relation(fields: [workOrderId], references: [id], onDelete: Restrict)
-  actorId     String
-  actor       User               @relation(fields: [actorId], references: [id])
-  type        WorkOrderEventType
-  fromStatus  WorkOrderStatus?
-  toStatus    WorkOrderStatus?
-  note        String?
-  createdAt   DateTime           @default(now())
+  id            String             @id @default(uuid())
+  workOrderId   String
+  workOrder     WorkOrder          @relation(fields: [workOrderId], references: [id], onDelete: Restrict)
+  actorId       String
+  actor         User               @relation(fields: [actorId], references: [id])
+  type          WorkOrderEventType
+  fromStatus    WorkOrderStatus?
+  toStatus      WorkOrderStatus?
+  note          String?
+  createdAt     DateTime           @default(now())
+  notifications Notification[]
 
   @@index([workOrderId, createdAt])
+}
+
+/// In-app notice for one user, derived from a work-order event.
+/// One row per (event, user): retries never notify twice.
+model Notification {
+  id        String         @id @default(uuid())
+  userId    String
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventId   String
+  event     WorkOrderEvent @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  readAt    DateTime?
+  createdAt DateTime       @default(now())
+
+  @@unique([eventId, userId])
+  @@index([userId, createdAt])
 }
