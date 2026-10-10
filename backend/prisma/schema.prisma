@@ -11,6 +11,44 @@ datasource db {
 enum Role {
   ADMIN
   STAFF
+  TECHNICIAN
+  SUPERVISOR
+}
+
+enum WorkOrderStatus {
+  OPEN
+  IN_PROGRESS
+  SUBMITTED
+  NEEDS_REVISION
+  APPROVED
+  CANCELLED
+}
+
+enum WorkOrderPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+enum EvidenceCategory {
+  BEFORE
+  AFTER
+  OTHER
+}
+
+enum WorkOrderEventType {
+  CREATED
+  ASSIGNED
+  STARTED
+  CHECKLIST_UPDATED
+  EVIDENCE_ADDED
+  EVIDENCE_REMOVED
+  SUBMITTED
+  CHANGES_REQUESTED
+  APPROVED
+  CANCELLED
+  MATERIAL_ISSUED
 }
 
 enum TxType {
@@ -35,6 +73,14 @@ model User {
   createdTx    StockTransaction[] @relation("CreatedBy")
   confirmedTx  StockTransaction[] @relation("ConfirmedBy")
   uploads      Attachment[]       @relation("UploadedBy")
+
+  createdWorkOrders  WorkOrder[]              @relation("WorkOrderCreatedBy")
+  assignedWorkOrders WorkOrder[]              @relation("WorkOrderAssignee")
+  reviewWorkOrders   WorkOrder[]              @relation("WorkOrderReviewer")
+  reviewedWorkOrders WorkOrder[]              @relation("WorkOrderReviewedBy")
+  workOrderEvents    WorkOrderEvent[]
+  evidenceUploads    WorkOrderEvidence[]
+  checklistDone      WorkOrderChecklistItem[]
 }
 
 model Category {
@@ -55,6 +101,7 @@ model Product {
   categoryId String
   category   Category               @relation(fields: [categoryId], references: [id])
   items      StockTransactionItem[]
+  materials  WorkOrderMaterial[]
   createdAt  DateTime               @default(now())
 }
 
@@ -73,6 +120,11 @@ model StockTransaction {
   confirmedAt   DateTime?
   items         StockTransactionItem[]
   attachments   Attachment[]
+  /// Optional: materials issued (or returned) for a work order.
+  workOrderId   String?
+  workOrder     WorkOrder?             @relation(fields: [workOrderId], references: [id], onDelete: Restrict)
+
+  @@index([workOrderId])
 }
 
 model StockTransactionItem {
@@ -94,4 +146,130 @@ model Attachment {
   uploadedById  String?
   uploadedBy    User?            @relation("UploadedBy", fields: [uploadedById], references: [id])
   createdAt     DateTime         @default(now())
+}
+
+/// Read-only checklist templates (seeded). Work orders copy their items.
+model ChecklistTemplate {
+  id          String                  @id @default(uuid())
+  name        String                  @unique
+  description String?
+  items       ChecklistTemplateItem[]
+  workOrders  WorkOrder[]
+}
+
+model ChecklistTemplateItem {
+  id          String            @id @default(uuid())
+  templateId  String
+  template    ChecklistTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  required    Boolean           @default(true)
+  position    Int
+
+  @@unique([templateId, position])
+}
+
+model WorkOrder {
+  id               String             @id @default(uuid())
+  /// Human code WO-00001 is derived from this.
+  number           Int                @unique @default(autoincrement())
+  clientUuid       String?            @unique
+  title            String
+  description      String?
+  siteName         String
+  siteAddress      String?
+  priority         WorkOrderPriority  @default(NORMAL)
+  status           WorkOrderStatus    @default(OPEN)
+  dueAt            DateTime?
+  requiredEvidence EvidenceCategory[]
+
+  templateId   String?
+  template     ChecklistTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+  createdById  String
+  createdBy    User               @relation("WorkOrderCreatedBy", fields: [createdById], references: [id])
+  assigneeId   String?
+  assignee     User?              @relation("WorkOrderAssignee", fields: [assigneeId], references: [id])
+  /// Optional specific reviewer; otherwise any SUPERVISOR or ADMIN.
+  reviewerId   String?
+  reviewer     User?              @relation("WorkOrderReviewer", fields: [reviewerId], references: [id])
+  reviewedById String?
+  reviewedBy   User?              @relation("WorkOrderReviewedBy", fields: [reviewedById], references: [id])
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  startedAt    DateTime?
+  submittedAt  DateTime?
+  reviewedAt   DateTime?
+  /// Latest request-changes reason (full history is in events).
+  reviewNote   String?
+  cancelReason String?
+
+  checklist         WorkOrderChecklistItem[]
+  materials         WorkOrderMaterial[]
+  evidence          WorkOrderEvidence[]
+  events            WorkOrderEvent[]
+  stockTransactions StockTransaction[]
+
+  @@index([status])
+  @@index([assigneeId, status])
+}
+
+/// Snapshot of the template item at creation, plus the technician's result.
+model WorkOrderChecklistItem {
+  id            String    @id @default(uuid())
+  workOrderId   String
+  workOrder     WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  title         String
+  description   String?
+  required      Boolean   @default(true)
+  position      Int
+  done          Boolean   @default(false)
+  note          String?
+  completedById String?
+  completedBy   User?     @relation(fields: [completedById], references: [id])
+  completedAt   DateTime?
+
+  @@unique([workOrderId, position])
+}
+
+model WorkOrderMaterial {
+  id          String    @id @default(uuid())
+  workOrderId String
+  workOrder   WorkOrder @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product   @relation(fields: [productId], references: [id])
+  plannedQty  Int
+
+  @@unique([workOrderId, productId])
+}
+
+model WorkOrderEvidence {
+  id           String           @id @default(uuid())
+  workOrderId  String
+  workOrder    WorkOrder        @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  category     EvidenceCategory
+  url          String
+  publicId     String           @unique
+  note         String?
+  uploadedById String
+  uploadedBy   User             @relation(fields: [uploadedById], references: [id])
+  createdAt    DateTime         @default(now())
+
+  @@index([workOrderId])
+}
+
+/// Append-only audit trail, written only by the server.
+model WorkOrderEvent {
+  id          String             @id @default(uuid())
+  workOrderId String
+  workOrder   WorkOrder          @relation(fields: [workOrderId], references: [id], onDelete: Restrict)
+  actorId     String
+  actor       User               @relation(fields: [actorId], references: [id])
+  type        WorkOrderEventType
+  fromStatus  WorkOrderStatus?
+  toStatus    WorkOrderStatus?
+  note        String?
+  createdAt   DateTime           @default(now())
+
+  @@index([workOrderId, createdAt])
 }

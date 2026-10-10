@@ -5,7 +5,14 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma, Role, TxStatus } from '@prisma/client';
+import {
+  Prisma,
+  Role,
+  TxStatus,
+  TxType,
+  WorkOrderEventType,
+  WorkOrderStatus,
+} from '@prisma/client';
 import { AuthUser } from '../auth/decorators/index.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { withRetry } from '../prisma/retry.js';
@@ -29,6 +36,7 @@ const txInclude = {
   createdBy: { select: { id: true, name: true } },
   confirmedBy: { select: { id: true, name: true } },
   attachments: true,
+  workOrder: { select: { id: true, number: true, title: true, status: true } },
 } satisfies Prisma.StockTransactionInclude;
 
 @Injectable()
@@ -59,6 +67,8 @@ export class StockService {
     if (found !== productIds.length) {
       throw new BadRequestException('One or more products do not exist');
     }
+    if (dto.workOrderId)
+      await this.checkWorkOrderLink(dto.type, dto.workOrderId);
 
     return this.prisma.db.stockTransaction.create({
       data: {
@@ -67,6 +77,7 @@ export class StockService {
         referenceNo: dto.referenceNo,
         note: dto.note,
         createdById: user.id,
+        workOrderId: dto.workOrderId,
         items: { create: dto.items },
       },
       include: txInclude,
@@ -146,6 +157,21 @@ export class StockService {
                 .message,
             );
           }
+        }
+
+        // Linked to a work order: record it in its audit trail, atomically.
+        if (tx.workOrderId) {
+          const lines = tx.items
+            .map((i) => `${i.quantity} × ${i.product.sku}`)
+            .join(', ');
+          await db.workOrderEvent.create({
+            data: {
+              workOrderId: tx.workOrderId,
+              actorId: user.id,
+              type: WorkOrderEventType.MATERIAL_ISSUED,
+              note: `${tx.type === TxType.ISSUE ? 'Issued' : 'Returned'} ${lines}${tx.referenceNo ? ` (${tx.referenceNo})` : ''}`,
+            },
+          });
         }
       }),
     );
@@ -251,6 +277,28 @@ export class StockService {
       unit: product.unit,
       onHand: product.onHand,
     };
+  }
+
+  /** Materials can be issued to (or returned from) an active work order only. */
+  private async checkWorkOrderLink(type: TxType, workOrderId: string) {
+    if (type === TxType.ADJUST) {
+      throw new BadRequestException(
+        'Only ISSUE or RECEIVE documents can be linked to a work order',
+      );
+    }
+    const wo = await this.prisma.db.workOrder.findUnique({
+      where: { id: workOrderId },
+      select: { status: true },
+    });
+    if (!wo) throw new BadRequestException('Work order not found');
+    if (
+      wo.status === WorkOrderStatus.APPROVED ||
+      wo.status === WorkOrderStatus.CANCELLED
+    ) {
+      throw new BadRequestException(
+        `Work order is ${wo.status.toLowerCase()}; materials can no longer be linked`,
+      );
+    }
   }
 
   private guardRules(fn: () => void) {

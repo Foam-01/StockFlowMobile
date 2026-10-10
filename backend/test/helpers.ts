@@ -12,8 +12,13 @@ export interface TestContext {
   app: INestApplication;
   prisma: PrismaService;
   http: () => ReturnType<typeof request>;
-  tokens: { admin: string; staff: string; staff2: string };
+  tokens: Record<Who, string>;
+  /** User ids by role key, for assignment. */
+  ids: Record<Who, string>;
 }
+
+export type Who =
+  'admin' | 'staff' | 'staff2' | 'tech' | 'tech2' | 'sup' | 'sup2';
 
 /** Boots the API exactly like main.ts, against an empty test database. */
 export async function createTestApp(): Promise<TestContext> {
@@ -35,14 +40,21 @@ export async function createTestApp(): Promise<TestContext> {
 
   const password = 'Passw0rd!';
   const hash = await bcrypt.hash(password, 4);
-  for (const [email, role] of [
-    ['admin@test.dev', Role.ADMIN],
-    ['staff@test.dev', Role.STAFF],
-    ['staff2@test.dev', Role.STAFF],
-  ] as const) {
-    await prisma.user.create({
-      data: { email, name: email.split('@')[0], role, passwordHash: hash },
+  const people: [Who, Role][] = [
+    ['admin', Role.ADMIN],
+    ['staff', Role.STAFF],
+    ['staff2', Role.STAFF],
+    ['tech', Role.TECHNICIAN],
+    ['tech2', Role.TECHNICIAN],
+    ['sup', Role.SUPERVISOR],
+    ['sup2', Role.SUPERVISOR],
+  ];
+  const ids = {} as Record<Who, string>;
+  for (const [who, role] of people) {
+    const u = await prisma.user.create({
+      data: { email: `${who}@test.dev`, name: who, role, passwordHash: hash },
     });
+    ids[who] = u.id;
   }
 
   const http = () => request(app.getHttpServer());
@@ -50,22 +62,23 @@ export async function createTestApp(): Promise<TestContext> {
     (await http().post('/auth/login').send({ email, password })).body
       .accessToken as string;
 
-  return {
-    app,
-    prisma,
-    http,
-    tokens: {
-      admin: await login('admin@test.dev'),
-      staff: await login('staff@test.dev'),
-      staff2: await login('staff2@test.dev'),
-    },
-  };
+  const tokens = {} as Record<Who, string>;
+  for (const [who] of people) tokens[who] = await login(`${who}@test.dev`);
+  return { app, prisma, http, tokens, ids };
 }
 
 export async function resetData(prisma: PrismaService) {
+  // Children before parents (events and stock links are Restrict).
   await prisma.attachment.deleteMany();
   await prisma.stockTransactionItem.deleteMany();
   await prisma.stockTransaction.deleteMany();
+  await prisma.workOrderEvent.deleteMany();
+  await prisma.workOrderEvidence.deleteMany();
+  await prisma.workOrderMaterial.deleteMany();
+  await prisma.workOrderChecklistItem.deleteMany();
+  await prisma.workOrder.deleteMany();
+  await prisma.checklistTemplateItem.deleteMany();
+  await prisma.checklistTemplate.deleteMany();
   await prisma.product.deleteMany();
   await prisma.category.deleteMany();
   await prisma.user.deleteMany();
@@ -99,17 +112,13 @@ export async function productWithStock(ctx: TestContext, onHand: number) {
   return product;
 }
 
-export function auth(
-  ctx: TestContext,
-  who: keyof TestContext['tokens'],
-  req: request.Test,
-) {
+export function auth(ctx: TestContext, who: Who, req: request.Test) {
   return req.set('Authorization', `Bearer ${ctx.tokens[who]}`);
 }
 
 export async function createTx(
   ctx: TestContext,
-  who: keyof TestContext['tokens'],
+  who: Who,
   type: 'RECEIVE' | 'ISSUE' | 'ADJUST',
   productId: string,
   quantity: number,

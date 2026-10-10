@@ -8,7 +8,8 @@ import {
   Query,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
-import { TxStatus } from '@prisma/client';
+import { Role, TxStatus } from '@prisma/client';
+import { Roles } from '../auth/decorators/index.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { dailyFlow, stockUrgency } from './dashboard-logic.js';
 
@@ -99,6 +100,7 @@ export class DashboardService {
 export class DashboardController {
   constructor(private readonly dashboard: DashboardService) {}
 
+  @Roles(Role.ADMIN, Role.STAFF, Role.SUPERVISOR)
   @Get()
   @ApiQuery({
     name: 'tzOffset',

@@ -4,6 +4,7 @@ import {
   txFolder,
   uploadParams,
   validateUploadedAsset,
+  workOrderFolder,
 } from './cloudinary.js';
 
 describe('signParams', () => {
@@ -71,6 +72,23 @@ describe('validateUploadedAsset', () => {
         ctx,
       ),
     ).toMatch(/Cloudinary/);
+  });
+
+  it('accepts the folder form used by work orders', () => {
+    const folder = workOrderFolder('wo1');
+    const id = `${folder}/x1`;
+    expect(
+      validateUploadedAsset(
+        {
+          publicId: id,
+          url: `https://res.cloudinary.com/demo/image/upload/v1/${id}.jpg`,
+        },
+        { cloudName: 'demo', folder },
+      ),
+    ).toBeNull();
+    expect(
+      validateUploadedAsset({ publicId, url }, { cloudName: 'demo', folder }),
+    ).toMatch(/folder/);
   });
 
   it('rejects path traversal and garbage URLs', () => {

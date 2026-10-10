@@ -20,10 +20,11 @@ import { ApiBearerAuth, ApiProperty, ApiTags } from '@nestjs/swagger';
 import { Role, TxStatus } from '@prisma/client';
 import { IsString, IsUrl, MaxLength } from 'class-validator';
 import type { AuthUser } from '../auth/decorators/index.js';
-import { CurrentUser } from '../auth/decorators/index.js';
+import { CurrentUser, Roles } from '../auth/decorators/index.js';
 import { PrismaService } from '../prisma/prisma.service.js';
 import {
   CloudinaryConfig,
+  destroyAsset,
   signParams,
   uploadParams,
   validateUploadedAsset,
@@ -144,34 +145,16 @@ export class AttachmentsService {
     await this.prisma.db.attachment.delete({ where: { id: attachment.id } });
     if (attachment.publicId) {
       // Best effort: the record is gone either way.
-      await this.destroy(attachment.publicId, config).catch((e) =>
+      await destroyAsset(attachment.publicId, config).catch((e) =>
         this.logger.warn(`Cloudinary destroy failed: ${e}`),
       );
     }
-  }
-
-  private async destroy(publicId: string, c: CloudinaryConfig) {
-    const params = {
-      public_id: publicId,
-      timestamp: Math.floor(Date.now() / 1000),
-    };
-    const body = new URLSearchParams({
-      ...Object.fromEntries(
-        Object.entries(params).map(([k, v]) => [k, String(v)]),
-      ),
-      api_key: c.apiKey,
-      signature: signParams(params, c.apiSecret),
-    });
-    const res = await fetch(
-      `https://api.cloudinary.com/v1_1/${c.cloudName}/image/destroy`,
-      { method: 'POST', body },
-    );
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
   }
 }
 
 @ApiTags('attachments')
 @ApiBearerAuth()
+@Roles(Role.ADMIN, Role.STAFF)
 @Controller('transactions/:txId/attachments')
 export class AttachmentsController {
   constructor(private readonly attachments: AttachmentsService) {}

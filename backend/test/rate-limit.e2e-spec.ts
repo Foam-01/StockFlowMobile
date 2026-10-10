@@ -4,9 +4,13 @@ import { createTestApp, TestContext } from './helpers.js';
 let ctx: TestContext;
 const previous = process.env.LOGIN_RATE_LIMIT_PER_MINUTE;
 
+let setupLogins = 0;
+
 beforeAll(async () => {
-  ctx = await createTestApp(); // logs in 3 users
-  process.env.LOGIN_RATE_LIMIT_PER_MINUTE = '5';
+  ctx = await createTestApp(); // logs in every test user
+  setupLogins = Object.keys(ctx.tokens).length;
+  // Budget: the setup logins plus 2 more attempts.
+  process.env.LOGIN_RATE_LIMIT_PER_MINUTE = String(setupLogins + 2);
 });
 afterAll(async () => {
   process.env.LOGIN_RATE_LIMIT_PER_MINUTE = previous;
@@ -22,7 +26,7 @@ it('blocks repeated login attempts with 429', async () => {
 
   const statuses: number[] = [];
   for (let i = 0; i < 4; i++) statuses.push((await attempt()).status);
-  // 3 setup logins + attempts: the budget of 5 runs out on the 3rd attempt.
+  // The budget runs out on the 3rd attempt.
   expect(statuses).toEqual([401, 401, 429, 429]);
 });
 

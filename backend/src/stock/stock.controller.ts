@@ -21,16 +21,19 @@ import { StockService } from './stock.service.js';
 export class StockController {
   constructor(private readonly stock: StockService) {}
 
+  @Roles(Role.ADMIN, Role.STAFF)
   @Post('transactions')
   create(@Body() dto: CreateTxDto, @CurrentUser() user: AuthUser) {
     return this.stock.create(dto, user);
   }
 
+  @Roles(Role.ADMIN, Role.STAFF, Role.SUPERVISOR)
   @Get('transactions')
   findAll(@Query() query: TxQueryDto) {
     return this.stock.findAll(query);
   }
 
+  @Roles(Role.ADMIN, Role.STAFF, Role.SUPERVISOR)
   @Get('transactions/:id')
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.stock.findOne(id);
@@ -46,6 +49,7 @@ export class StockController {
     return this.stock.confirm(id, user);
   }
 
+  @Roles(Role.ADMIN, Role.STAFF)
   @Post('transactions/:id/cancel')
   @HttpCode(200)
   cancel(

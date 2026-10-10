@@ -7,6 +7,7 @@ import {
   onHand,
   productWithStock,
   TestContext,
+  Who,
 } from './helpers.js';
 
 let ctx: TestContext;
@@ -18,7 +19,7 @@ afterAll(async () => {
   await ctx?.app.close();
 });
 
-const confirm = (who: keyof TestContext['tokens'], id: string) =>
+const confirm = (who: Who, id: string) =>
   auth(ctx, who, ctx.http().post(`/transactions/${id}/confirm`));
 
 describe('authentication', () => {

@@ -21,7 +21,8 @@
     "test:debug": "vitest --inspect-brk --no-file-parallelism",
     "test:e2e": "vitest run --config ./vitest.config.e2e.ts",
     "seed:history": "tsx prisma/seed-history.ts",
-    "seed:images": "tsx prisma/seed-images.ts"
+    "seed:images": "tsx prisma/seed-images.ts",
+    "seed:work-orders": "tsx prisma/seed-work-orders.ts"
   },
   "dependencies": {
     "@nestjs/common": "^12.0.1",

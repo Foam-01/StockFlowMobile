@@ -38,6 +38,14 @@ export class CreateTxDto {
   @IsUUID()
   clientUuid?: string;
 
+  @ApiPropertyOptional({
+    description:
+      'Work order these materials are issued for (ISSUE) or returned from (RECEIVE)',
+  })
+  @IsOptional()
+  @IsUUID()
+  workOrderId?: string;
+
   @ApiPropertyOptional({ example: 'PO-2026-0001' })
   @IsOptional()
   @IsString()

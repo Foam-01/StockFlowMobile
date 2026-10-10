@@ -43,9 +43,14 @@ export const INCOMING_TRANSFORMATION = 'c_limit,w_2000,h_2000';
  * Cloudinary. Cloudinary also rejects signatures older than one hour.
  */
 export function uploadParams(txId: string, now = Date.now()) {
+  return folderUploadParams(txFolder(txId), now);
+}
+
+/** Same signed limits, for any folder (stock documents, work orders). */
+export function folderUploadParams(folder: string, now = Date.now()) {
   return {
     allowed_formats: ALLOWED_FORMATS,
-    folder: txFolder(txId),
+    folder,
     timestamp: Math.floor(now / 1000),
     transformation: INCOMING_TRANSFORMATION,
   };
@@ -56,6 +61,11 @@ export function txFolder(txId: string): string {
   return `stockflow/transactions/${txId}`;
 }
 
+/** Evidence photos for a work order. */
+export function workOrderFolder(workOrderId: string): string {
+  return `stockflow/work-orders/${workOrderId}`;
+}
+
 /**
  * Checks that a client-reported upload really is an image in this
  * transaction's folder on our Cloudinary account, so a client can't attach
@@ -63,11 +73,12 @@ export function txFolder(txId: string): string {
  */
 export function validateUploadedAsset(
   asset: { publicId: string; url: string },
-  { cloudName, txId }: { cloudName: string; txId: string },
+  ctx: { cloudName: string } & ({ txId: string } | { folder: string }),
 ): string | null {
-  const folder = `${txFolder(txId)}/`;
+  const { cloudName } = ctx;
+  const folder = `${'folder' in ctx ? ctx.folder : txFolder(ctx.txId)}/`;
   if (!asset.publicId.startsWith(folder)) {
-    return 'Image is not in this transaction’s folder';
+    return 'Image is not in the expected folder';
   }
   if (asset.publicId.includes('..')) return 'Invalid image id';
 
@@ -87,4 +98,35 @@ export function validateUploadedAsset(
     return 'Image URL does not match its id';
   }
   return null;
+}
+
+/** Deletes an image from Cloudinary (signed Upload API call). */
+export async function destroyAsset(publicId: string, c: CloudinaryConfig) {
+  const params = {
+    public_id: publicId,
+    timestamp: Math.floor(Date.now() / 1000),
+  };
+  const body = new URLSearchParams({
+    public_id: publicId,
+    timestamp: String(params.timestamp),
+    api_key: c.apiKey,
+    signature: signParams(params, c.apiSecret),
+  });
+  const res = await fetch(
+    `https://api.cloudinary.com/v1_1/${c.cloudName}/image/destroy`,
+    { method: 'POST', body },
+  );
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+}
+
+/** Reads Cloudinary settings; null when photo upload isn't configured. */
+export function cloudinaryFromEnv(
+  get: (key: string) => string | undefined,
+): CloudinaryConfig | null {
+  const cloudName = get('CLOUDINARY_CLOUD_NAME');
+  const apiKey = get('CLOUDINARY_API_KEY');
+  const apiSecret = get('CLOUDINARY_API_SECRET');
+  return cloudName && apiKey && apiSecret
+    ? { cloudName, apiKey, apiSecret }
+    : null;
 }
