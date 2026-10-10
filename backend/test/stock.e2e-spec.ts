@@ -335,6 +335,13 @@ describe('evidence photos', () => {
       folder: `stockflow/transactions/${tx.id}`,
     });
     expect(sig.body).not.toHaveProperty('apiSecret');
+    // Format and size limits travel inside the signed fields.
+    expect(sig.body.fields).toMatchObject({
+      allowed_formats: 'jpg,jpeg,png,webp,heic',
+      transformation: 'c_limit,w_2000,h_2000',
+      folder: `stockflow/transactions/${tx.id}`,
+    });
+    expect(JSON.stringify(sig.body)).not.toContain('e2e-secret');
 
     await auth(
       ctx,

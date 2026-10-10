@@ -55,12 +55,11 @@ class ApiAttachmentsRepository implements AttachmentsRepository {
       // 2. Upload the file directly to Cloudinary.
       final uploaded = (await _cdn.post<Map<String, dynamic>>(
         sig['uploadUrl'] as String,
+        // Send exactly the fields the server signed (format/size limits
+        // included); changing any of them makes Cloudinary reject the upload.
         data: FormData.fromMap({
+          ...(sig['fields'] as Map<String, dynamic>),
           'file': MultipartFile.fromBytes(bytes, filename: filename),
-          'api_key': sig['apiKey'],
-          'timestamp': sig['timestamp'],
-          'folder': sig['folder'],
-          'signature': sig['signature'],
         }),
         onSendProgress: (sent, total) {
           if (total > 0) onProgress?.call(sent / total);

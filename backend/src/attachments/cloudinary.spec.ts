@@ -1,5 +1,10 @@
 import { createHash } from 'node:crypto';
-import { signParams, txFolder, validateUploadedAsset } from './cloudinary.js';
+import {
+  signParams,
+  txFolder,
+  uploadParams,
+  validateUploadedAsset,
+} from './cloudinary.js';
 
 describe('signParams', () => {
   it('matches Cloudinary’s documented example', () => {
@@ -75,5 +80,20 @@ describe('validateUploadedAsset', () => {
     expect(validateUploadedAsset({ publicId, url: 'not a url' }, ctx)).toMatch(
       /URL/,
     );
+  });
+});
+
+describe('uploadParams', () => {
+  it('restricts format and size, and signs them', () => {
+    const p = uploadParams('tx1', 1_700_000_000_000);
+    expect(p).toEqual({
+      allowed_formats: 'jpg,jpeg,png,webp,heic',
+      folder: 'stockflow/transactions/tx1',
+      timestamp: 1_700_000_000,
+      transformation: 'c_limit,w_2000,h_2000',
+    });
+    // Dropping a restriction changes the signature, so Cloudinary rejects it.
+    const { allowed_formats: _, ...withoutFormats } = p;
+    expect(signParams(withoutFormats, 's')).not.toBe(signParams(p, 's'));
   });
 });

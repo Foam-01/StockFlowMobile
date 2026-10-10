@@ -25,7 +25,7 @@ import { PrismaService } from '../prisma/prisma.service.js';
 import {
   CloudinaryConfig,
   signParams,
-  txFolder,
+  uploadParams,
   validateUploadedAsset,
 } from './cloudinary.js';
 
@@ -91,16 +91,19 @@ export class AttachmentsService {
         `At most ${MAX_PER_TX} photos per transaction`,
       );
     }
-    const params = {
-      folder: txFolder(txId),
-      timestamp: Math.floor(Date.now() / 1000),
-    };
+    const params = uploadParams(txId);
     return {
       cloudName,
       apiKey,
       ...params,
       signature: signParams(params, apiSecret),
       uploadUrl: `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+      // Form fields the app must send as-is (all signed).
+      fields: {
+        ...params,
+        api_key: apiKey,
+        signature: signParams(params, apiSecret),
+      },
     };
   }
 

@@ -30,6 +30,27 @@ export function signParams(
     .digest('hex');
 }
 
+/** Image types accepted for evidence photos. */
+export const ALLOWED_FORMATS = 'jpg,jpeg,png,webp,heic';
+
+/** Oversized photos are shrunk by Cloudinary on arrival (keeps aspect). */
+export const INCOMING_TRANSFORMATION = 'c_limit,w_2000,h_2000';
+
+/**
+ * Parameters for a signed upload into a transaction's folder. Everything
+ * here is covered by the signature, so a client that drops or changes any
+ * of them (e.g. to upload a PDF or skip the resize) is rejected by
+ * Cloudinary. Cloudinary also rejects signatures older than one hour.
+ */
+export function uploadParams(txId: string, now = Date.now()) {
+  return {
+    allowed_formats: ALLOWED_FORMATS,
+    folder: txFolder(txId),
+    timestamp: Math.floor(now / 1000),
+    transformation: INCOMING_TRANSFORMATION,
+  };
+}
+
 /** Every photo for a transaction lives in its own folder. */
 export function txFolder(txId: string): string {
   return `stockflow/transactions/${txId}`;
