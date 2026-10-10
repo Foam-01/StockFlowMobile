@@ -348,7 +348,11 @@ class _WorkOrderDetailScreenState extends ConsumerState<WorkOrderDetailScreen> {
       buttons.add(
         FilledButton.icon(
           key: const Key('wo_submit'),
-          onPressed: _busy != null ? null : () => _submit(wo),
+          // Disabled until the banner's blockers are resolved (the server
+          // checks again on submit).
+          onPressed: _busy != null || wo.submissionProblems.isNotEmpty
+              ? null
+              : () => _submit(wo),
           icon: const Icon(Icons.send_rounded),
           label: busyLabel('submit', 'Submit for review'),
         ),

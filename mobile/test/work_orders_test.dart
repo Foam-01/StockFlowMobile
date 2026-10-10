@@ -267,7 +267,7 @@ void main() {
         (_) async => _wo(
           status: 'IN_PROGRESS',
           actions: ['updateChecklist', 'manageEvidence', 'submit'],
-          problems: ['Photo required: after work'],
+          problems: const [],
         ),
       );
       when(() => wo.submit('wo1')).thenThrow(
@@ -279,13 +279,32 @@ void main() {
       await pumpAs(tester, Role.technician);
       await openDetail(tester);
 
-      expect(find.byKey(const Key('submission_problems')), findsOneWidget);
+      // Server still refuses (e.g. a photo was deleted elsewhere).
       await tester.tap(find.byKey(const Key('wo_submit')));
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('confirm_action')));
       await tester.pumpAndSettle();
       expect(find.textContaining('Work order is not ready'), findsOneWidget);
       expect(find.text('In progress'), findsOneWidget); // unchanged
+    });
+
+    testWidgets('submit stays disabled while blockers are listed', (
+      tester,
+    ) async {
+      when(() => wo.get('wo1')).thenAnswer(
+        (_) async => _wo(
+          status: 'IN_PROGRESS',
+          actions: ['updateChecklist', 'manageEvidence', 'submit'],
+          problems: ['Photo required: after work'],
+        ),
+      );
+      await pumpAs(tester, Role.technician);
+      await openDetail(tester);
+      expect(find.byKey(const Key('submission_problems')), findsOneWidget);
+      final button = tester.widget<ButtonStyleButton>(
+        find.byKey(const Key('wo_submit')),
+      );
+      expect(button.onPressed, isNull);
     });
 
     testWidgets('sees the reason when changes were requested', (tester) async {

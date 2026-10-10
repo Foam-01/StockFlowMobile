@@ -163,11 +163,14 @@ final routerProvider = Provider<GoRouter>((ref) {
                   ),
                   GoRoute(
                     path: ':id',
+                    // Full screen: the action bar needs the bottom edge.
+                    parentNavigatorKey: _rootKey,
                     builder: (_, state) =>
                         WorkOrderDetailScreen(id: state.pathParameters['id']!),
                     routes: [
                       GoRoute(
                         path: 'activity',
+                        parentNavigatorKey: _rootKey,
                         builder: (_, state) => WorkOrderActivityScreen(
                           id: state.pathParameters['id']!,
                           code: state.extra as String?,
