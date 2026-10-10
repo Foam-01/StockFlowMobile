@@ -8,6 +8,8 @@ import '../../../core/errors.dart';
 import '../../offline/domain/pending_op.dart';
 import '../../offline/presentation/sync_controller.dart';
 import '../../scanner/presentation/barcode_lookup.dart';
+import '../../work_orders/presentation/issue_materials.dart';
+import '../../work_orders/presentation/work_orders_controller.dart';
 import '../domain/draft.dart';
 import '../domain/stock_transaction.dart';
 import 'operations_controller.dart';
@@ -15,9 +17,17 @@ import 'product_picker_sheet.dart';
 import 'widgets/tx_widgets.dart';
 
 class NewOperationScreen extends ConsumerStatefulWidget {
-  const NewOperationScreen({super.key, required this.initialType});
+  const NewOperationScreen({
+    super.key,
+    required this.initialType,
+    this.forWorkOrder,
+  });
 
   final TxType initialType;
+
+  /// Issuing materials for a work order: lines are pre-filled and the
+  /// document is linked to it.
+  final IssueForWorkOrder? forWorkOrder;
 
   @override
   ConsumerState<NewOperationScreen> createState() => _NewOperationScreenState();
@@ -34,6 +44,17 @@ class _NewOperationScreenState extends ConsumerState<NewOperationScreen> {
 
   bool _submitted = false;
   bool _saving = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final wo = widget.forWorkOrder;
+    if (wo != null) {
+      _type = TxType.issue;
+      _lines.addAll(wo.lines);
+      _reference.text = wo.code;
+    }
+  }
 
   @override
   void dispose() {
@@ -91,16 +112,30 @@ class _NewOperationScreenState extends ConsumerState<NewOperationScreen> {
             type: _type,
             referenceNo: _reference.text.trim(),
             note: _note.text.trim(),
+            workOrderId: widget.forWorkOrder?.workOrderId,
             items: [
               for (final l in _lines)
                 (productId: l.product.id, quantity: l.quantity),
             ],
           );
       if (!mounted) return;
+      if (widget.forWorkOrder != null) {
+        // Back to the work order, which now lists the new document.
+        ref.invalidate(woDetailProvider(widget.forWorkOrder!.workOrderId));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Issue draft created for the work order'),
+          ),
+        );
+        context.pop();
+        return;
+      }
       context.pushReplacement('/operations/${tx.id}');
     } catch (e) {
       final error = ApiException.from(e);
-      if (error.isNetwork) return _saveOffline();
+      // The offline queue can't carry a work-order link yet, so a linked
+      // document is never queued silently without it.
+      if (error.isNetwork && widget.forWorkOrder == null) return _saveOffline();
       if (!mounted) return;
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(error.message)));
@@ -154,6 +189,15 @@ class _NewOperationScreenState extends ConsumerState<NewOperationScreen> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
         children: [
+          if (widget.forWorkOrder != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Chip(
+                key: const Key('linked_work_order'),
+                avatar: const Icon(Icons.assignment_outlined, size: 18),
+                label: Text('For ${widget.forWorkOrder!.code}'),
+              ),
+            ),
           SegmentedButton<TxType>(
             segments: [
               for (final t in TxType.values)
@@ -164,7 +208,8 @@ class _NewOperationScreenState extends ConsumerState<NewOperationScreen> {
                 ),
             ],
             selected: {_type},
-            onSelectionChanged: _saving
+            // A work-order issue stays an issue.
+            onSelectionChanged: _saving || widget.forWorkOrder != null
                 ? null
                 : (s) => setState(() => _type = s.first),
           ),

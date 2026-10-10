@@ -184,7 +184,10 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Drinking water 600ml'), findsOneWidget);
 
-      await tester.tap(navTab('Profile'));
+      // Admins open Profile from the dashboard avatar (tab bar is full).
+      await tester.tap(navTab('Dashboard'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('open_profile')));
       await tester.pumpAndSettle();
       await tester.tap(find.byKey(const Key('sign_out')));
       await tester.pumpAndSettle();

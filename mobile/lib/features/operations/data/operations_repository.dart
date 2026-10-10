@@ -25,6 +25,7 @@ abstract class OperationsRepository {
     required List<({String productId, int quantity})> items,
     String? referenceNo,
     String? note,
+    String? workOrderId,
   });
   Future<StockTransaction> confirm(String id);
   Future<StockTransaction> cancel(String id);
@@ -78,11 +79,13 @@ class ApiOperationsRepository implements OperationsRepository {
     required List<({String productId, int quantity})> items,
     String? referenceNo,
     String? note,
+    String? workOrderId,
   }) => _call(() async {
     final res = await _dio.post<Map<String, dynamic>>(
       '/transactions',
       data: {
         'clientUuid': clientUuid,
+        'workOrderId': ?workOrderId,
         'type': type.api,
         if (referenceNo != null && referenceNo.isNotEmpty)
           'referenceNo': referenceNo,

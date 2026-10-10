@@ -228,33 +228,44 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                 Wrap(
                                   alignment: WrapAlignment.center,
                                   spacing: 8,
+                                  runSpacing: 8,
                                   children: [
-                                    ActionChip(
-                                      avatar: const Icon(
-                                        Icons.admin_panel_settings_outlined,
-                                        size: 18,
+                                    // Seeded demo accounts, one per role.
+                                    for (final (label, icon, email, pw)
+                                        in const [
+                                          (
+                                            'Admin',
+                                            Icons.admin_panel_settings_outlined,
+                                            'admin@stockflow.dev',
+                                            'Admin1234!',
+                                          ),
+                                          (
+                                            'Staff',
+                                            Icons.person_outline,
+                                            'staff@stockflow.dev',
+                                            'Staff1234!',
+                                          ),
+                                          (
+                                            'Technician',
+                                            Icons.engineering_outlined,
+                                            'tech@stockflow.dev',
+                                            'Tech1234!',
+                                          ),
+                                          (
+                                            'Supervisor',
+                                            Icons.verified_user_outlined,
+                                            'supervisor@stockflow.dev',
+                                            'Super1234!',
+                                          ),
+                                        ])
+                                      ActionChip(
+                                        key: Key('demo_${label.toLowerCase()}'),
+                                        avatar: Icon(icon, size: 18),
+                                        label: Text(label),
+                                        onPressed: _submitting
+                                            ? null
+                                            : () => _fillDemo(email, pw),
                                       ),
-                                      label: const Text('Admin'),
-                                      onPressed: _submitting
-                                          ? null
-                                          : () => _fillDemo(
-                                              'admin@stockflow.dev',
-                                              'Admin1234!',
-                                            ),
-                                    ),
-                                    ActionChip(
-                                      avatar: const Icon(
-                                        Icons.person_outline,
-                                        size: 18,
-                                      ),
-                                      label: const Text('Staff'),
-                                      onPressed: _submitting
-                                          ? null
-                                          : () => _fillDemo(
-                                              'staff@stockflow.dev',
-                                              'Staff1234!',
-                                            ),
-                                    ),
                                   ],
                                 ),
                                 const SizedBox(height: 16),

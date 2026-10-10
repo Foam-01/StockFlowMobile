@@ -40,6 +40,11 @@ class ApiException implements Exception {
       final m = data['message'];
       message = m is List ? m.join('\n') : m.toString();
     }
+    // e.g. submit: { message, problems: ["Checklist: ... is not done", ...] }
+    if (data is Map && data['problems'] is List) {
+      final problems = (data['problems'] as List).map((p) => '• $p');
+      message = [message, ...problems].join('\n');
+    }
     return ApiException(message, statusCode: res?.statusCode);
   }
 

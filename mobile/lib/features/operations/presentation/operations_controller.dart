@@ -110,6 +110,7 @@ class TxActions {
     required List<({String productId, int quantity})> items,
     String? referenceNo,
     String? note,
+    String? workOrderId,
   }) async {
     final tx = await _repo.create(
       clientUuid: clientUuid,
@@ -117,6 +118,7 @@ class TxActions {
       items: items,
       referenceNo: referenceNo,
       note: note,
+      workOrderId: workOrderId,
     );
     _ref.invalidate(txListProvider);
     _ref.invalidate(dashboardProvider);

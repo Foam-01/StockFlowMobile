@@ -278,17 +278,29 @@ class _Header extends StatelessWidget {
                         ],
                       ),
                     ),
-                    Container(
-                      width: 40,
-                      height: 40,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.14),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Text(
-                        (userName ?? '?').characters.first.toUpperCase(),
-                        style: theme.textTheme.titleMedium?.copyWith(color: fg),
+                    // Profile lives here for roles whose tab bar is full.
+                    Semantics(
+                      button: true,
+                      label: 'Profile',
+                      child: InkWell(
+                        key: const Key('open_profile'),
+                        customBorder: const CircleBorder(),
+                        onTap: () => context.go('/profile'),
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.14),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Text(
+                            (userName ?? '?').characters.first.toUpperCase(),
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              color: fg,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ],

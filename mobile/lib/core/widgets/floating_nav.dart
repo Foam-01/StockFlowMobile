@@ -23,7 +23,7 @@ class FloatingNav extends StatelessWidget {
     required this.selectedIndex,
     required this.onSelected,
     required this.onScan,
-  }) : assert(items.length == 4);
+  }) : assert(items.length >= 2 && items.length <= 4);
 
   final List<NavItem> items;
   final int selectedIndex;
@@ -64,13 +64,13 @@ class FloatingNav extends StatelessWidget {
                   ),
                 ],
               ),
+              // Tabs split around the scan button (left gets the extra one).
               child: Row(
                 children: [
-                  slot(0),
-                  slot(1),
+                  for (var i = 0; i < (items.length + 1) ~/ 2; i++) slot(i),
                   const SizedBox(width: 72),
-                  slot(2),
-                  slot(3),
+                  for (var i = (items.length + 1) ~/ 2; i < items.length; i++)
+                    slot(i),
                 ],
               ),
             ),

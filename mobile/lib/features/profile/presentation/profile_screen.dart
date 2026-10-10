@@ -40,7 +40,7 @@ class ProfileScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 8),
-          Center(child: Chip(label: Text(user.isAdmin ? 'ADMIN' : 'STAFF'))),
+          Center(child: Chip(label: Text(user.role.label))),
           const SizedBox(height: 24),
           OutlinedButton.icon(
             key: const Key('sign_out'),

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/auth/domain/user.dart';
 import '../features/auth/presentation/auth_controller.dart';
-import '../features/scanner/presentation/barcode_lookup.dart';
 import '../features/auth/presentation/login_screen.dart';
 import '../features/dashboard/presentation/dashboard_screen.dart';
 import '../features/history/presentation/product_history_screen.dart';
@@ -15,9 +15,43 @@ import '../features/operations/presentation/operations_screen.dart';
 import '../features/products/presentation/product_detail_screen.dart';
 import '../features/products/presentation/products_screen.dart';
 import '../features/profile/presentation/profile_screen.dart';
+import '../features/scanner/presentation/barcode_lookup.dart';
+import '../features/work_orders/presentation/create_work_order_screen.dart';
+import '../features/work_orders/presentation/issue_materials.dart';
+import '../features/work_orders/presentation/work_order_activity_screen.dart';
+import '../features/work_orders/presentation/work_order_detail_screen.dart';
+import '../features/work_orders/presentation/work_orders_screen.dart';
 import 'widgets/floating_nav.dart';
 
 final _rootKey = GlobalKey<NavigatorState>();
+
+/// Shell branches, in this order.
+enum _Branch { dashboard, products, operations, workOrders, profile }
+
+/// First screen after sign-in.
+String homeFor(Role role) => switch (role) {
+  Role.technician || Role.supervisor => '/work-orders',
+  _ => '/dashboard',
+};
+
+/// Tabs per role (the floating bar fits up to 4; admins and warehouse staff
+/// reach Profile from the dashboard avatar). The server enforces the same
+/// boundaries; hiding a tab is only convenience.
+List<_Branch> _tabsFor(Role role) => switch (role) {
+  Role.admin || Role.staff => [
+    _Branch.dashboard,
+    _Branch.products,
+    _Branch.operations,
+    _Branch.workOrders,
+  ],
+  Role.supervisor => [
+    _Branch.workOrders,
+    _Branch.dashboard,
+    _Branch.products,
+    _Branch.profile,
+  ],
+  Role.technician => [_Branch.workOrders, _Branch.products, _Branch.profile],
+};
 
 final routerProvider = Provider<GoRouter>((ref) {
   // Re-run redirects whenever auth state changes, without rebuilding the router.
@@ -36,10 +70,15 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (auth.isLoading && !auth.hasValue) {
         return loc == '/splash' ? null : '/splash';
       }
-      final signedIn = auth.value != null;
-      if (!signedIn) return loc == '/login' ? null : '/login';
+      final user = auth.value;
+      if (user == null) return loc == '/login' ? null : '/login';
       if (loc == '/login' || loc == '/splash' || loc == '/') {
-        return '/dashboard';
+        return homeFor(user.role);
+      }
+      // Technicians have no inventory screens (the API refuses them too).
+      if (user.role == Role.technician &&
+          (loc.startsWith('/dashboard') || loc.startsWith('/operations'))) {
+        return '/work-orders';
       }
       return null;
     },
@@ -96,6 +135,9 @@ final routerProvider = Provider<GoRouter>((ref) {
                       initialType: TxType.fromApi(
                         state.uri.queryParameters['type'] ?? 'RECEIVE',
                       ),
+                      forWorkOrder: state.extra is IssueForWorkOrder
+                          ? state.extra as IssueForWorkOrder
+                          : null,
                     ),
                   ),
                   GoRoute(
@@ -103,6 +145,35 @@ final routerProvider = Provider<GoRouter>((ref) {
                     builder: (_, state) => OperationDetailScreen(
                       txId: state.pathParameters['id']!,
                     ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/work-orders',
+                builder: (_, _) => const WorkOrdersScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'new',
+                    parentNavigatorKey: _rootKey,
+                    builder: (_, _) => const CreateWorkOrderScreen(),
+                  ),
+                  GoRoute(
+                    path: ':id',
+                    builder: (_, state) =>
+                        WorkOrderDetailScreen(id: state.pathParameters['id']!),
+                    routes: [
+                      GoRoute(
+                        path: 'activity',
+                        builder: (_, state) => WorkOrderActivityScreen(
+                          id: state.pathParameters['id']!,
+                          code: state.extra as String?,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -127,48 +198,64 @@ class _HomeShell extends ConsumerWidget {
 
   final StatefulNavigationShell shell;
 
+  NavItem _item(_Branch b, int queued) => switch (b) {
+    _Branch.dashboard => const NavItem(
+      icon: Icons.space_dashboard_outlined,
+      selectedIcon: Icons.space_dashboard_rounded,
+      label: 'Dashboard',
+    ),
+    _Branch.products => const NavItem(
+      icon: Icons.inventory_2_outlined,
+      selectedIcon: Icons.inventory_2_rounded,
+      label: 'Products',
+    ),
+    _Branch.operations => NavItem(
+      icon: Icons.swap_vert_rounded,
+      selectedIcon: Icons.swap_vert_circle_rounded,
+      label: 'Operations',
+      badge: queued,
+    ),
+    _Branch.workOrders => const NavItem(
+      icon: Icons.assignment_outlined,
+      selectedIcon: Icons.assignment_rounded,
+      label: 'Jobs',
+    ),
+    _Branch.profile => const NavItem(
+      icon: Icons.person_outline_rounded,
+      selectedIcon: Icons.person_rounded,
+      label: 'Profile',
+    ),
+  };
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // Watching also starts auto-sync once the user is signed in.
     final queued = ref.watch(
       syncControllerProvider.select((s) => s.value?.queue.length ?? 0),
     );
+    final role =
+        ref.watch(authControllerProvider.select((a) => a.value?.role)) ??
+        Role.staff;
+    final tabs = _tabsFor(role);
+    // A screen outside the tab set (e.g. Profile for admins) selects none.
+    final selected = tabs.indexWhere((b) => b.index == shell.currentIndex);
+
     return Scaffold(
       body: shell,
       bottomNavigationBar: FloatingNav(
         key: const Key('app_nav'),
-        selectedIndex: shell.currentIndex,
-        onSelected: (i) =>
-            shell.goBranch(i, initialLocation: i == shell.currentIndex),
+        selectedIndex: selected,
+        onSelected: (i) {
+          final branch = tabs[i].index;
+          shell.goBranch(branch, initialLocation: branch == shell.currentIndex);
+        },
         onScan: () async {
           final product = await scanProduct(context, ref);
           if (product != null && context.mounted) {
             context.push('/products/${product.id}');
           }
         },
-        items: [
-          const NavItem(
-            icon: Icons.space_dashboard_outlined,
-            selectedIcon: Icons.space_dashboard_rounded,
-            label: 'Dashboard',
-          ),
-          const NavItem(
-            icon: Icons.inventory_2_outlined,
-            selectedIcon: Icons.inventory_2_rounded,
-            label: 'Products',
-          ),
-          NavItem(
-            icon: Icons.swap_vert_rounded,
-            selectedIcon: Icons.swap_vert_circle_rounded,
-            label: 'Operations',
-            badge: queued,
-          ),
-          const NavItem(
-            icon: Icons.person_outline_rounded,
-            selectedIcon: Icons.person_rounded,
-            label: 'Profile',
-          ),
-        ],
+        items: [for (final b in tabs) _item(b, queued)],
       ),
     );
   }

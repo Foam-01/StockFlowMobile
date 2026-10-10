@@ -1,4 +1,17 @@
-enum Role { admin, staff }
+enum Role {
+  admin('ADMIN', 'Admin'),
+  staff('STAFF', 'Warehouse'),
+  technician('TECHNICIAN', 'Technician'),
+  supervisor('SUPERVISOR', 'Supervisor');
+
+  const Role(this.api, this.label);
+
+  final String api;
+  final String label;
+
+  static Role fromApi(String v) =>
+      values.firstWhere((r) => r.api == v, orElse: () => Role.staff);
+}
 
 class User {
   const User({
@@ -15,10 +28,16 @@ class User {
 
   bool get isAdmin => role == Role.admin;
 
+  /// May create stock documents (the server enforces the same rule).
+  bool get canWriteInventory => role == Role.admin || role == Role.staff;
+
+  /// May see the dashboard and stock documents.
+  bool get canSeeInventory => canWriteInventory || role == Role.supervisor;
+
   factory User.fromJson(Map<String, dynamic> json) => User(
     id: json['id'] as String,
     email: json['email'] as String,
     name: json['name'] as String,
-    role: json['role'] == 'ADMIN' ? Role.admin : Role.staff,
+    role: Role.fromApi(json['role'] as String),
   );
 }
