@@ -127,6 +127,7 @@ export class WorkOrdersService {
     const [rows, total] = await Promise.all([
       this.prisma.db.workOrder.findMany({
         where,
+        relationLoadStrategy: 'join',
         orderBy: [
           { dueAt: { sort: 'asc', nulls: 'last' } },
           { number: 'desc' },
@@ -343,6 +344,7 @@ export class WorkOrdersService {
       precheck: async (db) => {
         const fresh = await db.workOrder.findUniqueOrThrow({
           where: { id },
+          relationLoadStrategy: 'join',
           select: {
             requiredEvidence: true,
             checklist: { select: { title: true, required: true, done: true } },
@@ -605,6 +607,8 @@ export class WorkOrdersService {
     const wo = await this.prisma.db.workOrder.findUnique({
       where: { id },
       include: detailInclude,
+      // One SQL query instead of one per relation (~9 round trips).
+      relationLoadStrategy: 'join',
     });
     if (!wo || !canView(actor, wo)) {
       throw new NotFoundException('Work order not found');
