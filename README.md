@@ -14,17 +14,19 @@ work-order step is auditable.
 - **Backend:** NestJS · Prisma · PostgreSQL (Neon) · JWT · Cloudinary
 - Built as a portfolio / demo project, run locally
 
-| Technician: jobs | Technician: job in progress | Supervisor: review |
-|---|---|---|
-| <img src="docs/screenshots/wo-tech-list.png" width="250" alt="Technician job list"> | <img src="docs/screenshots/wo-tech-detail.png" width="250" alt="Job with checklist and submit blockers"> | <img src="docs/screenshots/wo-review-detail.png" width="250" alt="Supervisor reviewing a submitted job"> |
+| My jobs + unread badge | Checklist + submit blockers | Submitted job | Notifications |
+|---|---|---|---|
+| <img src="docs/screenshots/wo-tech-list.png" width="200" alt="My jobs + unread badge"> | <img src="docs/screenshots/wo-tech-checklist.png" width="200" alt="Checklist + submit blockers"> | <img src="docs/screenshots/wo-review-detail.png" width="200" alt="Submitted job"> | <img src="docs/screenshots/notifications.png" width="200" alt="Notifications"> |
 
-| Dashboard | Products | Product & history |
-|---|---|---|
-| <img src="docs/screenshots/dashboard.png" width="250" alt="Dashboard"> | <img src="docs/screenshots/products.png" width="250" alt="Products"> | <img src="docs/screenshots/product-detail.png" width="250" alt="Product detail with movements"> |
+| Admin dashboard | Product catalog | Product detail | Issue with projected stock |
+|---|---|---|---|
+| <img src="docs/screenshots/dashboard.png" width="200" alt="Admin dashboard"> | <img src="docs/screenshots/products.png" width="200" alt="Product catalog"> | <img src="docs/screenshots/product-detail.png" width="200" alt="Product detail"> | <img src="docs/screenshots/new-operation.png" width="200" alt="Issue with projected stock"> |
 
-| Operations | New document | Sign in |
-|---|---|---|
-| <img src="docs/screenshots/operations.png" width="250" alt="Stock operations"> | <img src="docs/screenshots/new-operation.png" width="250" alt="New issue form"> | <img src="docs/screenshots/login.png" width="250" alt="Sign in"> |
+| Tick waiting to sync, submit blocked | Waiting to sync | Dark mode | English |
+|---|---|---|---|
+| <img src="docs/screenshots/wo-offline-pending.png" width="200" alt="Tick waiting to sync, submit blocked"> | <img src="docs/screenshots/offline-queue.png" width="200" alt="Waiting to sync"> | <img src="docs/screenshots/dark-dashboard.png" width="200" alt="Dashboard"> | <img src="docs/screenshots/en-dashboard.png" width="200" alt="Dashboard"> |
+
+All **78 screenshots** from the running app (Android emulator, real API and data) are in [Screenshots](#screenshots).
 
 ## How it fits together
 
@@ -83,6 +85,120 @@ work-order step is auditable.
 Docs: [architecture](docs/architecture.md) · [work orders](docs/work-orders.md) ·
 [offline sync](docs/offline-sync.md) · [security](docs/security.md) ·
 [testing](docs/testing.md) · decisions in [docs/adr](docs/adr)
+
+## Screenshots
+
+### Sign in, dashboard and profile
+
+| Sign in (Thai) | Sign in (English) | Admin dashboard | 7-day chart, low stock |
+|---|---|---|---|
+| <img src="docs/screenshots/login.png" width="190" alt="Sign in (Thai)"> | <img src="docs/screenshots/en-login.png" width="190" alt="Sign in (English)"> | <img src="docs/screenshots/dashboard.png" width="190" alt="Admin dashboard"> | <img src="docs/screenshots/dashboard-attention.png" width="190" alt="7-day chart, low stock"> |
+
+| Recent activity | Warehouse staff | Supervisor (no stock buttons) | Profile |
+|---|---|---|---|
+| <img src="docs/screenshots/dashboard-activity.png" width="190" alt="Recent activity"> | <img src="docs/screenshots/dashboard-staff.png" width="190" alt="Warehouse staff"> | <img src="docs/screenshots/dashboard-supervisor.png" width="190" alt="Supervisor (no stock buttons)"> | <img src="docs/screenshots/profile.png" width="190" alt="Profile"> |
+
+| Language: system / EN / TH | Technician profile |
+|---|---|
+| <img src="docs/screenshots/profile-language.png" width="190" alt="Language: system / EN / TH"> | <img src="docs/screenshots/profile-technician.png" width="190" alt="Technician profile"> |
+
+### Products and scanning
+
+| Product catalog | Low-stock filter | Technician view (3 tabs) | Product detail |
+|---|---|---|---|
+| <img src="docs/screenshots/products.png" width="190" alt="Product catalog"> | <img src="docs/screenshots/products-low-stock.png" width="190" alt="Low-stock filter"> | <img src="docs/screenshots/products-technician.png" width="190" alt="Technician view (3 tabs)"> | <img src="docs/screenshots/product-detail.png" width="190" alt="Product detail"> |
+
+| Recent movements | Stock history with balance | Barcode scanner | Type a barcode |
+|---|---|---|---|
+| <img src="docs/screenshots/product-detail-movements.png" width="190" alt="Recent movements"> | <img src="docs/screenshots/stock-history.png" width="190" alt="Stock history with balance"> | <img src="docs/screenshots/scanner.png" width="190" alt="Barcode scanner"> | <img src="docs/screenshots/scanner-manual.png" width="190" alt="Type a barcode"> |
+
+### Stock documents
+
+| All documents | Confirmed filter | Empty state | Choose a type |
+|---|---|---|---|
+| <img src="docs/screenshots/operations.png" width="190" alt="All documents"> | <img src="docs/screenshots/operations-confirmed.png" width="190" alt="Confirmed filter"> | <img src="docs/screenshots/operations-empty.png" width="190" alt="Empty state"> | <img src="docs/screenshots/new-operation-type.png" width="190" alt="Choose a type"> |
+
+| Pick products | Issue with projected stock | Draft waiting for confirmation | Confirm: cannot be undone |
+|---|---|---|---|
+| <img src="docs/screenshots/product-picker.png" width="190" alt="Pick products"> | <img src="docs/screenshots/new-operation.png" width="190" alt="Issue with projected stock"> | <img src="docs/screenshots/operation-draft.png" width="190" alt="Draft waiting for confirmation"> | <img src="docs/screenshots/operation-confirm-dialog.png" width="190" alt="Confirm: cannot be undone"> |
+
+| Confirmed by admin | Confirmed document |
+|---|---|
+| <img src="docs/screenshots/operation-confirmed.png" width="190" alt="Confirmed by admin"> | <img src="docs/screenshots/operation-detail.png" width="190" alt="Confirmed document"> |
+
+### Admin: work orders
+
+| All work orders | Create a work order | Due date (Thai calendar) | New job, assigned |
+|---|---|---|---|
+| <img src="docs/screenshots/wo-admin-list.png" width="190" alt="All work orders"> | <img src="docs/screenshots/wo-create.png" width="190" alt="Create a work order"> | <img src="docs/screenshots/wo-create-due-picker.png" width="190" alt="Due date (Thai calendar)"> | <img src="docs/screenshots/wo-admin-detail.png" width="190" alt="New job, assigned"> |
+
+| Assign / cancel | Waiting for review | Audit trail | Empty inbox |
+|---|---|---|---|
+| <img src="docs/screenshots/wo-admin-menu.png" width="190" alt="Assign / cancel"> | <img src="docs/screenshots/wo-admin-to-review.png" width="190" alt="Waiting for review"> | <img src="docs/screenshots/wo-activity.png" width="190" alt="Audit trail"> | <img src="docs/screenshots/notifications-admin.png" width="190" alt="Empty inbox"> |
+
+### Technician: doing the job
+
+| My jobs + unread badge | Notifications | After reading | New job |
+|---|---|---|---|
+| <img src="docs/screenshots/wo-tech-list.png" width="190" alt="My jobs + unread badge"> | <img src="docs/screenshots/notifications.png" width="190" alt="Notifications"> | <img src="docs/screenshots/notifications-read.png" width="190" alt="After reading"> | <img src="docs/screenshots/wo-tech-new-job.png" width="190" alt="New job"> |
+
+| Work started | Checklist + submit blockers | Job with materials | Note on an item |
+|---|---|---|---|
+| <img src="docs/screenshots/wo-tech-started.png" width="190" alt="Work started"> | <img src="docs/screenshots/wo-tech-checklist.png" width="190" alt="Checklist + submit blockers"> | <img src="docs/screenshots/wo-tech-detail.png" width="190" alt="Job with materials"> | <img src="docs/screenshots/wo-tech-note.png" width="190" alt="Note on an item"> |
+
+| Photo category | Camera or gallery | Uploading to Cloudinary | Before-work photo |
+|---|---|---|---|
+| <img src="docs/screenshots/wo-tech-add-photo.png" width="190" alt="Photo category"> | <img src="docs/screenshots/wo-tech-photo-source.png" width="190" alt="Camera or gallery"> | <img src="docs/screenshots/wo-tech-uploading.png" width="190" alt="Uploading to Cloudinary"> | <img src="docs/screenshots/wo-tech-photo-added.png" width="190" alt="Before-work photo"> |
+
+| Photo viewer |
+|---|
+| <img src="docs/screenshots/wo-tech-photo-view.png" width="190" alt="Photo viewer"> |
+
+### Supervisor: review
+
+| Review queue | Submitted for review | Submitted job | Request changes (reason required) |
+|---|---|---|---|
+| <img src="docs/screenshots/wo-review-queue.png" width="190" alt="Review queue"> | <img src="docs/screenshots/notifications-supervisor.png" width="190" alt="Submitted for review"> | <img src="docs/screenshots/wo-review-detail.png" width="190" alt="Submitted job"> | <img src="docs/screenshots/wo-request-changes.png" width="190" alt="Request changes (reason required)"> |
+
+| Sent back with the reason | Full history | Approved jobs | Approved by, when |
+|---|---|---|---|
+| <img src="docs/screenshots/wo-sent-back.png" width="190" alt="Sent back with the reason"> | <img src="docs/screenshots/wo-activity-review.png" width="190" alt="Full history"> | <img src="docs/screenshots/wo-done-list.png" width="190" alt="Approved jobs"> | <img src="docs/screenshots/wo-approved-detail.png" width="190" alt="Approved by, when"> |
+
+### Warehouse: materials for a job
+
+| Jobs (warehouse view) | Planned vs issued | Issue linked to the job | Draft linked |
+|---|---|---|---|
+| <img src="docs/screenshots/wo-staff-list.png" width="190" alt="Jobs (warehouse view)"> | <img src="docs/screenshots/wo-materials.png" width="190" alt="Planned vs issued"> | <img src="docs/screenshots/issue-for-work-order.png" width="190" alt="Issue linked to the job"> | <img src="docs/screenshots/issue-for-work-order-saved.png" width="190" alt="Draft linked"> |
+
+| Admin confirms |
+|---|
+| <img src="docs/screenshots/operation-linked-draft.png" width="190" alt="Admin confirms"> |
+
+### Offline
+
+| Receive while offline | Saved on the device | Waiting to sync | Synced when back online |
+|---|---|---|---|
+| <img src="docs/screenshots/offline-receive-form.png" width="190" alt="Receive while offline"> | <img src="docs/screenshots/offline-saved-toast.png" width="190" alt="Saved on the device"> | <img src="docs/screenshots/offline-queue.png" width="190" alt="Waiting to sync"> | <img src="docs/screenshots/offline-synced.png" width="190" alt="Synced when back online"> |
+
+| Job from the saved copy | Tick waiting to sync, submit blocked | Synced |
+|---|---|---|
+| <img src="docs/screenshots/wo-offline.png" width="190" alt="Job from the saved copy"> | <img src="docs/screenshots/wo-offline-pending.png" width="190" alt="Tick waiting to sync, submit blocked"> | <img src="docs/screenshots/wo-tech-synced.png" width="190" alt="Synced"> |
+
+### Dark mode
+
+| Dashboard | Products | Jobs | Job detail |
+|---|---|---|---|
+| <img src="docs/screenshots/dark-dashboard.png" width="190" alt="Dashboard"> | <img src="docs/screenshots/dark-products.png" width="190" alt="Products"> | <img src="docs/screenshots/dark-jobs.png" width="190" alt="Jobs"> | <img src="docs/screenshots/dark-job-detail.png" width="190" alt="Job detail"> |
+
+### English
+
+| Dashboard | Products | Work orders | Job detail |
+|---|---|---|---|
+| <img src="docs/screenshots/en-dashboard.png" width="190" alt="Dashboard"> | <img src="docs/screenshots/en-products.png" width="190" alt="Products"> | <img src="docs/screenshots/en-jobs.png" width="190" alt="Work orders"> | <img src="docs/screenshots/en-job-detail.png" width="190" alt="Job detail"> |
+
+| Activity |
+|---|
+| <img src="docs/screenshots/en-activity.png" width="190" alt="Activity"> |
 
 ## Project structure
 
@@ -207,7 +323,7 @@ The full list is in Swagger at `/docs` and in [docs/work-orders.md](docs/work-or
 
 | Suite | Count |
 |---|---|
-| Backend unit (rules: stock, work orders, notifications, dashboard, signing, retry, translations) | 57 |
+| Backend unit (rules: stock, work orders, notifications, dashboard, signing, retry, translations) | 58 |
 | Backend API tests against a real Postgres (auth, roles, transitions, concurrency, idempotency, inventory link, notifications, offline edits) | 62 |
 | Flutter widget / unit tests | 82 |
 

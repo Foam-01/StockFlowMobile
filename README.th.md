@@ -10,17 +10,19 @@
 - **Backend:** NestJS · Prisma · PostgreSQL (Neon) · JWT · Cloudinary
 - โปรเจกต์สำหรับ portfolio / demo รันบนเครื่อง local
 
-| ช่าง: รายการงาน | ช่าง: งานที่กำลังทำ | หัวหน้างาน: ตรวจงาน |
-|---|---|---|
-| <img src="docs/screenshots/wo-tech-list.png" width="250" alt="รายการงานของช่าง"> | <img src="docs/screenshots/wo-tech-detail.png" width="250" alt="งานพร้อม checklist และสิ่งที่ยังขาด"> | <img src="docs/screenshots/wo-review-detail.png" width="250" alt="หัวหน้างานตรวจงานที่ส่งมา"> |
+| งานของฉันและจำนวนแจ้งเตือน | เช็กลิสต์และสิ่งที่ยังขาด | งานที่ส่งมา | การแจ้งเตือน |
+|---|---|---|---|
+| <img src="docs/screenshots/wo-tech-list.png" width="200" alt="งานของฉันและจำนวนแจ้งเตือน"> | <img src="docs/screenshots/wo-tech-checklist.png" width="200" alt="เช็กลิสต์และสิ่งที่ยังขาด"> | <img src="docs/screenshots/wo-review-detail.png" width="200" alt="งานที่ส่งมา"> | <img src="docs/screenshots/notifications.png" width="200" alt="การแจ้งเตือน"> |
 
-| Dashboard | สินค้า | สินค้าและประวัติ |
-|---|---|---|
-| <img src="docs/screenshots/dashboard.png" width="250" alt="Dashboard"> | <img src="docs/screenshots/products.png" width="250" alt="สินค้า"> | <img src="docs/screenshots/product-detail.png" width="250" alt="รายละเอียดสินค้าและการเคลื่อนไหว"> |
+| ภาพรวมของผู้ดูแลระบบ | รายการสินค้า | รายละเอียดสินค้า | เบิกออกพร้อมยอดคงเหลือหลังเบิก |
+|---|---|---|---|
+| <img src="docs/screenshots/dashboard.png" width="200" alt="ภาพรวมของผู้ดูแลระบบ"> | <img src="docs/screenshots/products.png" width="200" alt="รายการสินค้า"> | <img src="docs/screenshots/product-detail.png" width="200" alt="รายละเอียดสินค้า"> | <img src="docs/screenshots/new-operation.png" width="200" alt="เบิกออกพร้อมยอดคงเหลือหลังเบิก"> |
 
-| เอกสารสต็อก | สร้างเอกสาร | เข้าสู่ระบบ |
-|---|---|---|
-| <img src="docs/screenshots/operations.png" width="250" alt="เอกสารสต็อก"> | <img src="docs/screenshots/new-operation.png" width="250" alt="ฟอร์มเบิกออก"> | <img src="docs/screenshots/login.png" width="250" alt="เข้าสู่ระบบ"> |
+| ติ๊กรอซิงก์ ส่งงานไม่ได้ | รอซิงก์ | โหมดมืด | ภาษาอังกฤษ |
+|---|---|---|---|
+| <img src="docs/screenshots/wo-offline-pending.png" width="200" alt="ติ๊กรอซิงก์ ส่งงานไม่ได้"> | <img src="docs/screenshots/offline-queue.png" width="200" alt="รอซิงก์"> | <img src="docs/screenshots/dark-dashboard.png" width="200" alt="ภาพรวม"> | <img src="docs/screenshots/en-dashboard.png" width="200" alt="ภาพรวม"> |
+
+ภาพหน้าจอทั้งหมด **78 ภาพ** จากแอปที่รันจริง (Android emulator, API และข้อมูลจริง) อยู่ในหัวข้อ [ภาพหน้าจอ](#ภาพหน้าจอ)
 
 ## การทำงานร่วมกัน
 
@@ -58,6 +60,120 @@
 - แอปใช้ได้ทั้ง **ภาษาไทยและอังกฤษ** (Flutter gen-l10n, ฟอนต์ IBM Plex Sans Thai) ใช้ภาษาตามเครื่อง หรือเลือกเองได้ที่หน้า login หรือโปรไฟล์ ข้อความจาก API เป็นภาษาไทยเมื่อส่ง `Accept-Language: th` และข้อมูลตัวอย่างเป็นภาษาไทย
 
 เอกสาร: [สถาปัตยกรรม](docs/architecture.th.md) · [ใบงาน](docs/work-orders.md) · [offline sync](docs/offline-sync.md) · [ความปลอดภัย](docs/security.md) · [การทดสอบ](docs/testing.md) · การตัดสินใจใน [docs/adr](docs/adr)
+
+## ภาพหน้าจอ
+
+### เข้าสู่ระบบ ภาพรวม และโปรไฟล์
+
+| เข้าสู่ระบบ | เข้าสู่ระบบ (อังกฤษ) | ภาพรวมของผู้ดูแลระบบ | กราฟ 7 วันและสินค้าใกล้หมด |
+|---|---|---|---|
+| <img src="docs/screenshots/login.png" width="190" alt="เข้าสู่ระบบ"> | <img src="docs/screenshots/en-login.png" width="190" alt="เข้าสู่ระบบ (อังกฤษ)"> | <img src="docs/screenshots/dashboard.png" width="190" alt="ภาพรวมของผู้ดูแลระบบ"> | <img src="docs/screenshots/dashboard-attention.png" width="190" alt="กราฟ 7 วันและสินค้าใกล้หมด"> |
+
+| กิจกรรมล่าสุด | พนักงานคลัง | หัวหน้างาน (ไม่มีปุ่มรับ/เบิก) | โปรไฟล์ |
+|---|---|---|---|
+| <img src="docs/screenshots/dashboard-activity.png" width="190" alt="กิจกรรมล่าสุด"> | <img src="docs/screenshots/dashboard-staff.png" width="190" alt="พนักงานคลัง"> | <img src="docs/screenshots/dashboard-supervisor.png" width="190" alt="หัวหน้างาน (ไม่มีปุ่มรับ/เบิก)"> | <img src="docs/screenshots/profile.png" width="190" alt="โปรไฟล์"> |
+
+| เลือกภาษา | โปรไฟล์ช่าง |
+|---|---|
+| <img src="docs/screenshots/profile-language.png" width="190" alt="เลือกภาษา"> | <img src="docs/screenshots/profile-technician.png" width="190" alt="โปรไฟล์ช่าง"> |
+
+### สินค้าและการสแกน
+
+| รายการสินค้า | กรองสินค้าใกล้หมด | มุมมองช่าง (3 แท็บ) | รายละเอียดสินค้า |
+|---|---|---|---|
+| <img src="docs/screenshots/products.png" width="190" alt="รายการสินค้า"> | <img src="docs/screenshots/products-low-stock.png" width="190" alt="กรองสินค้าใกล้หมด"> | <img src="docs/screenshots/products-technician.png" width="190" alt="มุมมองช่าง (3 แท็บ)"> | <img src="docs/screenshots/product-detail.png" width="190" alt="รายละเอียดสินค้า"> |
+
+| ความเคลื่อนไหวล่าสุด | ประวัติสต็อกพร้อมยอดคงเหลือ | สแกนบาร์โค้ด | พิมพ์บาร์โค้ดเอง |
+|---|---|---|---|
+| <img src="docs/screenshots/product-detail-movements.png" width="190" alt="ความเคลื่อนไหวล่าสุด"> | <img src="docs/screenshots/stock-history.png" width="190" alt="ประวัติสต็อกพร้อมยอดคงเหลือ"> | <img src="docs/screenshots/scanner.png" width="190" alt="สแกนบาร์โค้ด"> | <img src="docs/screenshots/scanner-manual.png" width="190" alt="พิมพ์บาร์โค้ดเอง"> |
+
+### เอกสารสต็อก
+
+| เอกสารทั้งหมด | กรองที่ยืนยันแล้ว | หน้าว่าง | เลือกประเภท |
+|---|---|---|---|
+| <img src="docs/screenshots/operations.png" width="190" alt="เอกสารทั้งหมด"> | <img src="docs/screenshots/operations-confirmed.png" width="190" alt="กรองที่ยืนยันแล้ว"> | <img src="docs/screenshots/operations-empty.png" width="190" alt="หน้าว่าง"> | <img src="docs/screenshots/new-operation-type.png" width="190" alt="เลือกประเภท"> |
+
+| เลือกสินค้า | เบิกออกพร้อมยอดคงเหลือหลังเบิก | ร่างรอยืนยัน | ยืนยัน (ย้อนกลับไม่ได้) |
+|---|---|---|---|
+| <img src="docs/screenshots/product-picker.png" width="190" alt="เลือกสินค้า"> | <img src="docs/screenshots/new-operation.png" width="190" alt="เบิกออกพร้อมยอดคงเหลือหลังเบิก"> | <img src="docs/screenshots/operation-draft.png" width="190" alt="ร่างรอยืนยัน"> | <img src="docs/screenshots/operation-confirm-dialog.png" width="190" alt="ยืนยัน (ย้อนกลับไม่ได้)"> |
+
+| ผู้ดูแลระบบยืนยันแล้ว | เอกสารที่ยืนยันแล้ว |
+|---|---|
+| <img src="docs/screenshots/operation-confirmed.png" width="190" alt="ผู้ดูแลระบบยืนยันแล้ว"> | <img src="docs/screenshots/operation-detail.png" width="190" alt="เอกสารที่ยืนยันแล้ว"> |
+
+### ผู้ดูแลระบบ: ใบงาน
+
+| ใบงานทั้งหมด | สร้างใบงาน | เลือกวันครบกำหนด | งานใหม่ที่มอบหมายแล้ว |
+|---|---|---|---|
+| <img src="docs/screenshots/wo-admin-list.png" width="190" alt="ใบงานทั้งหมด"> | <img src="docs/screenshots/wo-create.png" width="190" alt="สร้างใบงาน"> | <img src="docs/screenshots/wo-create-due-picker.png" width="190" alt="เลือกวันครบกำหนด"> | <img src="docs/screenshots/wo-admin-detail.png" width="190" alt="งานใหม่ที่มอบหมายแล้ว"> |
+
+| มอบหมาย / ยกเลิก | รอตรวจ | ประวัติการทำงาน | กล่องแจ้งเตือนว่าง |
+|---|---|---|---|
+| <img src="docs/screenshots/wo-admin-menu.png" width="190" alt="มอบหมาย / ยกเลิก"> | <img src="docs/screenshots/wo-admin-to-review.png" width="190" alt="รอตรวจ"> | <img src="docs/screenshots/wo-activity.png" width="190" alt="ประวัติการทำงาน"> | <img src="docs/screenshots/notifications-admin.png" width="190" alt="กล่องแจ้งเตือนว่าง"> |
+
+### ช่าง: ทำงานหน้างาน
+
+| งานของฉันและจำนวนแจ้งเตือน | การแจ้งเตือน | หลังอ่านแล้ว | งานใหม่ |
+|---|---|---|---|
+| <img src="docs/screenshots/wo-tech-list.png" width="190" alt="งานของฉันและจำนวนแจ้งเตือน"> | <img src="docs/screenshots/notifications.png" width="190" alt="การแจ้งเตือน"> | <img src="docs/screenshots/notifications-read.png" width="190" alt="หลังอ่านแล้ว"> | <img src="docs/screenshots/wo-tech-new-job.png" width="190" alt="งานใหม่"> |
+
+| เริ่มงานแล้ว | เช็กลิสต์และสิ่งที่ยังขาด | งานพร้อมวัสดุ | หมายเหตุของรายการ |
+|---|---|---|---|
+| <img src="docs/screenshots/wo-tech-started.png" width="190" alt="เริ่มงานแล้ว"> | <img src="docs/screenshots/wo-tech-checklist.png" width="190" alt="เช็กลิสต์และสิ่งที่ยังขาด"> | <img src="docs/screenshots/wo-tech-detail.png" width="190" alt="งานพร้อมวัสดุ"> | <img src="docs/screenshots/wo-tech-note.png" width="190" alt="หมายเหตุของรายการ"> |
+
+| ประเภทรูป | กล้องหรือคลังภาพ | กำลังอัปโหลด | รูปก่อนทำงาน |
+|---|---|---|---|
+| <img src="docs/screenshots/wo-tech-add-photo.png" width="190" alt="ประเภทรูป"> | <img src="docs/screenshots/wo-tech-photo-source.png" width="190" alt="กล้องหรือคลังภาพ"> | <img src="docs/screenshots/wo-tech-uploading.png" width="190" alt="กำลังอัปโหลด"> | <img src="docs/screenshots/wo-tech-photo-added.png" width="190" alt="รูปก่อนทำงาน"> |
+
+| ดูรูปเต็มจอ |
+|---|
+| <img src="docs/screenshots/wo-tech-photo-view.png" width="190" alt="ดูรูปเต็มจอ"> |
+
+### หัวหน้างาน: ตรวจงาน
+
+| คิวตรวจงาน | แจ้งเตือนงานส่งตรวจ | งานที่ส่งมา | ขอให้แก้ไข (ต้องระบุเหตุผล) |
+|---|---|---|---|
+| <img src="docs/screenshots/wo-review-queue.png" width="190" alt="คิวตรวจงาน"> | <img src="docs/screenshots/notifications-supervisor.png" width="190" alt="แจ้งเตือนงานส่งตรวจ"> | <img src="docs/screenshots/wo-review-detail.png" width="190" alt="งานที่ส่งมา"> | <img src="docs/screenshots/wo-request-changes.png" width="190" alt="ขอให้แก้ไข (ต้องระบุเหตุผล)"> |
+
+| ส่งกลับพร้อมเหตุผล | ประวัติทั้งหมด | งานที่อนุมัติแล้ว | อนุมัติโดยใคร เมื่อไร |
+|---|---|---|---|
+| <img src="docs/screenshots/wo-sent-back.png" width="190" alt="ส่งกลับพร้อมเหตุผล"> | <img src="docs/screenshots/wo-activity-review.png" width="190" alt="ประวัติทั้งหมด"> | <img src="docs/screenshots/wo-done-list.png" width="190" alt="งานที่อนุมัติแล้ว"> | <img src="docs/screenshots/wo-approved-detail.png" width="190" alt="อนุมัติโดยใคร เมื่อไร"> |
+
+### คลังสินค้า: เบิกวัสดุให้งาน
+
+| ใบงาน (มุมมองคลัง) | แผนเทียบกับที่เบิกแล้ว | เบิกผูกกับใบงาน | สร้างร่างแล้ว |
+|---|---|---|---|
+| <img src="docs/screenshots/wo-staff-list.png" width="190" alt="ใบงาน (มุมมองคลัง)"> | <img src="docs/screenshots/wo-materials.png" width="190" alt="แผนเทียบกับที่เบิกแล้ว"> | <img src="docs/screenshots/issue-for-work-order.png" width="190" alt="เบิกผูกกับใบงาน"> | <img src="docs/screenshots/issue-for-work-order-saved.png" width="190" alt="สร้างร่างแล้ว"> |
+
+| ผู้ดูแลระบบยืนยัน |
+|---|
+| <img src="docs/screenshots/operation-linked-draft.png" width="190" alt="ผู้ดูแลระบบยืนยัน"> |
+
+### ออฟไลน์
+
+| รับเข้าตอนออฟไลน์ | บันทึกไว้ในเครื่อง | รอซิงก์ | ซิงก์เมื่อกลับมาออนไลน์ |
+|---|---|---|---|
+| <img src="docs/screenshots/offline-receive-form.png" width="190" alt="รับเข้าตอนออฟไลน์"> | <img src="docs/screenshots/offline-saved-toast.png" width="190" alt="บันทึกไว้ในเครื่อง"> | <img src="docs/screenshots/offline-queue.png" width="190" alt="รอซิงก์"> | <img src="docs/screenshots/offline-synced.png" width="190" alt="ซิงก์เมื่อกลับมาออนไลน์"> |
+
+| ใบงานจากข้อมูลที่บันทึกไว้ | ติ๊กรอซิงก์ ส่งงานไม่ได้ | ซิงก์แล้ว |
+|---|---|---|
+| <img src="docs/screenshots/wo-offline.png" width="190" alt="ใบงานจากข้อมูลที่บันทึกไว้"> | <img src="docs/screenshots/wo-offline-pending.png" width="190" alt="ติ๊กรอซิงก์ ส่งงานไม่ได้"> | <img src="docs/screenshots/wo-tech-synced.png" width="190" alt="ซิงก์แล้ว"> |
+
+### โหมดมืด
+
+| ภาพรวม | สินค้า | ใบงาน | รายละเอียดงาน |
+|---|---|---|---|
+| <img src="docs/screenshots/dark-dashboard.png" width="190" alt="ภาพรวม"> | <img src="docs/screenshots/dark-products.png" width="190" alt="สินค้า"> | <img src="docs/screenshots/dark-jobs.png" width="190" alt="ใบงาน"> | <img src="docs/screenshots/dark-job-detail.png" width="190" alt="รายละเอียดงาน"> |
+
+### ภาษาอังกฤษ
+
+| ภาพรวม | สินค้า | ใบงาน | รายละเอียดงาน |
+|---|---|---|---|
+| <img src="docs/screenshots/en-dashboard.png" width="190" alt="ภาพรวม"> | <img src="docs/screenshots/en-products.png" width="190" alt="สินค้า"> | <img src="docs/screenshots/en-jobs.png" width="190" alt="ใบงาน"> | <img src="docs/screenshots/en-job-detail.png" width="190" alt="รายละเอียดงาน"> |
+
+| ประวัติ |
+|---|
+| <img src="docs/screenshots/en-activity.png" width="190" alt="ประวัติ"> |
 
 ## โครงสร้างโปรเจกต์
 
@@ -173,7 +289,7 @@ APK นี้เซ็นด้วย debug key ติดตั้งเพื�
 
 | ชุดเทสต์ | จำนวน |
 |---|---|
-| Backend unit (กฎ: สต็อก, ใบงาน, การแจ้งเตือน, dashboard, ลายเซ็น, retry, คำแปล) | 57 |
+| Backend unit (กฎ: สต็อก, ใบงาน, การแจ้งเตือน, dashboard, ลายเซ็น, retry, คำแปล) | 58 |
 | Backend API กับ Postgres จริง (auth, สิทธิ์, สถานะ, การทำงานพร้อมกัน, ส่งซ้ำ, การเชื่อมกับคลัง, การแจ้งเตือน, แก้ไขออฟไลน์) | 62 |
 | Flutter widget / unit | 82 |
 
