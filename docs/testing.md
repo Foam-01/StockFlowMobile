@@ -7,7 +7,7 @@ How StockFlow is tested, how to run it, and what is **not** covered yet.
 | Suite | Where | Count | Runs in CI |
 |---|---|---|---|
 | Backend unit tests (Vitest) | `backend/src/**/*.spec.ts` | 57 | ✅ |
-| Backend API tests (Vitest + supertest, real Postgres) | `backend/test/*.e2e-spec.ts` | 61 | ✅ (Postgres service container) |
+| Backend API tests (Vitest + supertest, real Postgres) | `backend/test/*.e2e-spec.ts` | 62 | ✅ (Postgres service container) |
 | Flutter widget + unit tests | `mobile/test/` | 82 | ✅ |
 | Release APK build | `mobile/` | — | ✅ (artifact `stockflow-apk`) |
 

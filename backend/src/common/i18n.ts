@@ -63,6 +63,7 @@ const EXACT: Record<string, string> = {
   Unauthorized: 'กรุณาเข้าสู่ระบบ',
   'Checklist item was changed on the server':
     'รายการนี้ถูกแก้ไขจากที่อื่นแล้ว กรุณาโหลดใหม่',
+  'Registration is disabled': 'ปิดการสมัครสมาชิกเอง กรุณาติดต่อผู้ดูแลระบบ',
   'clientUuid already used': 'รหัสเอกสารนี้ถูกใช้แล้ว',
   'ThrottlerException: Too Many Requests':
     'มีคำขอมากเกินไป กรุณารอสักครู่แล้วลองใหม่',

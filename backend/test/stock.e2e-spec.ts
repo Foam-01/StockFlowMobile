@@ -23,6 +23,14 @@ const confirm = (who: Who, id: string) =>
   auth(ctx, who, ctx.http().post(`/transactions/${id}/confirm`));
 
 describe('authentication', () => {
+  it('self-registration is off unless enabled', async () => {
+    await ctx
+      .http()
+      .post('/auth/register')
+      .send({ email: 'new@test.dev', name: 'New', password: 'Password1!' })
+      .expect(403);
+  });
+
   it('rejects requests without a token', async () => {
     await ctx.http().get('/products').expect(401);
   });

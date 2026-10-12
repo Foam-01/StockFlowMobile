@@ -1,9 +1,11 @@
 import {
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
 import bcrypt from 'bcryptjs';
@@ -19,10 +21,18 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
+    private readonly config: ConfigService,
   ) {}
 
-  /** Self-registration always creates STAFF; admins are seeded. */
+  /**
+   * Self-registration always creates STAFF; admins are seeded. Off unless
+   * ALLOW_REGISTRATION=true: otherwise anyone who finds the API could give
+   * themselves a warehouse account.
+   */
   async register(dto: RegisterDto) {
+    if (this.config.get('ALLOW_REGISTRATION') !== 'true') {
+      throw new ForbiddenException('Registration is disabled');
+    }
     const email = dto.email.toLowerCase();
     const exists = await this.prisma.db.user.findUnique({ where: { email } });
     if (exists) throw new ConflictException('Email already registered');

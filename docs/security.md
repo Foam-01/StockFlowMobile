@@ -98,8 +98,8 @@ These are acceptable for a local demo, not for a public deployment:
 - **HTTP, not HTTPS**: the demo API runs on the LAN, and the Android app
   allows cleartext traffic for that. A deployment needs TLS and should remove
   `usesCleartextTraffic`.
-- **CORS is open** (`enableCors()` with defaults). Restrict origins if a web
-  client is deployed.
+- **CORS is open by default**; set `CORS_ORIGINS` for a deployed web client
+  (the mobile app does not need CORS).
 - **No refresh tokens or server-side revocation**: logout deletes the token
   on the device; a stolen token stays valid until it expires.
 - **Rate limits are in memory, per instance**: fine for one server, not for
@@ -109,3 +109,31 @@ These are acceptable for a local demo, not for a public deployment:
 - Secrets that were shared while developing (database password, Cloudinary
   API secret) should be rotated before the repository or a demo is made
   public.
+
+## Review (2026-10-12)
+
+Manual review of the API and app after the field-operations work, plus
+`npm audit`. Each item lists the evidence and what was done. Automated
+tests passing is not proof of security; this is a portfolio-level review,
+not a professional audit.
+
+| # | Severity | Finding | Evidence | Status |
+|---|---|---|---|---|
+| 1 | Medium | Anyone could create an account: `POST /auth/register` was public and creates `STAFF` (can create stock drafts and upload photos) | `auth.controller.ts` `@Public()` register; schema default role `STAFF` | **Fixed**: off unless `ALLOW_REGISTRATION=true` (403 otherwise); API test added |
+| 2 | Low | A deployment could start with the example JWT secret | `.env.example` has `change-me`; nothing checked it | **Fixed**: with `NODE_ENV=production` the API refuses to start unless the secret has 32+ characters |
+| 3 | Low | CORS allowed every origin | `app.enableCors()` | **Fixed**: `CORS_ORIGINS` allow-list; unset keeps the development behaviour |
+| 4 | Low | Swagger (`/docs`) public everywhere, listing every route | `main.ts` | **Fixed**: hidden when `NODE_ENV=production` unless `SWAGGER=true` |
+| 5 | Low | Demo account buttons show passwords in every build | `login_screen.dart` | **Fixed**: `--dart-define=DEMO_ACCOUNTS=false` removes them; on by default for the portfolio APK |
+| 6 | Low | `npm audit`: 3 high in production dependencies, all through the Prisma CLI (`deepmerge-ts` stack exhaustion, GHSA-ggr8-5vv4-36mx) | `npm audit --omit=dev` | **Accepted for now**: the CLI runs migrations with our own schema, never untrusted input; the fix needs Prisma 7 (major). Revisit when upgrading |
+| 7 | Low | Tokens can't be revoked (1-day JWT, no refresh) | `auth.module.ts` | Known limit (above) |
+| 8 | Info | No security headers (helmet) | `main.ts` | JSON-only API, low value; add with a reverse proxy/TLS on deployment |
+
+Checked and found in place (with tests): every route behind the JWT guard
+unless `@Public`; role checks on stock confirm, work-order actions and
+reviews; resource-level checks (other technicians' jobs, notifications and
+photos return 404); state changes only through explicit transitions with
+conditional updates; signed uploads limited to format/size/folder and
+validated again on save; idempotent `clientUuid` creates; rate limits on
+login; request logs without tokens, bodies or upload signatures; no secrets
+in the app or tracked files; offline data limited to what the user could
+already see (no tokens in SQLite; the token stays in secure storage).

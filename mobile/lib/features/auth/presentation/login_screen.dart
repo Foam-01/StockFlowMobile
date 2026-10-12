@@ -8,6 +8,13 @@ import 'auth_controller.dart';
 import 'server_settings.dart';
 import '../../../core/l10n.dart';
 
+/// Demo account buttons (with their passwords) for the portfolio build.
+/// Build with `--dart-define=DEMO_ACCOUNTS=false` for anything real.
+const showDemoAccounts = bool.fromEnvironment(
+  'DEMO_ACCOUNTS',
+  defaultValue: true,
+);
+
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
@@ -218,60 +225,66 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                         )
                                       : Text(context.l10n.signIn),
                                 ),
-                                const SizedBox(height: 32),
-                                Text(
-                                  context.l10n.demoAccounts,
-                                  textAlign: TextAlign.center,
-                                  style: theme.textTheme.labelMedium?.copyWith(
-                                    color: theme.colorScheme.onSurfaceVariant,
+                                if (showDemoAccounts) ...[
+                                  const SizedBox(height: 32),
+                                  Text(
+                                    context.l10n.demoAccounts,
+                                    textAlign: TextAlign.center,
+                                    style: theme.textTheme.labelMedium
+                                        ?.copyWith(
+                                          color: theme
+                                              .colorScheme
+                                              .onSurfaceVariant,
+                                        ),
                                   ),
-                                ),
-                                const SizedBox(height: 8),
-                                Wrap(
-                                  alignment: WrapAlignment.center,
-                                  spacing: 8,
-                                  runSpacing: 8,
-                                  children: [
-                                    // Seeded demo accounts, one per role.
-                                    for (final (role, icon, email, pw)
-                                        in const <
-                                          (Role, IconData, String, String)
-                                        >[
-                                          (
-                                            Role.admin,
-                                            Icons.admin_panel_settings_outlined,
-                                            'admin@stockflow.dev',
-                                            'Admin1234!',
-                                          ),
-                                          (
-                                            Role.staff,
-                                            Icons.person_outline,
-                                            'staff@stockflow.dev',
-                                            'Staff1234!',
-                                          ),
-                                          (
-                                            Role.technician,
-                                            Icons.engineering_outlined,
-                                            'tech@stockflow.dev',
-                                            'Tech1234!',
-                                          ),
-                                          (
-                                            Role.supervisor,
-                                            Icons.verified_user_outlined,
-                                            'supervisor@stockflow.dev',
-                                            'Super1234!',
-                                          ),
-                                        ])
-                                      ActionChip(
-                                        key: Key('demo_${role.name}'),
-                                        avatar: Icon(icon, size: 18),
-                                        label: Text(role.tr(context.l10n)),
-                                        onPressed: _submitting
-                                            ? null
-                                            : () => _fillDemo(email, pw),
-                                      ),
-                                  ],
-                                ),
+                                  const SizedBox(height: 8),
+                                  Wrap(
+                                    alignment: WrapAlignment.center,
+                                    spacing: 8,
+                                    runSpacing: 8,
+                                    children: [
+                                      // Seeded demo accounts, one per role.
+                                      for (final (role, icon, email, pw)
+                                          in const <
+                                            (Role, IconData, String, String)
+                                          >[
+                                            (
+                                              Role.admin,
+                                              Icons
+                                                  .admin_panel_settings_outlined,
+                                              'admin@stockflow.dev',
+                                              'Admin1234!',
+                                            ),
+                                            (
+                                              Role.staff,
+                                              Icons.person_outline,
+                                              'staff@stockflow.dev',
+                                              'Staff1234!',
+                                            ),
+                                            (
+                                              Role.technician,
+                                              Icons.engineering_outlined,
+                                              'tech@stockflow.dev',
+                                              'Tech1234!',
+                                            ),
+                                            (
+                                              Role.supervisor,
+                                              Icons.verified_user_outlined,
+                                              'supervisor@stockflow.dev',
+                                              'Super1234!',
+                                            ),
+                                          ])
+                                        ActionChip(
+                                          key: Key('demo_${role.name}'),
+                                          avatar: Icon(icon, size: 18),
+                                          label: Text(role.tr(context.l10n)),
+                                          onPressed: _submitting
+                                              ? null
+                                              : () => _fillDemo(email, pw),
+                                        ),
+                                    ],
+                                  ),
+                                ],
                                 const SizedBox(height: 16),
                                 Wrap(
                                   alignment: WrapAlignment.center,
