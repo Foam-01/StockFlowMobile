@@ -238,7 +238,12 @@ abstract final class AppTheme {
         checkmarkColor: s.surface,
         side: BorderSide(color: s.outline),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        labelStyle: text.labelLarge?.copyWith(color: s.onSurface),
+        // Selected chips are dark; the label and icon flip to the surface.
+        labelStyle: text.labelLarge?.copyWith(
+          color: WidgetStateColor.resolveWith(
+            (st) => st.contains(WidgetState.selected) ? s.surface : s.onSurface,
+          ),
+        ),
         secondaryLabelStyle: text.labelLarge?.copyWith(color: s.surface),
         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
         showCheckmark: false,

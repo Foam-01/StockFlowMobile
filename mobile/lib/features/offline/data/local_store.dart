@@ -46,16 +46,18 @@ Future<Database> openLocalDatabase({String? path}) async => openDatabase(
 );
 
 /// v2: saved work orders and checklist edits made offline.
+/// Idempotent, so an upgrade over a pre-release build that already created
+/// these tables doesn't crash at startup.
 Future<void> _createWorkOrderTables(Database db) async {
   await db.execute('''
-    CREATE TABLE wo_cache (
+    CREATE TABLE IF NOT EXISTS wo_cache (
       id        TEXT PRIMARY KEY,
       json      TEXT NOT NULL,
       cached_at INTEGER NOT NULL
     )''');
   // One row per checklist item: a newer edit replaces an older one.
   await db.execute('''
-    CREATE TABLE wo_checklist_ops (
+    CREATE TABLE IF NOT EXISTS wo_checklist_ops (
       wo_id         TEXT NOT NULL,
       item_id       TEXT NOT NULL,
       done          INTEGER NOT NULL,

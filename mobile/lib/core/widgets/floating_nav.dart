@@ -66,13 +66,31 @@ class FloatingNav extends StatelessWidget {
                   ),
                 ],
               ),
-              // Tabs split around the scan button (left gets the extra one).
+              // Two equal halves keep the gap centred under the scan button,
+              // even with an odd number of tabs (left gets the extra one).
               child: Row(
                 children: [
-                  for (var i = 0; i < (items.length + 1) ~/ 2; i++) slot(i),
+                  Expanded(
+                    child: Row(
+                      children: [
+                        for (var i = 0; i < (items.length + 1) ~/ 2; i++)
+                          slot(i),
+                      ],
+                    ),
+                  ),
                   const SizedBox(width: 72),
-                  for (var i = (items.length + 1) ~/ 2; i < items.length; i++)
-                    slot(i),
+                  Expanded(
+                    child: Row(
+                      children: [
+                        for (
+                          var i = (items.length + 1) ~/ 2;
+                          i < items.length;
+                          i++
+                        )
+                          slot(i),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
