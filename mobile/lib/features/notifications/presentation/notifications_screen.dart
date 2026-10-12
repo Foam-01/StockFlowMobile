@@ -22,10 +22,13 @@ class NotificationBell extends ConsumerWidget {
           ? context.l10n.notificationsUnread(unread)
           : context.l10n.notifications,
       onPressed: () => context.push('/work-orders/notifications'),
-      icon: Badge(
-        isLabelVisible: unread > 0,
-        label: Text(unread > 99 ? '99+' : '$unread'),
-        child: const Icon(Icons.notifications_outlined),
+      // The badge number alone would be read as "5"; the tooltip says it all.
+      icon: ExcludeSemantics(
+        child: Badge(
+          isLabelVisible: unread > 0,
+          label: Text(unread > 99 ? '99+' : '$unread'),
+          child: const Icon(Icons.notifications_outlined),
+        ),
       ),
     );
   }

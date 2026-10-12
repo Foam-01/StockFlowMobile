@@ -90,7 +90,29 @@ const ACTION: Record<string, string> = {
 
 const status = (s: string) => STATUS[s] ?? s;
 
+const person = (n: string) =>
+  ({ unassigned: 'ยังไม่มอบหมาย', 'any supervisor': 'หัวหน้างานคนใดก็ได้' })[
+    n
+  ] ?? n;
+
 const PATTERNS: [RegExp, (...m: string[]) => string][] = [
+  // Notes the server writes into the audit trail.
+  [
+    /^Technician: (.+) · Reviewer: (.+)$/,
+    (t, r) => `ช่าง: ${person(t)} · ผู้ตรวจ: ${person(r)}`,
+  ],
+  [/^Done: (.+)$/, (t) => `เสร็จ: ${t}`],
+  [/^Not done: (.+)$/, (t) => `ยังไม่เสร็จ: ${t}`],
+  [
+    /^(before|after|other) photo$/,
+    (c) =>
+      `รูป${{ before: 'ก่อนทำงาน', after: 'หลังทำงาน', other: 'อื่น ๆ' }[c]}`,
+  ],
+  [
+    /^(Issued|Returned) (.+?)( \(.+\))?$/,
+    (k, lines, ref) =>
+      `${k === 'Issued' ? 'เบิก' : 'คืน'} ${lines}${ref ?? ''}`,
+  ],
   [/^Checklist: "(.+)" is not done$/, (t) => `เช็กลิสต์ “${t}” ยังไม่เสร็จ`],
   [
     /^Photo required: (before|after|other) work$/,
@@ -167,20 +189,34 @@ export class LocalizedResponseInterceptor implements NestInterceptor {
   intercept(ctx: ExecutionContext, next: CallHandler): Observable<unknown> {
     const req = ctx.switchToHttp().getRequest<Request>();
     if (!wantsThai(req.headers['accept-language'])) return next.handle();
-    return next.handle().pipe(
-      map((data: unknown) => {
-        if (
-          data &&
-          typeof data === 'object' &&
-          Array.isArray(
-            (data as { submissionProblems?: unknown }).submissionProblems,
-          )
-        ) {
-          const d = data as { submissionProblems: string[] };
-          return { ...d, submissionProblems: d.submissionProblems.map(toThai) };
-        }
-        return data;
-      }),
-    );
+    return next.handle().pipe(map(localizeBody));
   }
 }
+
+type Json = Record<string, unknown>;
+const isObj = (v: unknown): v is Json =>
+  !!v && typeof v === 'object' && !Array.isArray(v);
+
+/** Translates the server-written text fields clients display. */
+function localizeBody(data: unknown): unknown {
+  // Event lists (GET /work-orders/:id/events) and notification pages.
+  if (Array.isArray(data)) return data.map(localizeNote);
+  if (!isObj(data)) return data;
+  let out: Json = data;
+  if (Array.isArray(out.submissionProblems)) {
+    out = {
+      ...out,
+      submissionProblems: (out.submissionProblems as string[]).map(toThai),
+    };
+  }
+  if (
+    Array.isArray(out.items) &&
+    out.items.some((i) => isObj(i) && 'note' in i)
+  ) {
+    out = { ...out, items: out.items.map(localizeNote) };
+  }
+  return out;
+}
+
+const localizeNote = (v: unknown) =>
+  isObj(v) && typeof v.note === 'string' ? { ...v, note: toThai(v.note) } : v;

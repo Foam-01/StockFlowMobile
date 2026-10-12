@@ -77,6 +77,9 @@ class _ScannerScreenState extends State<ScannerScreen> {
         title: Text(widget.title ?? context.l10n.scanBarcode),
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
+        // The theme sets a dark title colour; over the camera it must be white.
+        titleTextStyle: Theme.of(context).appBarTheme.titleTextStyle
+            ?.copyWith(color: Colors.white),
         actions: [
           ValueListenableBuilder(
             valueListenable: _controller,

@@ -19,6 +19,17 @@ describe('toThai', () => {
     ).toBe('สต็อกไม่พอ: คงเหลือ 2 แต่ต้องการ 5');
   });
 
+  it('translates notes written into the audit trail', () => {
+    expect(toThai('Technician: Niran · Reviewer: any supervisor')).toBe(
+      'ช่าง: Niran · ผู้ตรวจ: หัวหน้างานคนใดก็ได้',
+    );
+    expect(toThai('Done: Clean filters')).toBe('เสร็จ: Clean filters');
+    expect(toThai('after photo')).toBe('รูปหลังทำงาน');
+    expect(toThai('Issued 2 × INS-001, 1 × INS-005 (REQ-1)')).toBe(
+      'เบิก 2 × INS-001, 1 × INS-005 (REQ-1)',
+    );
+  });
+
   it('leaves unknown messages unchanged', () => {
     expect(toThai('quantity must be a positive number')).toBe(
       'quantity must be a positive number',

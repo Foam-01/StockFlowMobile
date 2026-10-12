@@ -315,7 +315,11 @@ class _CreateWorkOrderScreenState extends ConsumerState<CreateWorkOrderScreen> {
                 contentPadding: EdgeInsets.zero,
                 title: Text(_materials[i].product.name),
                 subtitle: Text(
-                  '${_materials[i].product.sku} · on hand ${_materials[i].product.onHand} ${_materials[i].product.unit}',
+                  context.l10n.skuOnHand(
+                    _materials[i].product.sku,
+                    _materials[i].product.onHand,
+                    _materials[i].product.unit,
+                  ),
                 ),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
