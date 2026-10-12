@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/domain/user.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../products/domain/product.dart';
+import '../data/offline_work_orders_repository.dart';
 import '../data/work_orders_repository.dart';
 import '../domain/work_order.dart';
 
@@ -206,4 +207,12 @@ class WoDetailController extends AsyncNotifier<WorkOrder> {
   );
   Future<WorkOrder> removeEvidence(String evidenceId) =>
       _apply(() => _repo.removeEvidence(id, evidenceId));
+
+  /// Throws away this device's unsynced edit of one checklist item.
+  Future<WorkOrder> discardLocalEdit(String itemId) => _apply(() async {
+    final repo = _repo;
+    return repo is OfflineWorkOrdersRepository
+        ? repo.discardLocalEdit(id, itemId)
+        : repo.get(id);
+  });
 }

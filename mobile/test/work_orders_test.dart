@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stockflow/core/errors.dart';
@@ -17,6 +18,10 @@ import 'package:stockflow/main.dart';
 
 import 'package:stockflow/features/notifications/data/notifications_repository.dart';
 import 'package:stockflow/features/notifications/domain/app_notification.dart';
+
+import 'package:stockflow/features/work_orders/data/offline_work_orders_repository.dart';
+
+import 'package:stockflow/features/work_orders/data/work_order_offline_store.dart';
 
 import 'fakes.dart';
 
@@ -152,7 +157,12 @@ void main() {
   late FakeNotificationsRepository inbox;
   setUp(() => inbox = FakeNotificationsRepository());
 
-  Future<void> pumpAs(WidgetTester tester, Role role) async {
+  Future<void> pumpAs(
+    WidgetTester tester,
+    Role role, {
+    WorkOrdersRepository? repo,
+    List<Override> extra = const [],
+  }) async {
     when(() => auth.me()).thenAnswer((_) async => _user(role));
     tester.view.physicalSize = const Size(1080, 2400);
     tester.view.devicePixelRatio = 2.75;
@@ -165,11 +175,12 @@ void main() {
           dashboardRepositoryProvider.overrideWithValue(
             EmptyDashboardRepository(),
           ),
-          workOrdersRepositoryProvider.overrideWithValue(wo),
+          workOrdersRepositoryProvider.overrideWithValue(repo ?? wo),
           productsRepositoryProvider.overrideWithValue(products),
           operationsRepositoryProvider.overrideWithValue(ops),
           tokenStorageProvider.overrideWithValue(MemoryTokenStorage()),
           notificationsRepositoryProvider.overrideWithValue(inbox),
+          ...extra,
         ],
         child: const StockFlowApp(),
       ),
@@ -381,6 +392,44 @@ void main() {
       verify(() => wo.approve('wo1', note: 'Neat')).called(1);
       expect(find.text('Approved'), findsWidgets);
       expect(find.byKey(const Key('wo_approve')), findsNothing);
+    });
+  });
+
+  group('offline checklist', () {
+    testWidgets('an offline tick waits to sync, blocks submit, then syncs', (
+      tester,
+    ) async {
+      final store = MemoryWoOfflineStore();
+      final server = FakeServer(store);
+      await pumpAs(
+        tester,
+        Role.technician,
+        repo: OfflineWorkOrdersRepository(server, store),
+        extra: [
+          woOfflineStoreProvider.overrideWithValue(store),
+          workOrdersApiProvider.overrideWithValue(server),
+        ],
+      );
+      await tester.tap(find.byKey(const Key('wo_wo1')));
+      await tester.pumpAndSettle();
+
+      server.offline = true;
+      await tester.tap(find.byKey(const Key('check_item0')));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('check_pending_item0')), findsOneWidget);
+      expect(find.byKey(const Key('wo_unsynced')), findsOneWidget);
+      final submit = tester.widget<ButtonStyleButton>(
+        find.byKey(const Key('wo_submit')),
+      );
+      expect(submit.onPressed, isNull);
+      expect(server.done['item0'], isFalse);
+
+      server.offline = false;
+      await tester.tap(find.byKey(const Key('wo_sync_now')));
+      await tester.pumpAndSettle();
+      expect(server.done['item0'], isTrue);
+      expect(find.byKey(const Key('check_pending_item0')), findsNothing);
+      expect(find.byKey(const Key('wo_unsynced')), findsNothing);
     });
   });
 

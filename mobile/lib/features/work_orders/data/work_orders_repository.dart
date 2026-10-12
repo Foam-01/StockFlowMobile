@@ -8,9 +8,13 @@ import '../../../core/errors.dart';
 import '../../../core/l10n.dart';
 import '../../products/domain/product.dart';
 import '../domain/work_order.dart';
+import 'offline_work_orders_repository.dart';
+import 'work_order_offline_store.dart';
 
-final workOrdersRepositoryProvider = Provider<WorkOrdersRepository>(
-  (ref) => ApiWorkOrdersRepository(
+/// The network repository, without offline behaviour (sync uses this).
+final workOrdersApiProvider = Provider<WorkOrdersRepository>((ref) {
+  final store = ref.watch(woOfflineStoreProvider);
+  return ApiWorkOrdersRepository(
     ref.watch(dioProvider),
     // Separate client for Cloudinary: it must never receive our JWT.
     Dio(
@@ -20,6 +24,15 @@ final workOrdersRepositoryProvider = Provider<WorkOrdersRepository>(
         receiveTimeout: const Duration(seconds: 30),
       ),
     ),
+    // Every full work order the server sends is saved for offline viewing.
+    onDetail: store.cache,
+  );
+});
+
+final workOrdersRepositoryProvider = Provider<WorkOrdersRepository>(
+  (ref) => OfflineWorkOrdersRepository(
+    ref.watch(workOrdersApiProvider),
+    ref.watch(woOfflineStoreProvider),
   ),
 );
 
@@ -88,6 +101,10 @@ abstract class WorkOrdersRepository {
     String itemId, {
     required bool done,
     String? note,
+
+    /// The server value the change was based on (offline edits): the
+    /// server refuses with 409 if the item changed since.
+    bool? expectedDone,
   });
   Future<WorkOrder> submit(String id);
   Future<WorkOrder> approve(String id, {String? note});
@@ -107,10 +124,11 @@ abstract class WorkOrdersRepository {
 }
 
 class ApiWorkOrdersRepository implements WorkOrdersRepository {
-  ApiWorkOrdersRepository(this._api, this._cdn);
+  ApiWorkOrdersRepository(this._api, this._cdn, {this.onDetail});
 
   final Dio _api;
   final Dio _cdn;
+  final Future<void> Function(Map<String, dynamic> json)? onDetail;
 
   Future<T> _call<T>(Future<T> Function() fn) async {
     try {
@@ -121,7 +139,15 @@ class ApiWorkOrdersRepository implements WorkOrdersRepository {
   }
 
   Future<WorkOrder> _wo(Future<Response<Map<String, dynamic>>> req) =>
-      _call(() async => WorkOrder.fromJson((await req).data!));
+      _call(() async {
+        final json = (await req).data!;
+        try {
+          await onDetail?.call(json);
+        } catch (_) {
+          // A full disk only costs the offline copy, never the answer.
+        }
+        return WorkOrder.fromJson(json);
+      });
 
   @override
   Future<Paged<WorkOrderSummary>> list({
@@ -189,10 +215,11 @@ class ApiWorkOrdersRepository implements WorkOrdersRepository {
     String itemId, {
     required bool done,
     String? note,
+    bool? expectedDone,
   }) => _wo(
     _api.put<Map<String, dynamic>>(
       '/work-orders/$id/checklist/$itemId',
-      data: {'done': done, 'note': ?note},
+      data: {'done': done, 'note': ?note, 'expectedDone': ?expectedDone},
     ),
   );
 

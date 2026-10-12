@@ -2040,6 +2040,42 @@ abstract class L10n {
   /// In en, this message translates to:
   /// **'{actor} cancelled {code}'**
   String ntfCancelled(String actor, String code);
+
+  /// No description provided for @offlineCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline: showing the copy saved {time}. Checklist changes stay on this device and sync when you are back online.'**
+  String offlineCopy(String time);
+
+  /// No description provided for @unsyncedChecklist.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 checklist change waiting to sync} other{{count} checklist changes waiting to sync}}'**
+  String unsyncedChecklist(int count);
+
+  /// No description provided for @waitingSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting to sync'**
+  String get waitingSync;
+
+  /// No description provided for @notSynced.
+  ///
+  /// In en, this message translates to:
+  /// **'Not synced: {error}'**
+  String notSynced(String error);
+
+  /// No description provided for @useServerValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Use server value'**
+  String get useServerValue;
+
+  /// No description provided for @syncBeforeSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync your checklist changes before submitting.'**
+  String get syncBeforeSubmit;
 }
 
 class _L10nDelegate extends LocalizationsDelegate<L10n> {

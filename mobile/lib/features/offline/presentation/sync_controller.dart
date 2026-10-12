@@ -5,6 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../dashboard/data/dashboard_repository.dart';
 import '../../operations/data/operations_repository.dart';
 import '../../operations/presentation/operations_controller.dart';
+import '../../work_orders/data/offline_work_orders_repository.dart';
+import '../../work_orders/data/work_order_offline_store.dart';
+import '../../work_orders/data/work_orders_repository.dart';
+import '../../work_orders/presentation/work_orders_controller.dart';
 import '../data/local_store.dart';
 import '../domain/pending_op.dart';
 import '../domain/sync_engine.dart';
@@ -100,10 +104,32 @@ class SyncController extends AsyncNotifier<SyncState> {
       ref.invalidate(txListProvider);
       ref.invalidate(dashboardProvider);
     }
-    state = AsyncData(
-      SyncState(queue: await _outbox.all(), lastReport: report),
+
+    // Checklist edits made offline in work orders.
+    var checklist = (synced: 0, failed: 0, stoppedOffline: false);
+    if (!report.stoppedOffline) {
+      try {
+        checklist = await syncChecklistOps(
+          ref.read(woOfflineStoreProvider),
+          ref.read(workOrdersApiProvider),
+        );
+      } catch (_) {
+        // Never let a storage error break the stock sync result.
+      }
+      if (checklist.synced + checklist.failed > 0) {
+        ref.invalidate(woDetailProvider);
+        ref.invalidate(woListProvider);
+      }
+    }
+    final combined = SyncReport(
+      synced: report.synced + checklist.synced,
+      failed: report.failed + checklist.failed,
+      stoppedOffline: report.stoppedOffline || checklist.stoppedOffline,
     );
-    return report;
+    state = AsyncData(
+      SyncState(queue: await _outbox.all(), lastReport: combined),
+    );
+    return combined;
   }
 
   /// Puts a failed item back in the queue (e.g. after the cause was fixed).

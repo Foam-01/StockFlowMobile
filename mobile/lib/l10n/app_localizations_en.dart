@@ -1134,4 +1134,35 @@ class L10nEn extends L10n {
   String ntfCancelled(String actor, String code) {
     return '$actor cancelled $code';
   }
+
+  @override
+  String offlineCopy(String time) {
+    return 'Offline: showing the copy saved $time. Checklist changes stay on this device and sync when you are back online.';
+  }
+
+  @override
+  String unsyncedChecklist(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count checklist changes waiting to sync',
+      one: '1 checklist change waiting to sync',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get waitingSync => 'Waiting to sync';
+
+  @override
+  String notSynced(String error) {
+    return 'Not synced: $error';
+  }
+
+  @override
+  String get useServerValue => 'Use server value';
+
+  @override
+  String get syncBeforeSubmit =>
+      'Sync your checklist changes before submitting.';
 }

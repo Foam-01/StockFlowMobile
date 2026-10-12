@@ -490,10 +490,14 @@ export class WorkOrdersService {
 
     await withRetry(() =>
       this.prisma.$transaction(async (db) => {
-        // Only while still in progress and still assigned to this user.
+        const note =
+          dto.note === undefined ? undefined : dto.note.trim() || null;
+        // Only while still in progress and still assigned to this user, and
+        // (for offline edits) only if nobody changed the item meanwhile.
         const res = await db.workOrderChecklistItem.updateMany({
           where: {
             id: itemId,
+            ...(dto.expectedDone !== undefined && { done: dto.expectedDone }),
             workOrder: {
               id,
               status: WorkOrderStatus.IN_PROGRESS,
@@ -502,13 +506,30 @@ export class WorkOrdersService {
           },
           data: {
             done: dto.done,
-            note: dto.note === undefined ? undefined : dto.note.trim() || null,
+            note,
             completedById: dto.done ? actor.id : null,
-            completedAt: dto.done ? new Date() : null,
+            // Keep the original time when re-sending "done".
+            completedAt: dto.done ? (item.completedAt ?? new Date()) : null,
           },
         });
         if (res.count === 0) {
-          throw new ConflictException('Work order is no longer in progress');
+          const now = await db.workOrderChecklistItem.findUniqueOrThrow({
+            where: { id: itemId },
+            include: { workOrder: { select: { status: true } } },
+          });
+          if (now.workOrder.status !== WorkOrderStatus.IN_PROGRESS) {
+            throw new ConflictException('Work order is no longer in progress');
+          }
+          // A retry of a change that already landed: nothing to do.
+          if (
+            now.done === dto.done &&
+            (note === undefined || now.note === note)
+          ) {
+            return;
+          }
+          throw new ConflictException(
+            'Checklist item was changed on the server',
+          );
         }
         if (item.done !== dto.done) {
           await db.workOrderEvent.create({

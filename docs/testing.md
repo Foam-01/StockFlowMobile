@@ -7,8 +7,8 @@ How StockFlow is tested, how to run it, and what is **not** covered yet.
 | Suite | Where | Count | Runs in CI |
 |---|---|---|---|
 | Backend unit tests (Vitest) | `backend/src/**/*.spec.ts` | 57 | ✅ |
-| Backend API tests (Vitest + supertest, real Postgres) | `backend/test/*.e2e-spec.ts` | 60 | ✅ (Postgres service container) |
-| Flutter widget + unit tests | `mobile/test/` | 71 | ✅ |
+| Backend API tests (Vitest + supertest, real Postgres) | `backend/test/*.e2e-spec.ts` | 61 | ✅ (Postgres service container) |
+| Flutter widget + unit tests | `mobile/test/` | 82 | ✅ |
 | Release APK build | `mobile/` | — | ✅ (artifact `stockflow-apk`) |
 
 Counts are from the latest local run; CI runs the same suites on every push
@@ -95,6 +95,7 @@ fails.
 | `dashboard_roles_test.dart` | dashboard shortcuts per role, field-jobs counts open the matching list, no stale jobs after switching users, switching the app to Thai and back |
 | `server_settings_test.dart` | URL normalisation/validation, test connection, save |
 | `offline_logic_test.dart` | sync engine rules, SQLite outbox and product cache (in-memory SQLite), offline fallback that never hides server errors |
+| `offline_work_orders_test.dart` | saved copy offline (and no invented data), queued ticks per item, latest edit wins, untick-back cancels, sync once, stop while offline, stale edit refused and discarded, SQLite store, v1 → v2 database upgrade keeps queued stock documents |
 | `offline_flow_test.dart` | save offline → queued → sync fails → sync succeeds with the **same clientUuid**; rejected item marked failed and discarded; offline banner; server errors not queued |
 
 Camera, image picker and network are behind Riverpod providers that tests

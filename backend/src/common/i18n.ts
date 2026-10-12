@@ -61,6 +61,8 @@ const EXACT: Record<string, string> = {
   'You are not allowed to do this': 'คุณไม่มีสิทธิ์ทำรายการนี้',
   'Validation failed (uuid is expected)': 'รหัสอ้างอิงไม่ถูกต้อง',
   Unauthorized: 'กรุณาเข้าสู่ระบบ',
+  'Checklist item was changed on the server':
+    'รายการนี้ถูกแก้ไขจากที่อื่นแล้ว กรุณาโหลดใหม่',
   'clientUuid already used': 'รหัสเอกสารนี้ถูกใช้แล้ว',
   'ThrottlerException: Too Many Requests':
     'มีคำขอมากเกินไป กรุณารอสักครู่แล้วลองใหม่',

@@ -12,8 +12,12 @@ final localDatabaseProvider = Provider<Database?>((_) => null);
 
 Future<Database> openLocalDatabase({String? path}) async => openDatabase(
   path ?? p.join(await getDatabasesPath(), 'stockflow.db'),
-  version: 1,
+  version: 2,
+  onUpgrade: (db, from, _) async {
+    if (from < 2) await _createWorkOrderTables(db);
+  },
   onCreate: (db, _) async {
+    await _createWorkOrderTables(db);
     await db.execute('''
       CREATE TABLE outbox (
         client_uuid  TEXT PRIMARY KEY,
@@ -40,6 +44,30 @@ Future<Database> openLocalDatabase({String? path}) async => openDatabase(
     );
   },
 );
+
+/// v2: saved work orders and checklist edits made offline.
+Future<void> _createWorkOrderTables(Database db) async {
+  await db.execute('''
+    CREATE TABLE wo_cache (
+      id        TEXT PRIMARY KEY,
+      json      TEXT NOT NULL,
+      cached_at INTEGER NOT NULL
+    )''');
+  // One row per checklist item: a newer edit replaces an older one.
+  await db.execute('''
+    CREATE TABLE wo_checklist_ops (
+      wo_id         TEXT NOT NULL,
+      item_id       TEXT NOT NULL,
+      done          INTEGER NOT NULL,
+      note          TEXT,
+      has_note      INTEGER NOT NULL,
+      expected_done INTEGER NOT NULL,
+      created_at    INTEGER NOT NULL,
+      error         TEXT,
+      attempts      INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY (wo_id, item_id)
+    )''');
+}
 
 // ---------------------------------------------------------------- outbox
 

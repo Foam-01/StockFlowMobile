@@ -136,6 +136,15 @@ export class ChecklistUpdateDto {
   @IsString()
   @MaxLength(1000)
   note?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Optimistic check for offline edits: `done` as the client last saw it. ' +
+      'If the server value differs (someone changed it since), 409.',
+  })
+  @IsOptional()
+  @IsBoolean()
+  expectedDone?: boolean;
 }
 
 export class ReasonDto {

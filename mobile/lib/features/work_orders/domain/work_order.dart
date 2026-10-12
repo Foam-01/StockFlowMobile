@@ -289,6 +289,8 @@ class WorkOrder {
     this.startedAt,
     this.submittedAt,
     this.reviewedAt,
+    this.cachedAt,
+    this.localChecklist = const {},
   });
 
   final String id;
@@ -319,6 +321,15 @@ class WorkOrder {
   final Set<WoAction> allowedActions;
   final List<String> submissionProblems;
 
+  /// Set when this is the device's saved copy (offline), not a fresh answer.
+  final DateTime? cachedAt;
+
+  /// Checklist edits made on this device that the server hasn't accepted
+  /// yet, by item id.
+  final Map<String, LocalEdit> localChecklist;
+
+  bool get hasUnsyncedChecklist => localChecklist.isNotEmpty;
+
   bool can(WoAction a) => allowedActions.contains(a);
 
   int get checklistDone => checklist.where((i) => i.done).length;
@@ -326,7 +337,13 @@ class WorkOrder {
   bool get isOverdue =>
       dueAt != null && !status.isClosed && dueAt!.isBefore(DateTime.now());
 
-  factory WorkOrder.fromJson(Map<String, dynamic> j) => WorkOrder(
+  factory WorkOrder.fromJson(
+    Map<String, dynamic> j, {
+    DateTime? cachedAt,
+    Map<String, LocalEdit> localChecklist = const {},
+  }) => WorkOrder(
+    cachedAt: cachedAt,
+    localChecklist: localChecklist,
     id: j['id'] as String,
     code: j['code'] as String,
     title: j['title'] as String,
@@ -441,4 +458,15 @@ class ChecklistTemplate {
         description: j['description'] as String?,
         itemCount: (j['items'] as List? ?? const []).length,
       );
+}
+
+/// A checklist change saved on the device, waiting for (or refused by) the
+/// server.
+class LocalEdit {
+  const LocalEdit({this.error});
+
+  /// The server's reason when it refused the change; null while pending.
+  final String? error;
+
+  bool get failed => error != null;
 }

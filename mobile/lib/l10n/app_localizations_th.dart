@@ -1125,4 +1125,33 @@ class L10nTh extends L10n {
   String ntfCancelled(String actor, String code) {
     return '$actor ยกเลิกงาน $code';
   }
+
+  @override
+  String offlineCopy(String time) {
+    return 'ออฟไลน์: แสดงข้อมูลที่บันทึกไว้เมื่อ $time การแก้เช็กลิสต์จะเก็บไว้ในเครื่องและซิงก์เมื่อกลับมาออนไลน์';
+  }
+
+  @override
+  String unsyncedChecklist(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'มีการแก้เช็กลิสต์ $count รายการรอซิงก์',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get waitingSync => 'รอซิงก์';
+
+  @override
+  String notSynced(String error) {
+    return 'ซิงก์ไม่สำเร็จ: $error';
+  }
+
+  @override
+  String get useServerValue => 'ใช้ค่าจาก server';
+
+  @override
+  String get syncBeforeSubmit => 'ต้องซิงก์การแก้เช็กลิสต์ให้เสร็จก่อนส่งงาน';
 }

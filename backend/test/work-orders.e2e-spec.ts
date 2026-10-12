@@ -737,3 +737,34 @@ it('reassigning notifies the new technician only', async () => {
   ]);
   expect(await inbox('tech', wo.id)).toHaveLength(1); // only the original
 });
+
+// ------------------------------------------------- offline checklist edits
+
+it('queued checklist edits: retries are harmless, stale ones are refused', async () => {
+  const wo = await workOrder();
+  await http('tech', 'post', `/work-orders/${wo.id}/start`).expect(200);
+  const item = wo.checklist[0];
+  const put = (body: Record<string, unknown>) =>
+    http('tech', 'put', `/work-orders/${wo.id}/checklist/${item.id}`).send(
+      body,
+    );
+
+  // Offline edit synced: the item was not done when the technician ticked it.
+  await put({ done: true, expectedDone: false }).expect(200);
+  // Uncertain timeout → the same request again: success, no second event.
+  const again = await put({ done: true, expectedDone: false }).expect(200);
+  expect(again.body.checklist[0].done).toBe(true);
+  const events = await http('tech', 'get', `/work-orders/${wo.id}/events`);
+  expect(
+    events.body.filter((e: any) => e.type === 'CHECKLIST_UPDATED'),
+  ).toHaveLength(1);
+
+  // An older queued "untick" based on a state that no longer exists.
+  await put({ done: true, note: 'from tablet' }).expect(200);
+  const stale = await put({ done: false, expectedDone: false })
+    .set('Accept-Language', 'th')
+    .expect(409);
+  expect(stale.body.message).toBe(
+    'รายการนี้ถูกแก้ไขจากที่อื่นแล้ว กรุณาโหลดใหม่',
+  );
+});

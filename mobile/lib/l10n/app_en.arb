@@ -809,5 +809,32 @@
         "type": "String"
       }
     }
-  }
+  },
+  "offlineCopy": "Offline: showing the copy saved {time}. Checklist changes stay on this device and sync when you are back online.",
+  "@offlineCopy": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "unsyncedChecklist": "{count, plural, =1{1 checklist change waiting to sync} other{{count} checklist changes waiting to sync}}",
+  "@unsyncedChecklist": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "waitingSync": "Waiting to sync",
+  "notSynced": "Not synced: {error}",
+  "@notSynced": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "useServerValue": "Use server value",
+  "syncBeforeSubmit": "Sync your checklist changes before submitting."
 }

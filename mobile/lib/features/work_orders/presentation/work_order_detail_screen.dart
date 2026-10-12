@@ -9,6 +9,7 @@ import '../../auth/presentation/auth_controller.dart';
 import '../../operations/presentation/evidence_photos.dart'
     show imagePickerProvider;
 import '../../operations/presentation/widgets/tx_widgets.dart';
+import '../../offline/presentation/sync_controller.dart';
 import '../domain/work_order.dart';
 import 'issue_materials.dart';
 import 'widgets/wo_badges.dart';
@@ -362,7 +363,10 @@ class _WorkOrderDetailScreenState extends ConsumerState<WorkOrderDetailScreen> {
           key: const Key('wo_submit'),
           // Disabled until the banner's blockers are resolved (the server
           // checks again on submit).
-          onPressed: _busy != null || wo.submissionProblems.isNotEmpty
+          onPressed:
+              _busy != null ||
+                  wo.submissionProblems.isNotEmpty ||
+                  wo.hasUnsyncedChecklist
               ? null
               : () => _submit(wo),
           icon: const Icon(Icons.send_rounded),
@@ -464,6 +468,11 @@ class _WorkOrderDetailScreenState extends ConsumerState<WorkOrderDetailScreen> {
                     for (final item in wo.checklist)
                       _ChecklistTile(
                         item: item,
+                        local: wo.localChecklist[item.id],
+                        onDiscard: () => _run(
+                          'item_${item.id}',
+                          () => _ctl.discardLocalEdit(item.id),
+                        ),
                         enabled:
                             wo.can(WoAction.updateChecklist) && _busy == null,
                         busy: _busy == 'item_${item.id}',
@@ -565,7 +574,45 @@ class _WorkOrderDetailScreenState extends ConsumerState<WorkOrderDetailScreen> {
           ),
         );
 
+    final unsynced = wo.localChecklist.length;
     return [
+      if (wo.cachedAt != null)
+        banner(
+          Icons.cloud_off_outlined,
+          context.l10n.offlineCopy(formatDateTime(wo.cachedAt!)),
+          scheme.surfaceContainerHighest,
+          scheme.onSurfaceVariant,
+          key: const Key('wo_offline_copy'),
+        ),
+      if (unsynced > 0)
+        Container(
+          key: const Key('wo_unsynced'),
+          margin: const EdgeInsets.only(top: 16),
+          padding: const EdgeInsets.fromLTRB(12, 4, 4, 4),
+          decoration: BoxDecoration(
+            color: scheme.tertiaryContainer,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.sync_problem, color: scheme.onTertiaryContainer),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  '${context.l10n.unsyncedChecklist(unsynced)}\n'
+                  '${context.l10n.syncBeforeSubmit}',
+                  style: TextStyle(color: scheme.onTertiaryContainer),
+                ),
+              ),
+              TextButton(
+                key: const Key('wo_sync_now'),
+                onPressed: () =>
+                    ref.read(syncControllerProvider.notifier).syncNow(),
+                child: Text(context.l10n.syncNow),
+              ),
+            ],
+          ),
+        ),
       if (wo.status == WoStatus.needsRevision && wo.reviewNote != null)
         banner(
           Icons.feedback_outlined,
@@ -703,10 +750,14 @@ class _ChecklistTile extends StatelessWidget {
     required this.enabled,
     required this.busy,
     required this.onToggle,
+    required this.onDiscard,
+    this.local,
     this.onNote,
   });
 
   final ChecklistItem item;
+  final LocalEdit? local;
+  final VoidCallback onDiscard;
   final bool enabled;
   final bool busy;
   final ValueChanged<bool> onToggle;
@@ -719,6 +770,26 @@ class _ChecklistTile extends StatelessWidget {
       if (!item.required) context.l10n.optional,
       if (item.note != null) context.l10n.noteIs(item.note!),
     ].join(' · ');
+    final scheme = theme.colorScheme;
+    final localLine = switch (local) {
+      null => null,
+      LocalEdit(failed: true, :final error?) => Text(
+        context.l10n.notSynced(error),
+        key: Key('check_failed_${item.id}'),
+        style: theme.textTheme.bodySmall?.copyWith(color: scheme.error),
+      ),
+      _ => Row(
+        key: Key('check_pending_${item.id}'),
+        children: [
+          Icon(Icons.schedule, size: 14, color: scheme.tertiary),
+          const SizedBox(width: 4),
+          Text(
+            context.l10n.waitingSync,
+            style: theme.textTheme.bodySmall?.copyWith(color: scheme.tertiary),
+          ),
+        ],
+      ),
+    };
     return ListTile(
       key: Key('check_${item.id}'),
       contentPadding: EdgeInsets.zero,
@@ -742,7 +813,25 @@ class _ChecklistTile extends StatelessWidget {
               )
             : null,
       ),
-      subtitle: subtitle.isEmpty ? null : Text(subtitle),
+      subtitle: subtitle.isEmpty && localLine == null
+          ? null
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (subtitle.isNotEmpty) Text(subtitle),
+                ?localLine,
+                if (local?.failed ?? false)
+                  TextButton(
+                    key: Key('check_discard_${item.id}'),
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      visualDensity: VisualDensity.compact,
+                    ),
+                    onPressed: onDiscard,
+                    child: Text(context.l10n.useServerValue),
+                  ),
+              ],
+            ),
       trailing: onNote == null
           ? null
           : IconButton(
