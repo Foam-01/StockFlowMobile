@@ -53,6 +53,11 @@ work-order step is auditable.
   with shortage warnings
 - Role-based app: technicians see only their own jobs; supervisors start on
   the review queue; buttons follow the server's `allowedActions`
+- In-app notifications (assigned, submitted, changes requested, approved,
+  cancelled), created with the audit event and never sent twice
+- Offline checklist: jobs opened before can be viewed without a connection;
+  ticks and notes are queued and synced, and an edit based on an outdated
+  value is refused instead of overwriting newer data
 
 **Inventory**
 - **Dashboard:** stock KPIs, received vs issued over the last 7 days, products that need attention, recent activity
@@ -202,9 +207,9 @@ The full list is in Swagger at `/docs` and in [docs/work-orders.md](docs/work-or
 
 | Suite | Count |
 |---|---|
-| Backend unit (rules: stock, work orders, dashboard, signing, retry) | 48 |
-| Backend API tests against a real Postgres (auth, roles, transitions, concurrency, idempotency, inventory link) | 54 |
-| Flutter widget / unit tests | 65 |
+| Backend unit (rules: stock, work orders, notifications, dashboard, signing, retry, translations) | 57 |
+| Backend API tests against a real Postgres (auth, roles, transitions, concurrency, idempotency, inventory link, notifications, offline edits) | 62 |
+| Flutter widget / unit tests | 82 |
 
 ```bash
 cd backend && npm test          # unit tests
@@ -216,7 +221,28 @@ CI runs all of the above on every push and pull request, plus typecheck,
 lint, format, analyze and a release APK build. What is **not** covered yet
 (on-device testing, UI end-to-end) is listed in [docs/testing.md](docs/testing.md).
 
+## Known limitations
+
+Honest list of what this version does **not** do (details in the linked docs):
+
+- **Not deployed**: runs locally (API + Neon + Cloudinary). The APK is signed
+  with the debug key, so it is a demo build, not Play Store ready.
+- **Offline is partial**: stock drafts, product search and job checklists work
+  offline; photos, start/submit/review and the job list need a connection
+  ([offline-sync.md](docs/offline-sync.md)).
+- **Notifications are in-app only**: no push service; the badge refreshes when
+  you pull to refresh or open the inbox.
+- **No stock reservation**: materials are issued with explicit documents
+  linked to the job ([work-orders.md](docs/work-orders.md)).
+- **Security for a public deployment** still needs TLS, token revocation and a
+  Prisma upgrade for a CLI advisory ([security.md](docs/security.md#review-2026-10-12)).
+- **Testing**: no on-device or UI end-to-end tests yet; scanner and camera were
+  checked by hand only ([testing.md](docs/testing.md)).
+- Server messages are translated into Thai; form-field validation messages
+  from the API are still English.
+
 ## Demo
 
-<!-- Add a short screen recording link here (e.g. YouTube / Google Drive). -->
-_Demo video coming soon._
+A walkthrough script for the demo video is in
+[docs/demo-storyboard.md](docs/demo-storyboard.md).
+
